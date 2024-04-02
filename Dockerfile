@@ -17,7 +17,7 @@ ENV LOCAL=/usr/local \
 ENV PATH=$PATH:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script:$SIOSEIS \
     PERL5LIB=$PERL5LIB:$SeismicUnixGui
 
-# Update and install common development tools, Perl, Tk dependencies, and X11/Tcl-Tk development libraries
+# Update and install required packages including development tools, X11/Tcl-Tk libraries, and others as specified
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
@@ -32,8 +32,16 @@ RUN apt-get update && apt-get install -y \
     libtk-img \
     libx11-dev \
     libxft-dev \
-    tcl-dev \
-    tk-dev \
+    libmotif-dev \
+    aptitude \
+    libpng-dev \
+    libz-dev \
+    libjpeg-dev \
+    evince \  
+    gfortran \
+    libxext-dev \
+    ncftp \ 
+    dpkg-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install cpanminus for easier module installation
@@ -41,3 +49,6 @@ RUN cpan App::cpanminus
 
 # Install Perl modules
 RUN cpanm Tk Tk::JFileDialog Tk::Pod
+
+# Install SUGui
+RUN cpan App::SeismicUnixGui
