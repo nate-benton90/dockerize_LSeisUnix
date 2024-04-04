@@ -50,5 +50,5 @@ RUN cpan App::cpanminus
 # Install Perl modules
 RUN cpanm Tk Tk::JFileDialog Tk::Pod
 
-# Install SUGui
-RUN cpan App::SeismicUnixGui
+# Force install App::SeismicUnixGui without running tests
+RUN cpanm --notest App::SeismicUnixGui
