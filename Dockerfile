@@ -5,12 +5,14 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive \
     PERL_MM_USE_DEFAULT=1
 
+# Force rebuild for copy layer below
+RUN echo "foo"
+
 # Copy the SeisUnix-master directory contents into the image
-COPY C:\Users\nbent\Downloads\SeisUnix-master.zip\SeisUnix-master /usr/local/cwp_su_all_44R22
+COPY SeisUnix-master/* /usr/local/cwp_su_all_44R22
 
 # Clone the repository using SSH
-RUN mkdir /usr/local/cwp_su_all_44R22 && \
-    cd /usr/local/cwp_su_all_44R22
+RUN cd /usr/local/cwp_su_all_44R22
 
 # Set the environment variables as specified
 ENV LOCAL=/usr/local \
@@ -20,8 +22,8 @@ ENV LOCAL=/usr/local \
     PGPLOT_DIR=/usr/local/pgplot \
     PGPLOT_DEV=/XWINDOW \
     SIOSEIS=/usr/local/sioseis \
-    PATH=$PATH:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script:$SIOSEIS \
-    PERL5LIB=$PERL5LIB:$SeismicUnixGui
+    PATH=$PATH:/$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script:$SIOSEIS \
+    PERL5LIB=$PERL5LIB:$SeismicUnixGui 
 
 # Update and install required packages including development tools, X11/Tcl-Tk libraries, and others as specified
 # Also adding the newly required packages
@@ -55,6 +57,9 @@ RUN apt-get update && apt-get install -y \
     xorg \
     && rm -rf /var/lib/apt/lists/*
 
+# Export the display for UI to work
+RUN export DISPLAY=host.docker.internal:0.0
+
 # Install cpanminus for easier module installation
 RUN cpan App::cpanminus
 
@@ -70,7 +75,9 @@ RUN cpan Moose
 RUN cpanm --notest App::SeismicUnixGui
 
 # Execute commands without failing the build if one fails
-RUN make xminstall || true \
+RUN yes | make install || true \
+    && make xtinstall || true \
+    && make xminstall || true \
     && make mglinstall || true \
     && make finstall || true \
     && make sfinstall || true
