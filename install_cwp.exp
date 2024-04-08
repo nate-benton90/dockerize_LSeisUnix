@@ -1,0 +1,47 @@
+#!/usr/bin/expect -f
+
+set timeout -1
+
+# Start the installation process
+spawn make install
+
+# A loop to continuously handle expected prompts until the end
+set promptHandled 0
+while {1} {
+    expect {
+        -re {Continue install\? \[y/n\]} {
+            send "y\r"
+            set promptHandled 1
+        }
+        -re {hit return key to continue} {
+            send "\r"
+            set promptHandled 1
+        }
+        -re {--More--} {
+            send " "
+            set promptHandled 1
+        }
+        -re {LEGAL STATEMENT \?\[y/n\]} {
+            send "y\r"
+            set promptHandled 1
+        }
+        -re {Send automatic mail message back to CWP\?\[y/n\]} {
+            send "n\r"
+            set promptHandled 1
+        }
+        eof {
+            break
+        }
+        timeout {
+            if {!$promptHandled} {
+                break
+            }
+            set promptHandled 0
+        }
+    }
+}
+
+# The process completion is handled in the while loop above with 'eof { break }'
+# No need for another 'expect eof' here
+
+puts "Installation process completed or terminated."
