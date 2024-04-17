@@ -9,4 +9,6 @@ work is here: https://github.com/gllore
 4) Use Choco (for Windows users) to install stuff for #1 above: `choco install vcxsrv`.
 5) For macOS users, use XQuartz instead of VcXsrv and install that via Homebrew: `brew cask install xquartz` (and in case one does not have brew, install it via: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`.
 6) For Linux users, use X11 and install it via: `sudo apt-get install x11-apps`.
-7) 
+7) To acquire the Docker image, run this: `docker pull nathanbenton/sug`.
+8) To run the container with file sharing enabled and interacting with it directly, run this command (which is similar to the initial one, which is docker `run -it nathanbenton/sug`): `docker run --mount type=bind,source=C:\Users\nbent\dev_testing\k8s\youtube\videos,target=/usr/local/cwp_su_all_44R22/data -it  nathanbenton/sug` (see email to Dr. Lorenzo for more details).
+9) 
