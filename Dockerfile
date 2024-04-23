@@ -58,7 +58,9 @@ RUN cpan Moose
 RUN cpanm --notest App::SeismicUnixGui
 
 # Setup this rediculous thing to avoid interactive prompts
-RUN apt-get update && apt-get install -y expect && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+        && apt-get install -y expect \
+        && rm -rf /var/lib/apt/lists/*
 
 # Add your expect script and other necessary files
 COPY install_cwp.exp /usr/local/cwp_su_all_44R22/src/install_cwp.exp
@@ -67,4 +69,5 @@ COPY install_cwp.exp /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 RUN chmod +x /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 
 # Fix the line endings for the install_cwp.exp script
-RUN apt-get install dos2unix && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp && rm -rf /var/lib/apt/lists/*
+RUN apt-get install dos2unix && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp \
+        && rm -rf /var/lib/apt/lists/*
