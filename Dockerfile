@@ -2,6 +2,7 @@
 FROM ubuntu:22.04 as builder
 
 # Avoid prompts from apt and set CPAN to non-interactive mode
+# TODO: maybe combine with large ENV layer near end of this file
 ENV DEBIAN_FRONTEND=noninteractive \
     PERL_MM_USE_DEFAULT=1
 
@@ -48,6 +49,7 @@ RUN apt-get install --fix-missing -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set LD_LIBRARY_PATH including PGPLOT directory
+# TODO: not sure if this section here is actually needed
 RUN echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/pgplot/" >> /etc/profile
 
 # Install cpanminus for easier module installation
@@ -81,25 +83,20 @@ RUN apt-get update && apt-get install -y dos2unix \
 
 # Placed here to avoid this error during container run: libpgplot.so: 
 # cannot open shared object file: No such file or directory
-ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH
-ENV PATH=/usr/local/pgplot:$PATH
-ENV CWPROOT=/usr/local/cwp_su_all_44R22
-
-# Set other environment variables
-ENV LOCAL=/usr/local \
+ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \
+    CWPROOT=/usr/local/cwp_su_all_44R22 \
+    LOCAL=/usr/local \
     SeismicUnixGui=/usr/local/share/perl/5.34.0/App/SeismicUnixGui \
     SeismicUnixGui_script=/usr/local/share/perl/5.34.0/App/SeismicUnixGui/script \
     PGPLOT_DIR=/usr/local/pgplot \
     PGPLOT_DEV=/XWINDOW \
-    SIOSEIS=/usr/local/sioseis
+    SIOSEIS=/usr/local/sioseis \
+    DISPLAY=host.docker.internal:0.0
 
-# Required to project graphics to the host machine
-ENV DISPLAY=host.docker.internal:0.0
+# Extend PATH to include all required directories
+ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script
 
-# Now append to PATH
-ENV PATH="${PATH}:${CWPROOT}/bin:${CWPROOT}/src/Sfio/bin:${SeismicUnixGui_script}:${SIOSEIS}"
-
-# ---
+# Optional final downloads from SeismicUnix download/config docs - not all these download successfully
 RUN cd /usr/local/cwp_su_all_44R22/src \
         && make xtinstall || true \
         && make xminstall || true \

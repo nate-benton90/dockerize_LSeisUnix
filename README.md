@@ -1,4 +1,11 @@
-All preliminary, ongoing, and future work based strictly on
+SeismicUnix GUI (SUG) "Dockerization" Project
+
+Welcome!
+
+![Main intro image](images\sug_illustration.jpg)
+
+
+* All preliminary, ongoing, and future work based strictly on
 initial dev provided by Dr. Juan Lorenzo (at LSU), which his
 work is here: https://github.com/gllore. Right now, these notes
 are not listed in order, and are here mostly for reference.

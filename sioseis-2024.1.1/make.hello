@@ -1,0 +1,7 @@
+FC = gfortran
+CC = gcc
+OBJECTS=hello.o helloc.o
+LDFLAGS:=-lgfortran
+
+hello:$(OBJECTS)
+	$(FC) $(FFLAGS) $(OBJECTS) $(LIBS) $(LDFLAGS) -o hello

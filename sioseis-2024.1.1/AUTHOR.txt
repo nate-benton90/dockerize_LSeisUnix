@@ -1,0 +1,11 @@
+Paul Henkart, phenkart@phenkart@gmail.com
+Alistair Harding, Graham Kent, Dan Lizaralde,
+John Hopper, Tom O'Brien, Mark Wiederspahn, 
+Mary Kappus, John Shay, Rudolf Widmer-Schnidrig,
+Warren Wood, David Hale, Mladen Nedimovic,
+Kurt Schwehr
+
+Some routines from books:
+Robinson: "Multichannel Time Series"
+Oppenheim and Schafer: "Digital Signal Processing"
+Press et al:"Numerical Recipes"

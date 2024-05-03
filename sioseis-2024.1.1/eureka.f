@@ -1,0 +1,52 @@
+      SUBROUTINE EUREKA (LR,R,G,F,A)
+!    THIS ROUTINE IS TAKEN FROM ENDERS ROBINSON'S BOOK "MULTICHANNEL
+!  TIME SERIES ANALYSIS WITH DIGITAL COMPUTER PROGRAMS", 1967 HOLDEN-DAY,
+!  500 SANSOME ST., SAN FRANCISCO, CA.
+!
+!    NOTE THAT EUREKA IS IDENTICAL TO SUBOUTINE WEINER IN THE FPS LIBRARY,
+!  THEREFORE IT IS NICE FOR COMPATIBILITY!
+!
+!  LR - LENGTH OF FILTER = M
+!  R  - AUTOCORRELATION COEFFICIENTS = R0,R1,R2,....,RM
+!  G  - RIGHT-HAND SIDE COEFFICIENTS = G0,G1,G2,....,GM
+!  F  - FILTER COEFFICIENTS = F0,F1,F2,....FM
+!  A  - PREDICTION ERROR OPERATOR = A0=1,A1,A2,....,AM
+      DIMENSION R(LR),G(LR),A(LR),F(LR)
+      V=R(1)
+      D=R(2)
+      A(1)=1.
+      F(1)=G(1)/V
+      Q=F(1)*R(2)
+      IF(LR.EQ.1) RETURN
+!      DO 4 L=2,LR
+      DO 6 L=2,LR
+      A(L)=-D/V
+      IF(L.EQ.2) GO TO 2
+      L1=(L-2)/2
+      L2=L1+1
+      IF(L2.LT.2) GO TO 5
+      DO 1 J=2,L2
+      HOLD=A(J)
+      K=L-J+1
+      A(J)=A(J)+A(L)*A(K)
+      A(K)=A(K)+A(L)*HOLD
+1     CONTINUE
+    5 IF(2*L1.EQ.L-2) GO TO 2
+      A(L2+1)=A(L2+1)+A(L)*A(L2+1)
+2     V=V+A(L)*D
+      F(L)=(G(L)-Q)/V
+      L3=L-1
+      DO J=1,L3
+         K=L-J+1
+    3    F(J)=F(J)+F(L)*A(K)
+      ENDDO
+      IF(L.EQ.LR) RETURN
+      D=0.
+      Q=0.
+      DO 4 I=1,L
+         K=L-I+2
+         D=D+A(I)*R(K)
+    4 CONTINUE
+      Q=Q+F(I)*R(K)     ! was label 4
+    6 CONTINUE
+      END

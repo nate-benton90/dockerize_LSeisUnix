@@ -1,0 +1,132 @@
+      SUBROUTINE WINDOW(JTYPE,BUF,N,BETA)
+!
+!     CALCULATES AND STORES A N POINT WINDOW FUNCTION IN BUF.
+!     THE WHOLE WINDOW (BOTH HALVES) ARE COMPUTED AND STORED UNLESS JTYPE<0.
+!    N IS THE TOTAL WINDOW LENGTH.
+!
+!     ARGUMENTS:
+!        JTYPE  - INTEGER DESIGNATOR OF THE TYPE OF WINDOW TO CALCULATE.
+!               <0,  ONLY THE LEFT HALF OF THE WINDOW IS RETURNED( BASED ON WINDOW OF 2*N)
+!               >0, THE WHOLE WINDOW IS RETURN (BASED ON WINDOW OF N)
+!               =1,  HAMMING
+!               =2,  HANNING
+!               =3,  GAUSSIAN
+!               =4,  BARTLETT (TRIANGULAR)
+!               =5,  RECTANGULAR (BOX CAR)
+!               =6,  BLACKMAN
+!               =7,  EXACT BLACKMAN
+!               =8,  BLACKMAN HARRIS
+!
+!        BUF    - ARRAY TO STORE THE WINDOW MULTIPLIERS.  MUST BE N LONG.
+!        N      - NUMBER OF POINTS OF THE WINDOW
+!        BETA   - BETA THE VARIABLE BETA FOR THE GAUSSIAN WINDOW
+!
+!  WRITTEN AND COPYRIGHTED BY:
+!  PAUL HENKART, SCRIPPS INSTITUTION OF OCEANOGRAPHY, NOVEMBER 1978
+!  ALL RIGHTS ARE RESERVED BY THE AUTHOR.  PERMISSION TO COPY OR REPRODUCE THIS
+!  SUBROUTINE, BY COMPUTER OR OTHER MEANS, MAY BE OBTAINED ONLY FROM THE AUTHOR.
+      DIMENSION BUF(1)
+      DATA E/2.71828/
+      DATA PI2/6.2831853/
+      M=N
+      K=N
+      IF(JTYPE.LT.0) K=N*2
+!      K=K-1
+!      I=K/2
+!      IF(M/2*2.EQ.M) GO TO 10
+!      I=I-1
+!      IF(JTYPE.LT.0) I=I+1
+      IF(JTYPE.LT.0) K=K-1
+      I=-N/2
+      SGN=1.
+      IF(JTYPE.GT.0) GO TO 10
+      I=0
+      SGN=-1.
+   10 CONTINUE
+      I=I-1
+      ITYPE=IABS(JTYPE)
+      J=1
+      IF(ITYPE.LT.1.OR.ITYPE.GT.8) RETURN
+      GO TO (100,200,300,400,500,600,700,800), ITYPE
+!****
+!****      HAMMING FUNCTION
+!****
+  100 CONTINUE
+  110 I=I+1
+      BUF(J)=.54+.46*SGN*COS(FLOAT(I)*PI2/FLOAT(K))
+      J=J+1
+      IF(J.LE.M) GO TO 110
+      RETURN
+!****
+!****        HANNING
+!****
+  200 CONTINUE
+  210 I=I+1
+      BUF(J)=.5+.5*SGN*COS(FLOAT(I)*PI2/FLOAT(K))
+      J=J+1
+      IF(J.LE.M) GO TO 210
+      RETURN
+!****
+!****    GAUSSIAN
+!****
+  300 CONTINUE
+      B2=BETA*BETA/2.
+  310 I=I+1
+      BUF(J)=E**(-1*(((2.*FLOAT(I)/FLOAT(M))**2.)*B2))
+      J=J+1
+      IF(J.LE.M) GO TO 310
+      RETURN
+!****
+!****     TRIANGULAR
+!****
+  400 CONTINUE
+      K=M/2
+      TEMP=FLOAT(K)
+      DO 410 I=1,K
+      BUF(I)=FLOAT(I-1)/TEMP
+      BUF(N-I+1)=BUF(I)
+  410 CONTINUE
+      BUF(K+1)=1.
+      RETURN
+!****
+!****     RECTANGULAR
+!****
+  500 CONTINUE
+      DO I=1,M
+  510    BUF(I)=1.
+      ENDDO
+      RETURN
+!****
+!****        BLACKMAN
+!****
+  600 CONTINUE
+      A0=.42
+      A1=.5
+      A2=.08
+      A3=0
+  610 I=I+1
+      TEMP=PI2*FLOAT(I)/FLOAT(K)
+      BUF(J)=A0+SGN*A1*COS(TEMP)+A2*COS(TEMP*2)+SGN*A3*COS(TEMP*3)
+      J=J+1
+      IF(J.LE.M) GO TO 610
+      RETURN
+!****
+!****    EXACT BLACKMAN
+!****
+  700 CONTINUE
+      A0=.42659071
+      A1=.49656062
+      A2=.07684867
+      A3=0.
+      GO TO 610
+!****
+!****      BLACKMAN HARRIS
+!****
+  800 CONTINUE
+      A0=.35875
+      A1=.48829
+      A2=.14128
+      A3=.01168
+      GO TO 610
+!****
+      END

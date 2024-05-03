@@ -1,0 +1,10 @@
+#FC = /usr/local/bin/gfortran
+#CC = /usr/local/bin/gcc
+FC = gfortran
+CC = gcc
+LIBS =
+FFLAGS=-O
+OBJECTS=helloc.o
+
+hello:$(OBJECTS)
+	$(FC) $(FFLAGS) $(OBJECTS) -o helloc $(LIBS)

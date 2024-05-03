@@ -1,0 +1,542 @@
+      SUBROUTINE VELAED(BUF,LBUF,IBUF)
+!                           PROCESS VELAN  (VELOCITY ANALYSIS)
+!
+!                           ------- -----
+! DOCUMENT DATE:  3 January 1995
+!
+!     A VELOCITY ANALYSIS IS AN AID IN DETERMINING THE STACKING VELOCITIES
+!  TO USE IN NORMAL MOVEOUT.  THERE ARE CURRENTLY 6 TYPES OF ANALYSIS
+!  AVAILABLE IN THIS PACKAGE, THE FIRST 3 FOR REFLECTORS AND THE LAST 3 FOR
+!  REFRACTORS.
+!            1)  CONSTANT VELOCITY GATHERS
+!            2)  CONSTANT VELOCITY STACK
+!            3)  SEMBLANCE SPECTRA
+!            4)  CONSTANT P TAU-P GATHERS
+!            5)  TAU-SUM OR SLANT STACK
+!            6)  TAU-P SEBLANCE SPECTRA
+!
+!    CONSTANT VELOCITY GATHERS
+!    -------- -------- -------
+!     A CONSTANT VELOCITY GATHER VELOCITY ANALYSIS USUALLY CONSISTS OF ALL THE
+!  TRACES OF A SINGLE RP (REFLECTION POINT) MOVED-OUT WITH A NUMBER OF DIFFERENT
+!  VELOCITIES THAT DO NOT VARY IN TIME.
+!     THIS METHOD OF ANALYSIS IS USEFUL FOR EXAMINING EXACTLY HOW THE DATA
+!  ALIGNS AT DIFFERENT VELOCITIES.
+!     EXAMPLE: FOR 24 FOLD DATA A SINGLE RP WITH VELS 5000 200 7000 WOULD OUTPUT
+!  THE FIRST 24 TRACES MOVED OUT WITH A VELOCITY OF 5000.  THE NEXT 24 TRACES
+!  WOULD BE MOVED-OUT WITH A VELOCITY OF 5500. THE FOLLOWING 24 TRACES WOULD BE
+!  MOVED-OUT WITH A VELOCITY OF 6000. ETC.
+!
+!    CONSTANT VELOCITY STACK
+!    -------- -------- -----
+!     A CONSTANT VELOCITY STACK IS A SUITE OF STACKED GATHERS, USUALLY SEVERAL
+!  ADJACENT RPS, MOVED-OUT WITH VELOCITIES THAT DO NOT VARY WITH TIME.
+!     THIS METHOD OF VELOCITY ANALYSIS IS USEFUL BECAUSE IT SHOWS THE ACTUAL
+!  STACK OF THE DATA USING THE NORMAL NMO AND STACK ROUTINES.
+!     TO OBTAIN A CONSTANT VELOCITY STACK FROM THIS SOFTWARE PACKAGE, PROCESS
+!  STACK MUST FOLLOW PROCESS VELAN AND THE CVEL OPTION MUST BE USED. BY DOING
+!  THIS, THE CONSTANT VELOCITY GATHERS MADE BY VELAN WILL BE STACKED.
+!     EXAMPLE: PROCS INPUT VELAN STACK OUTPUT END
+!              VELAN NRP 6 VELS 1800 50 2000 100 2500 END END
+!     WILL PRODUCE THE FOLLOWING OUTPUT:
+!       TRACES 1-6, STACK OF THE 6 RPS AT 1800 M/SEC.
+!       TRACES 7-12, STACK OF THE 6 RPS AT 1850.
+!       TRACES 13-18, STACK OF THE 6 RPS AT 1900.
+!       TRACES 19-24, STACK OF THE 6 RPS AT 1950.
+!       TRACES 25-30, STACK OF THE 6 RPS AT 2000.
+!       TRACES 31-36, STACK OF THE 6 RPS AT 2100.
+!       TRACES 37-42, STACK OF THE 6 RPS AT 2200.
+!       TRACES 43-48, STACK OF THE 6 RPS AT 2300.
+!       TRACES 49-54, STACK OF THE 6 RPS AT 2400.
+!       TRACES 55-60, STACK OF THE 6 RPS AT 2500.
+!
+!     THE OUTPUT IS NORMALLY DISPLAYED WITH A SPACE BETWEEN THE TRACES WITH
+!  DIFFERENT VELOCITIES.
+!
+!     SEMBLANCE SPECTRA
+!     --------- -------
+!      A SEMBLANCE VELOCITY SPECTRA IS THE PRINTER PLOT OF THE SEMBLANCE OF
+!  TRACE WINDOWS MOVED-OUT WITH CONSTANT VELOCITIES.  SEMBLANCE IS THE RATIO
+!  OF THE ENERGY OF THE OUTPUT TRACE (THE STACKED TRACE) AND THE MEAN ENERGY
+!  OF THE INPUT TRACES.  THE STACKED TRACE IS OBTAINED BY SUMMING ALL THE TRACES
+!  OF THE RP AFTER MOVING THEM OUT. THE MOVE-OUT IS A LITTLE DIFFERENT FROM
+!  CONVENTIONAL NMO SINCE THE ENTIRE WINDOW RECEIVES THE SAME NMO AS THE CENTER
+!  OF THE WINDOW.  THE MEAN ENERGY IS SIMPLY THE SUM OF THE ENERGIES OF ALL
+!  THE CORRESPONDING INPUT WINDOWS.  SUCCESSIVE WINDOWS ARE SPACED HALF A
+!  WINDOW AWAY, THUS THE WINDOWS OVERLAP.
+!      MORE THAN ONE RP MAY BE INCLUDED IN THE SPECTRA BY USING THE PARAMETER
+!  NRP.  IN THIS CASE, ALL THE INPUT RPS (TRACES) ARE TREATED AS ONE LARGER
+!  RP, AS IF SMEARING THE SUBSURFACE.  THIS MAY INCREASE THE SIGNAL TO NOISE
+!  RATIO IN AREAS OF NEGLIGIBLE DIP.
+!     VELOCITY SPECTRA ARE DISCUSSED IN A PAPER BY TERRY TANNER OF SEISCOM
+!  DELTA IN GEOPHYSICS, DECEMBER 1969.  SEMBLANCE IS DISCUSSED IN A PAPER BY
+!  TANNER AND NEIDELL OF SEISCOM IN GEOPHYSICS, JUNE 1971.
+!
+!     CONSTANT P GATHERS
+!     -------- - -------
+!      A CONSTANT P GATHER IS ANALOGOUS TO THE CONSTANT VELOCITY GATHER EXCEPT
+!  THAT THE DATA IS 'MOVED-OUT' USING THE LINEAR TIME SHIFT EQUATION OF A
+!  REFRACTED RAY (T0=TX-X/V OR TAU=T-PX WHERE P=1/V, THE SLOWNESS).  THE
+!  PARAMETER REFRAC MUST BE USED IN ORDER TO OBTAIN THE REFRACTION EQUATION.
+!
+!     SLANT STACK
+!     ----- -----
+!      A SLANT STACK IS OBTAINED BY STACKING THE CONSTANT P GATHERS.  THIS
+!  IS ANALOGOUS TO CONSTANT VELOCITY STACK EXCEPT THAT THE 'MOVE-OUT' IS
+!  FOR REFRACTED ARRIVALS RATHER THAN REFLECTED ARRIVALS.  THE VELAN PARAMETER
+!  MUST BE USED.
+!
+!    TAU-P SEMBLANCE SPECTRA
+!    ----- --------- -------
+!     THE TAU-P SEMBLANCE SPECTRA IS ANALOGOUS TO THE REFLECTION SEMBLANCE
+!  SPECTRA EXCEPT THAT THE LINEAR REFRACTION EQUATION IS USED.
+!
+!
+!  THE PARAMETER DICTIONARY
+!  --- --------- ----------
+!
+!  PARAMATERS NEEDED BY BOTH CONSTANT VELOCITY AND VELOCITY SPECTRA
+!  ---------- ------ -- ---- -------- -------- --- -------- -------
+!  VELS   - THE LIST OF VELOCITY-VELOCITY INCREMENTS TO BE INCLUDED IN THE
+!           ANALYSIS.  THE FIRST AND LAST ENTRY MUST BE VELOCITIES.
+!           E.G. VELS 1800 50 2200 100 3000 WILL PRODUCE AN ANALYSIS WITH
+!           VELOCITIES 1800 1850 1900 1950 2000 2050 2100 2150 2200 2300 2400
+!           2500 2600 2700 2800 2900 3000.
+!           REQUIRED.  UP TO 21 ENTRIES MAY BE GIVEN
+!  NRP    - THE NUMBER OF RPS TO BE INCLUDED IN EACH ANALYSIS.
+!           PRESET=1.
+!  TYPE   - THE TYPE OF VELOCITY ANALYSIS TO PERFORM.
+!         =CVEL,  CONSTANT VELOCITY MOVEOUT WILL BE DONE.
+!         =SPEC,  THE VELOCITY SPECTRA VELOCITY ANALYSIS WILL BE DONE.
+!           PRESET=SPEC
+!  REFRAC - REFRACTION EVENT ANALYSIS (T0=TX-X/V) WILL BE PERFORMED WHEN
+!           REFRAC IS SET NON-ZERO.
+!           PRESET=0.  E.G. REFRAC 1
+!  STAPER - THE NUMBER OF TRACES TO WEIGHT IN ORDER TO FORM A SPATIAL TAPER.
+!           A SPATIAL TAPER OR WINDOW REDUCES THE EDGE EFFECTS DUE TO THERE
+!           NOT BEING AN INFINITE NUMBER OF TRACES IN THE ANALYSIS.  THE TAPER
+!           IS APPLIED TO STAPER TRACES AT THE BEGINNING AND THE END OF EACH
+!           RP IN THE ANALYSIS.  THE TAPER IS A BARTLET WINDOW OR LINEAR RAMP.
+!           E.G. STAPER 3 WILL WEIGHT THE FIRST AND LAST TRACE BY .25, THE 2ND
+!           AND SECOND TO LAST BY .5, AND THE THIRD AND THIRD TO LAST BY .75.
+!           PRESET=0 FOR NORMAL INCIDENCE
+!                       PRESET=3 FOR REFRACTION
+!  TTAPER - THE LENGTH OF A LINEAR TAPER, IN SECONDS, TO APPLY TO THE ENDS
+!           OF THE DATA IN ORDER TO PREVENT BOUNDARY PROBLEMS IN TIME.  EACH
+!           TRACE WILL BE TAPERED FROM EITHER THE DELAY OR MUTE TIME FOR
+!           TTAPER SECONDS.  LIKEWISE, EACH TRACE WILL BE TAPERED FOR TTAPER
+!           SECONDS AT THE END OF DATA.  A LINEAR TAPER IS ALSO CALLED A
+!           BARTLETT WINDOW.
+!           PRESET=0. FOR NORMAL INCIDENCE DATA
+!           PRESET=.2 FOR REFRACTION (TAU-P) DATA
+!
+!  CVEL PARAMETERS
+!  ---- ----------
+!  STRETC - THE AMOUNT OF STRETCH (NMO), IN SECONDS, PERMISSIBLE.  DATA WITH NMO
+!           EXCEEDING STRETCH WILL BE MUTED.
+!           PRESET=1.
+!
+!  VELOCITY SPECTRA PARAMETERS
+!  -------- ------- ----------
+!  WINLEN - THE WINDOW LENGTH, IN SECONDS, OF THE WINDOW TO USE IN THE SEMBLANCE
+!           SPECTRA.  THE WINDOW LENGTH SHOULD INCLUDE A FULL WAVELENGTH.
+!           PRESET=.100.  EXAMPLE, WINLEN .080
+!  VTUPLE - THE VELOCITY (HORIZONTAL) SCALE TO USE ON THE PRINTER PLOT OF THE
+!           VELOCITY SPECTRA.  THE TUPLE IS COMPRISED OF THE MINIMUM VELOCITY
+!           TO PLOT, THE MAXIMUM VELOCITY TO PLOT, AND THE NUMBER OF COLUMNS TO
+!           USE BETWEEN THE MINIMUM AND THE MAXIMUM (INCLUSIVE).
+!           PRESET=THE SMALLEST VELS, THE LARGEST VELS, 101 COLUMNS
+!           EXAMPLE: VTUPLE 5000 20000 101
+!  CHARS  - THE CHARACTER SET TO USE ON THE LINE PRINTER SEMBLANCE SPECTRA PLOT.
+!           THE SEMLANCE VALUES ARE NORMALLY DIVIDED INTO 10 INTERVALS, 0.-1.,
+!           1.-2.,2.-3.,....., 9.-10..  THE SEMBLANCE VALUE IS A REAL NUMBER
+!           WHICH IS CONVERTED TO INTEGER BY TRUNCATING.  THIS INTEGER IS THEN
+!           USED AS AN INDEX TO THE CHARACTER ARRAY USED IN THE PLOT.  THE
+!           CHARACTERS IN THE CHARS LIST MUST BE SEPARATED BY A BLANK.  A BLANK
+!           CHARACTER IN THE CHARS LIST IS REPRESENTED BY ANY TWO CHARACTERS
+!           WITHOUT A BLANK SEPARATOR.  Up to 50 characters may be given.  
+!           PRESET= 0 1 2 3 4 5 6 7 8 9  E.G. chars AA 1 2 3 4 5 6 7 8 9 
+!  OPATH  - The pathname of an output file containing the semblance values in
+!           full floating point (before being truncated to integer). The format
+!           of this file is either ASCII or SEGY. If the pathname ends in "segy",
+!           then the output file will be structured according to SEGY convention,
+!           otherwise an ASCII file will be written with one ASCII semblance 
+!           value per line, all values for a given velocity together as a group.
+!           The SEGY file will be constructed as a CMP gather with velocity values
+!           placed in the range value of CMP gather (i.e., RP 3450, range 1500,....,
+!           range 4000). For SEGY option, semblance values are resampled to give an
+!           equivalent time window and sample rate of original data. Interpolation
+!           is done via cubic spline.
+!           Preset = none  e.g.  opath velan.1234 (ASCII), velan.1234.segy (SEGY)
+!
+!  END    - TERMINATES EACH PARAMETER LIST.
+!
+!  WRITTEN AND COPYRIGHTED BY:
+!  PAUL HENKART, SCRIPPS INSTITUTION OF OCEANOGRAPHY, 26 MARCH 1981
+!  ALL RIGHTS ARE RESERVED BY THE AUTHOR.  PERMISSION TO COPY OR REPRODUCE THIS
+!  SUBROUTINE, BY COMPUTER OR OTHER MEANS, MAY BE OBTAINED ONLY FROM THE AUTHOR.
+!
+!   THE PARAMETER LIST PASSED TO VELAEX ON THE DISC LOOKS LIKE:
+!    WORD 1)  NRP (32 BIT INTEGER)
+!         2)  TYPE (32 BIT INTEGER)
+!         3)  STRETC (FLOATING POINT)
+!         4)  NVELS (32 BIT INTEGER) - THE NUMBER OF VELOCITIES IN THE VELS ARRAY
+!         5)  LPRINT (32 BIT INTEGER)
+!         6)  WINLEN (REAL)
+!         7)  NCHAR (REAL)
+!         8)  REFRAC (REAL)
+!         9)  STAPER (INTEGER*4)
+!         10) TTAPER (REAL)
+!         11) NSEGYFILE (INTEGER*4) - Flag to tell if OPATH is ASCII or SEGY or MAT
+!         14-34) VELS
+!         35-64)  BOUNDS
+!         65-67)  VTUPLE
+!
+!  ARGUMENTS:
+!  BUF    - A SCRATCH ARRAY AT LEAST 60 32 BIT WORDS LONG.
+!  LBUF   - THE SAME ARRAY BUT THE 32 BIT INTEGER EQUIVALENT.  NEEDED
+!           BECAUSE PRIME FORTRAN DOESN'T ALLOW EQUIVALENCING OF ARGUMENTS.
+!
+!
+!***GMK 12/23/94
+!*** ADDED SEGY OUTPUT FOR SEMBLANCE TO FACILTATE PLOTTING & PICKING
+!   mod Oct 95 - change vtuple preset
+!   mod 15 Jan 02 - Linux needed the null terminator on OPATH
+!
+      PARAMETER (NPARS=14)                                              ! THE NUMBER OF USER PARAMETERS
+      PARAMETER (MULTIV=10)                                             ! THE FIRST MULTI-VALUED PARAMETER IN THE NAMES ARRAY
+      PARAMETER (MAXBOU=30)                                             ! MOST BOUNDS THAT MAY BE GIVEN
+      PARAMETER (MAXVEL=21)                                             ! THE MAXIMUM NUMBER OF ENTRIES IN THE VELS LIST
+      PARAMETER (IVEL=NPARS+1)
+      PARAMETER (IVTUPL=NPARS+MAXVEL+MAXBOU+1)
+      PARAMETER (NWRDS=MAXVEL+NPARS+MAXBOU+3)                           ! THE NUMBER OF PARAMETERS IN EACH PARAMETER DISC FILE
+      EQUIVALENCE (VALS(1),LVALS(1))
+      COMMON /VELAN/ MUNIT,NLISTS,IVELU1,IVELU2,ivelu3
+      COMMON /VPLT/ IALPHA(50)
+      CHARACTER*1 IALPHA
+      DIMENSION BUF(111),LBUF(111),IBUF(111)
+      CHARACTER CHARS*1
+      INTEGER NRP,STAPER
+      INTEGER NSEGYFILE 
+      LOGICAL iexist
+      CHARACTER*4 TYPE
+      CHARACTER*6 NAMES(NPARS)
+      CHARACTER*1 TYPES(NPARS)
+      DIMENSION LENGTH(NPARS)
+      CHARACTER*100 TOKEN
+      CHARACTER*100 ctemp
+      DIMENSION VALS(NPARS),LVALS(NPARS)
+      CHARACTER*4 CVALS(NPARS)
+      COMMON /EDITS/ IERROR,IWARN,IRUN,NOW,ICOMPT
+!
+!
+      EQUIVALENCE (NRP,LVALS(1)),
+!     2            (TYPE,LVALS(2)),
+     3            (STRETC,VALS(3)),
+     4            (LPRINT,LVALS(4)),
+     5            (WINLEN,LVALS(5)),
+     6            (NCHAR,VALS(6)),
+     7            (REFRAC,VALS(7)),
+     8            (STAPER,LVALS(8)),
+     9            (TTAPER,VALS(9)),
+     *            (VELS,VALS(10)),
+     1            (BOUNDS,VALS(11)),
+     2            (VTUPLE,VALS(12)),
+     3            (CHARS,CVALS(13)),
+     4            (opath,vals(14))
+      DATA NAMES/'NRP   ',
+     2           'TYPE  ',
+     3           'STRETC',
+     4           'LPRINT',
+     5           'WINLEN',
+     6           'NCHAR ',
+     7           'REFRAC',
+     8           'STAPER',
+     9           'TTAPER',
+     *           'VELS  ',
+     1           'BOUNDS',
+     2           'VTUPLE',
+     3           'CHARS ',
+     4           'OPATH '/
+      DATA LENGTH/3,4,6,6,6,5,6,6,6,4,6,6,5,5/
+      DATA TYPES/'L','A','F','L','F','F','F','L','F','F','F','F','A',
+     *           'A'/
+!****
+!****      SET THE PRESETS
+!****
+      DO I=1,10                                                      ! PRESET THE CHAR ARRAY (IARRAY) TO '0','1','2',....'9'
+   10 WRITE(IALPHA(I),11) I-1
+      ENDDO
+   11 FORMAT(I1)
+      DO i = 11, 50 
+   12 ialpha(i) = ' '
+      ENDDO
+      NRP=1
+      TYPE='SPEC'
+      STRETC=1.0
+      WINLEN=.100
+      LPRINT=0
+      NCHAR=10.
+      nc = 0
+      STAPER=-1
+      TTAPER=-1.
+      NSEGYFILE=0
+      REFRAC=0.
+      IADDWB=0
+      LLNO = 0
+      NLISTS=0
+      NS=0
+      NVELS=0
+      NBOUS=0
+      ivelu3 = 0
+      DO I=1,NWRDS
+   20    BUF(I)=0.
+      ENDDO
+!****
+!****     GET A PARAMETER FILE
+!****
+      CALL GETFIL(1,MUNIT,TOKEN,ISTAT)
+!****
+!****   THE CURRENT COMMAND LINE IN THE SYSTEM BUFFER MAY HAVE THE PARAMETERS.
+!****   GET A PARAMETER LIST FROM THE USER.
+!****
+      NTOKES=1
+  100 CONTINUE
+      CALL GETOKE(TOKEN,NCHARS)                                         ! GET A TOKEN FROM THE USER PARAMETER LINE
+  110 CALL UPCASE(TOKEN,NCHARS)                                         ! CONVERT THE TOKEN TO UPPERCASE
+      IF(NCHARS.GT.0) GO TO 150
+      IF(NOW.EQ.1) PRINT 140
+  140 FORMAT(' <  ENTER PARAMETERS  >')
+      CALL RDLINE                                                       ! GET ANOTHER USER PARAMETER LINE
+      NTOKES=0
+      GO TO 100
+  150 CONTINUE
+      NTOKES=NTOKES+1
+      DO 190 I=1,NPARS                                                  ! SEE IF IT IS A PARAMETER NAME
+      LEN=LENGTH(I)                                                     ! GET THE LEGAL PARAMETER NAME LENGTH
+      IPARAM=I                                                          ! SAVE THE INDEX
+      IF(TOKEN(1:NCHARS).EQ.NAMES(I)(1:LEN).AND.NCHARS.EQ.LEN) GO TO 200
+  190 CONTINUE                                                          ! STILL LOOKING FOR THE NAME
+      IF(TOKEN(1:NCHARS).EQ.'END'.AND.NCHARS.EQ.3) GO TO 1000           ! END OF PARAM LIST?
+      IF(NS+nc.NE.0) GO TO 230
+      PRINT 191, TOKEN(1:NCHARS)
+  191 FORMAT(' ***  ERROR  *** VELAN DOES NOT HAVE A PARAMETER ',
+     *  'NAMED ',A10)
+      IERROR=IERROR+1
+      GO TO 100
+!****
+!****    FOUND THE PARAMETER NAME, NOW FIND THE VALUE
+!****
+  200 CONTINUE
+      NS=0
+      NPARAM=IPARAM
+  210 CONTINUE                                                          !  NOW FIND THE VALUE
+      CALL GETOKE(TOKEN,NCHARS)
+      NTOKES=NTOKES+1
+      IF(NCHARS.GT.0) GO TO 230                                         ! END OF LINE?
+      IF(NOW.EQ.1) PRINT 140                                            ! THIS ALLOWS A PARAMETER TO BE ON A DIFFERENT LINE FROM THE NAME
+      CALL RDLINE                                                       ! GET ANOTHER LINE
+      NTOKES=0
+      GO TO 210
+  230 CONTINUE
+      IF(TYPES(NPARAM).NE.'A') GO TO 240
+      IF( names(nparam) .EQ. 'OPATH' ) THEN
+          ctemp(1:100) = token(1:nchars)
+          CALL upcase( token, nchars )
+          ctemp (nchars+1:nchars+1) = CHAR(0) 
+!*** GMK  IS OUTPUT FILE SEGY FORMAT OR ASCII
+          IF ( token(nchars-3:nchars) .EQ. 'SEGY' .OR.
+     *         token(nchars-2:nchars) .EQ. 'MAT') THEN
+!*** GMK OPEN SEGY FILE BUT WAIT UNTIL EX TO WRITE EBCDIC & TAPE ID HEADERS
+!*** SINCE SOME VALUES LIKE NSAMPS & DELTAT CHANGE FOR SEMBLANCE
+            NSEGYFILE = 1
+            IF ( token(nchars-2:nchars) .EQ. 'MAT' ) nsegyfile = 2
+            CALL getfil( 3, ivelu3, ctemp, istat )          
+            GOTO 100     
+          ELSE 
+            NSEGYFILE = 0
+            token(nchars+1:nchars+1) = CHAR(0)
+            CALL getfil( 2, ivelu3, token, istat )          
+            INQUIRE( FILE = ctemp, EXIST = iexist )
+            IF( iexist ) THEN
+               OPEN( UNIT = ivelu3, FILE = ctemp, STATUS = 'OLD' )
+               CLOSE( UNIT = ivelu3, STATUS = 'DELETE' )
+            ENDIF
+            OPEN( UNIT = ivelu3,
+     *          FILE = ctemp,
+     *          ACCESS = 'SEQUENTIAL',
+     *          FORM = 'FORMATTED',
+     *          STATUS = 'NEW' )
+            GOTO 100
+          ENDIF
+      ENDIF
+      IF(NAMES(NPARAM).EQ.'ADDWB'.AND.TOKEN(1:NCHARS).EQ.'YES')
+     *    IADDWB=1
+      IF(NAMES(NPARAM).EQ.'TYPE') THEN
+           CALL upcase( token, 4 )
+           TYPE(1:4)=TOKEN(1:4)
+           GO TO 100
+      ENDIF
+      IF(NAMES(NPARAM).EQ.'CHARS') THEN
+  231     nc = nc + 1
+          IF( nc .GT. 50 ) THEN
+              PRINT *,' ***  ERROR  ***  More than 50 CHARS are given.'
+              ierror = ierror + 1
+              GOTO 100
+          ENDIF
+          IALPHA(nc) = TOKEN(1:1)
+          IF( NCHARS .GT. 1 ) IALPHA(nc)=' '                            ! WAS IT A "BLANK"?
+  235     CALL getoke( token, nchars )
+          IF( nchars .EQ. 0 ) THEN
+              CALL rdline
+              ntokes = 0
+              GOTO 235
+          ENDIF
+          IF( nchars .EQ. 1 ) GOTO 231
+          GO TO 110
+      ENDIF
+  240 CONTINUE
+      CALL UPCASE(TOKEN,NCHARS)
+      CALL DCODE(TOKEN,NCHARS,AREAL,ISTAT)                              ! TRY AND DECODE IT
+      IF(ISTAT.EQ.2) GO TO 420                                          ! =2 MEANS IT IS A NUMERIC
+      IERROR=IERROR+1                                                   ! DCODE PRINTED AN ERROR
+      GO TO 100
+  420 IF(TYPES(NPARAM).EQ.'L') GO TO 500
+      IF(NPARAM.LT.MULTIV) GO TO 490                                    !  IS IT A MULTIVALUED PARAMETER
+      NS=NS+1                                                           !  THE TOKEN WAS A MULTI-VALUED PARAMETER
+      VALS(NPARAM)=1.
+      IF(NAMES(NPARAM).EQ.'VELS') THEN
+           ITEMP=0
+           NVELS=NVELS+1
+      ENDIF
+      IF(NAMES(NPARAM).EQ.'BOUNDS') THEN
+          NBOUS=NBOUS+1
+          ITEMP=MAXVEL
+      ENDIF
+      IF(NAMES(NPARAM).EQ.'VTUPLE') ITEMP=maxvel+MAXBOU
+      BUF(NPARS+NS+ITEMP)=AREAL
+      GO TO 100
+  490 VALS(NPARAM)=AREAL                                                !  FLOATING POINT VALUES
+      GO TO 100
+  500 CONTINUE                                                          !  32 BIT INTEGER VALUES
+      LVALS(NPARAM)=AREAL
+      GO TO 100
+!****
+!****   FINISHED A LIST, NOW DO THE ERROR AND VALIDITY CHECKS
+!****
+ 1000 CONTINUE                                                          ! MAKE SURE ALL SHOT & RP NUMBERS INCREASE
+      IF(TYPE.EQ.'CVEL'.OR.TYPE.EQ.'SPEC') GO TO 1020
+      PRINT 1010,TYPE
+ 1010 FORMAT('  ***  ERROR  ***  ILLEGAL TYPE ',A4)
+      IERROR=IERROR+1
+ 1020 CONTINUE
+      IF(NVELS.GT.2) GO TO 1120
+      PRINT 1110
+ 1110 FORMAT(' ***  ERROR  ***  AT LEAST 3 VELS MUST BE GIVEN.'
+     *   )
+      IERROR=IERROR+1
+ 1120 CONTINUE
+      IF(NBOUS.EQ.0.OR.NBOUS.GE.6) GO TO 1130
+      PRINT 1125
+ 1125 FORMAT(' AT LEAST 2 BOUNDS TRIPLETS MUST BE GIVEN.')
+      IERROR=IERROR+1
+ 1130 CONTINUE
+      IF(BUF(IVEL).GE.BUF(IVTUPL)) GO TO 1140
+      PRINT 1135
+ 1135 FORMAT(' ***  ERROR   ***   ALL VELS MUST LIE IN VTUPLE RANGE.')
+      IERROR=IERROR+1
+ 1140 CONTINUE
+!      IF(BUF(IVTUPL).LE.0.) BUF(IVTUPL)=BUF(IVEL)                      ! PRESET THE VTUPLE ARRAY
+!      IF(BUF(IVTUPL+1).LE.0.) BUF(IVTUPL+1)=BUF(IVEL+NVELS-1)
+!      IF(BUF(IVTUPL+2).LE.0.) BUF(IVTUPL+2)=101.
+      IF( BUF(IVTUPL) .NE. 0. .AND. BUF(IVTUPL) .GE. BUF(IVTUPL+1)) THEN
+            PRINT *,' ***  ERROR  ***  VTUPLE(2) MUST BE GREATER ',
+     *              'THAN VTUPLE(1)'
+            IERROR=IERROR+1
+      ENDIF
+      IF( BUF(IVTUPL+2) .LT. 0 .OR. BUF(IVTUPL+2) .GT. 132 ) THEN
+             PRINT *,' ***  ERROR  ***  0<VTUPLE(3)<133'
+             IERROR=IERROR+1
+      ENDIF
+      DO 1150 I=2,NVELS,2
+      IF(BUF(IVEL+I).LT.BUF(IVEL+I-2)) THEN
+          PRINT *,' ***  ERROR  ***  VEL VELOCITIES MUST INCREASE ',
+     *            BUF(IVEL+I-2),BUF(IVEL+I)
+             IERROR=IERROR+1
+      ENDIF
+      IF(BUF(IVEL+I-1).LT.0) THEN
+          PRINT *,' ***  ERROR  ***  VEL VELOCITY INCREMENT ERROR',
+     *      BUF(IVEL+I-2)
+            IERROR=IERROR+1
+      ENDIF
+ 1150 CONTINUE
+      IF( nsegyfile .NE. 0 .AND. nvels .NE. 3 ) THEN
+          PRINT *,' ***  ERROR  ***  Only 3 VELS permitted with SEGY ',
+     &         'OPATH.'
+          ierror = ierror + 1
+      ENDIF
+!****
+!****      WRITE THE PARAMETER LIST TO DISC
+!****
+      IF(NVELS.LE.MAXVEL) GO TO 1360
+      ITEMP=MAXVEL
+      PRINT 1350,ITEMP
+ 1350 FORMAT(' ***  ERROR  ***  VELAED CAN HANDLE ONLY ',I3,' WEIGHTS.')
+      IERROR=IERROR+1
+ 1360 CONTINUE
+      LBUF(1)=NRP
+      IF(TYPE.EQ.'CVEL') LBUF(2)=1
+      IF(TYPE.EQ.'SPEC') LBUF(2)=2
+      BUF(3)=STRETC
+      LBUF(4)=NVELS
+      LBUF(5)=LPRINT
+      BUF(6)=WINLEN
+      IF( nc .EQ. 0 ) THEN
+          BUF(7)=NCHAR
+      ELSE
+          buf(7) = nc
+      ENDIF
+      BUF(8)=REFRAC
+      IF(STAPER.LT.0.AND.REFRAC.EQ.0.) STAPER=0
+      IF(STAPER.LT.0.AND.REFRAC.NE.0.) STAPER=3
+      LBUF(9)=STAPER
+      IF(TTAPER.LT.0..AND.REFRAC.EQ.0.) TTAPER=0.                       ! PRESET FOR NORMAL INCIDENCE
+      IF(TTAPER.LT.0..AND.REFRAC.NE.0.) TTAPER=.2                       ! PRESET FOR REFRACTION
+      BUF(10)=TTAPER
+!***GMK PASS BINARY FLAG TO TELL EX WHETHER SEGY OR ASCII FILE IS DESIRED
+!***PARAMETER IS PASSED AS 11th VARIABLE, 14 IS THE LIMIT, BEWARE 
+      LBUF(11) = NSEGYFILE
+      ITEMP=NPARS+1
+      ITEMP1=NPARS+MAXVEL+MAXBOU+3
+      IF( IAND(LPRINT,1).EQ.1) THEN
+          PRINT 2010,(LBUF(I),I=1,2),
+     *  BUF(3),LBUF(4),LBUF(5),BUF(6),BUF(7),BUF(8),LBUF(9),BUF(10),
+     *      LBUF(11), (BUF(J),J=ITEMP,ITEMP1)
+          PRINT *, ivelu3
+      ENDIF
+ 2010 FORMAT(' VELAN PARAMS:',/,1X,I8,1X,I4,1X,G10.4,2I10,3(1X,G10.4),/,
+     *  I8,2X,G10.4,2X,I4,/,10(10(1X,F10.3),/))
+      CALL WRDISC(MUNIT,BUF,NWRDS)
+      NLISTS=NLISTS+1
+      LLNO=LNO
+      LNO=32768                                                         ! DEFAULT THE DEFAULTS
+      NS=0
+      NVELS=0
+ 2020 CALL GETOKE(TOKEN,NCHARS)                                         ! GET THE NEXT TOKEN
+      CALL UPCASE(TOKEN,NCHARS)
+      NTOKES=NTOKES+1
+      IF(NCHARS.GT.0) GO TO 2030                                        ! WAS IT THE END OF A LINE?
+      IF(NOW.EQ.1) PRINT 140
+      CALL RDLINE                                                       ! GET ANOTHER LINE
+      NTOKES=0
+      GO TO 2020
+ 2030 IF(TOKEN(1:NCHARS).NE.'END'.OR.NCHARS.NE.3) GO TO 150
+!****
+!****      SET UP THE VELAN FILES
+!****
+      CALL GETFIL(1,IVELU1,token,ISTAT)
+      CALL GETFIL(1,IVELU2,token,ISTAT)
+!****
+!****
+      RETURN                                                            !  FINISHED ALL OF THE VELAN PARAMETERS!!!
+      END
