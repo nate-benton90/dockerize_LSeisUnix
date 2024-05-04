@@ -1,8 +1,7 @@
 # SeismicUnix GUI (SUG) "Dockerization" Project
 
-Welcome!
 
-Before reading anything else below, note that the main functionality
+Welcome - before reading anything else below, note that the main functionality
 of this project is based on Dr. Juan Lorenzo's work at LSU (more info
 here: https://www.lsu.edu/science/geology/people/faculty/lorenzo.php). 
 The Dockerizing portion, graphics rending (*NOT GUI*), versioning,
@@ -11,6 +10,16 @@ Benton (info here: https://subsurfacesee.org/)
 
 ![Main intro image](images\sug_illustration.jpg)
 
+## Section 1: To get started or continue with this project...
+1) Install Docker Desktop (or equivalent) on your machine (if this is your first 
+   time using Docker).
+2) Clone this repo to your local machine (if this is your first time using this project).
+3) Acquire or update the Docker image by running this command: `docker pull nathanbenton/sug`.
+4) Start the graphics rendering software with (for Windows users): `& 'C:\Program Files\VcXsrv\vcxsrv.exe' :0 -ac`. If you haven't installed that yet (via choco - see further note), refer to the Appendix below by clicking here: [Appendix](#appendix-dev-notes-if-you-are-a-basic-user-ignore-this-section-below).
+5) Run Docker container with basic, non-file sharing command: `docker run -it nathanbenton/sug`.
+6) If you want to enable file sharing, run this command: `docker run --mount type=bind,source=C:\Users\nbent\dev_testing\k8s\youtube\videos,target=/usr/local/cwp_su_all_44R22/data -it  nathanbenton/sug` (see email to Dr. Lorenzo for more details in regards to changing the source file path example here).
+
+### Appendix: DEV Notes (if you are a basic user, ignore this section below)...
 * All preliminary, ongoing, and future work based strictly on
 initial dev provided by Dr. Juan Lorenzo (at LSU), which his
 work is here: https://github.com/gllore. Right now, these notes
