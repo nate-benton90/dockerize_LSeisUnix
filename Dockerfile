@@ -46,6 +46,7 @@ RUN apt-get install --fix-missing -y \
     vim \
     wget \
     xorg \
+    imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
 # Install cpanminus for easier module installation
