@@ -8,9 +8,6 @@ CC=gcc
 #FC=/usr/local/gfortran/bin/gfortran
 #CC=/usr/local/gfortran/bin/gcc
 
-
-FFLAGS :=
-
 # needed for gcc10.2. and fortran 2018
 #  sioseis was intentionally built, especially disko.c, knowing fortran
 #  passed arguments as addresses so TYPE doesn't matter

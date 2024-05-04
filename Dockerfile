@@ -48,26 +48,16 @@ RUN apt-get install --fix-missing -y \
     xorg \
     && rm -rf /var/lib/apt/lists/*
 
-# Set LD_LIBRARY_PATH including PGPLOT directory
-# TODO: not sure if this section here is actually needed
-RUN echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/pgplot/" >> /etc/profile
-
 # Install cpanminus for easier module installation
-RUN cpan App::cpanminus
-
-# Install Perl modules
-RUN cpanm Tk Tk::JFileDialog Tk::Pod
+RUN cpan App::cpanminus \
+        && cpanm Tk Tk::JFileDialog Tk::Pod
 
 # Install last 2 packages from DL's docs for CPAN setup
-RUN cpan Module::Build
-RUN cpan TAP::Harness
-RUN cpan Moose
-
-# Force install App::SeismicUnixGui without running tests
-RUN cpanm --notest App::SeismicUnixGui
-
-# Setup this ridiculous thing to avoid interactive prompts
-RUN apt-get update \
+RUN cpan Module::Build \
+        && cpan TAP::Harness \
+        && cpan Moose \
+        && cpanm --notest App::SeismicUnixGui \
+        && apt-get update \
         && apt-get install -y expect
 
 # Add your expect script and other necessary files
@@ -81,8 +71,8 @@ RUN apt-get update && apt-get install -y dos2unix \
         && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp \
         && rm -rf /var/lib/apt/lists/*
 
-# Placed here to avoid this error during container run: libpgplot.so: 
-# cannot open shared object file: No such file or directory
+# Placed here to avoid this error >>> "during container run: libpgplot.so: 
+# cannot open shared object file: No such file or directory"
 ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \
     CWPROOT=/usr/local/cwp_su_all_44R22 \
     LOCAL=/usr/local \
@@ -90,11 +80,15 @@ ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \
     SeismicUnixGui_script=/usr/local/share/perl/5.34.0/App/SeismicUnixGui/script \
     PGPLOT_DIR=/usr/local/pgplot \
     PGPLOT_DEV=/XWINDOW \
-    SIOSEIS=/usr/local/sioseis \
+    SIOSEIS=/usr/local/sioseis/sioseis-2024.1.1 \
     DISPLAY=host.docker.internal:0.0
 
 # Extend PATH to include all required directories
-ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script
+ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis/sioseis-2024.1.1:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script
+
+# Set LD_LIBRARY_PATH including PGPLOT directory
+# TODO: not sure if this section here is actually needed
+RUN echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/pgplot/" >> /etc/profile
 
 # Optional final downloads from SeismicUnix download/config docs - not all these download successfully
 RUN cd /usr/local/cwp_su_all_44R22/src \
@@ -103,3 +97,11 @@ RUN cd /usr/local/cwp_su_all_44R22/src \
         && make mglinstall || true \
         && make finstall || true \
         && make sfinstall || true
+
+# Testing seoseis package...
+RUN mkdir -p /usr/local/sioseis
+COPY sioseis-2024.1.1 /usr/local/sioseis/sioseis-2024.1.1/
+
+# Run MAKE on the sioseis package
+RUN cd /usr/local/sioseis/sioseis-2024.1.1 \
+        && make all
