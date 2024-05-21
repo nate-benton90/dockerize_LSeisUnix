@@ -3,12 +3,12 @@
 
 Welcome - before reading anything else below, note that the main functionality
 of this project is based on Dr. Juan Lorenzo's work at LSU (more info
-here: https://www.lsu.edu/science/geology/people/faculty/lorenzo.php). 
+[here](https://www.lsu.edu/science/geology/people/faculty/lorenzo.php). 
 The Dockerizing portion, graphics rending (*NOT GUI*), versioning,
 docs herein and some other presumably "nice stuff" is added by Nathan
-Benton (info here: https://subsurfacesee.org/)
+Benton [here](https://subsurfacesee.org/).
 
-![Main intro image](images\lsu_thing.png)
+![Main intro image](images/lsu_thing.png)
 
 ## Section 1: To get started or continue with this project...
 1) Install Docker Desktop (or equivalent) on your machine (if this is your first 
