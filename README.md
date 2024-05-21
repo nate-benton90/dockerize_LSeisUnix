@@ -8,7 +8,7 @@ The Dockerizing portion, graphics rending (*NOT GUI*), versioning,
 docs herein and some other presumably "nice stuff" is added by Nathan
 Benton (info here: https://subsurfacesee.org/)
 
-![Main intro image](images\sug_illustration.jpg)
+![Main intro image](images\lsu_thing.png)
 
 ## Section 1: To get started or continue with this project...
 1) Install Docker Desktop (or equivalent) on your machine (if this is your first 
