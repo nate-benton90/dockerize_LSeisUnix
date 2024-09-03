@@ -106,3 +106,17 @@ COPY sioseis-2024.1.1 /usr/local/sioseis/sioseis-2024.1.1/
 # Run MAKE on the sioseis package
 RUN cd /usr/local/sioseis/sioseis-2024.1.1 \
         && make all
+
+# Create non-admin user
+RUN groupadd -r sug_ug \
+        && useradd -r -g sug_ug -m -s /bin/bash sug_user
+
+# Run as the new non-admin user by default
+USER sug_user
+
+# Copy the large zipped tar file from the build context to the image
+COPY data/* usr/local/data
+
+# Optional: Extract the tar file inside the image (if needed)
+RUN tar -xzf usr/local/data/Servilleta.tz -C usr/local/data && rm usr/local/data/Servilleta.tz
+
