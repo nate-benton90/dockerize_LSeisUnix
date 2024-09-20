@@ -107,16 +107,29 @@ COPY sioseis-2024.1.1 /usr/local/sioseis/sioseis-2024.1.1/
 RUN cd /usr/local/sioseis/sioseis-2024.1.1 \
         && make all
 
+# Optional: Extract the tar file inside the image (if needed)
+# Ensure the data directory exists
+RUN mkdir -p /usr/local/data \
+        && mkdir -p /home/sug_user
+
+# Copy the large zipped tar file from the build context to the image
+COPY data/Servilleta.tz /usr/local/data/Servilleta.tz
+
+# Untar/decrompress the tar file
+RUN tar -xzf /usr/local/data/Servilleta.tz -C /home/sug_user
+
 # Create non-admin user
-RUN groupadd -r sug_ug \
-        && useradd -r -g sug_ug -m -s /bin/bash sug_user
+RUN groupadd -r sug_ug || true \
+    && useradd -r -g sug_ug -m -s /bin/bash sug_user
+
+# Add the sug_user to the sudo group
+RUN usermod -aG sudo sug_user
+
+# Allow passwordless sudo for sug_user
+RUN echo 'sug_user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Final lazy setup for image config for PWD at startup
+WORKDIR /home/sug_user
 
 # Run as the new non-admin user by default
 USER sug_user
-
-# Copy the large zipped tar file from the build context to the image
-COPY data/* usr/local/data
-
-# Optional: Extract the tar file inside the image (if needed)
-RUN tar -xzf usr/local/data/Servilleta.tz -C usr/local/data && rm usr/local/data/Servilleta.tz
-
