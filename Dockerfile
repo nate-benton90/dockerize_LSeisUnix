@@ -122,11 +122,14 @@ RUN tar -xzf /usr/local/data/Servilleta.tz -C /home/sug_user
 RUN groupadd -r sug_ug || true \
     && useradd -r -g sug_ug -m -s /bin/bash sug_user
 
-# Add the sug_user to the sudo group
-RUN usermod -aG sudo sug_user
+# Set the correct home directory
+ENV HOME=/home/sug_user
 
-# Allow passwordless sudo for sug_user
-RUN echo 'sug_user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# Ensure sug_user has ownership of their home directory
+RUN chown -R sug_user:sug_ug /home/sug_user
+
+# Create a symbolic link from /home/username to /home/sug_user
+RUN ln -s /home/sug_user /home/username
 
 # Final lazy setup for image config for PWD at startup
 WORKDIR /home/sug_user
