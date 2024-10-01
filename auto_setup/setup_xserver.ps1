@@ -1,19 +1,27 @@
 # Define VcXsrv launch arguments
 $vcxsrvArgs = ":0 -multiwindow -clipboard -wgl"
 
-# Function to install Chocolatey
-function Install-Choco {
+# Function to uninstall Chocolatey if it exists
+function Uninstall-Choco {
     Write-Host "Checking if Chocolatey is installed..."
     $chocoPath = (Get-Command choco.exe -ErrorAction SilentlyContinue).Path
-    if (-not $chocoPath) {
-        Write-Host "Chocolatey not found. Installing Chocolatey..."
-        Set-ExecutionPolicy Bypass -Scope Process -Force;
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;
-        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-        Write-Host "Chocolatey installed successfully."
+    if ($chocoPath) {
+        Write-Host "Chocolatey found at $chocoPath. Uninstalling..."
+        # Removing Chocolatey directory
+        Remove-Item "C:\ProgramData\chocolatey" -Recurse -Force
+        Write-Host "Chocolatey uninstalled successfully."
     } else {
-        Write-Host "Chocolatey is already installed."
+        Write-Host "Chocolatey not found, no need to uninstall."
     }
+}
+
+# Function to install Chocolatey
+function Install-Choco {
+    Write-Host "Installing Chocolatey..."
+    Set-ExecutionPolicy Bypass -Scope Process -Force;
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    Write-Host "Chocolatey installed successfully."
 }
 
 # Function to install VcXsrv using Chocolatey
@@ -35,6 +43,7 @@ function Start-VcXsrv {
 }
 
 # Main script execution
+Uninstall-Choco
 Install-Choco
 Install-VcXsrv
 Start-VcXsrv
