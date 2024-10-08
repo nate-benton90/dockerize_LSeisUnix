@@ -138,5 +138,8 @@ RUN ln -s /home/sug_user /home/username
 # Final lazy setup for image config for PWD at startup
 WORKDIR /home/sug_user
 
+# Create the directory inside the container (if needed)
+RUN mkdir -p /home/sug_user/sug_data
+
 # Run as the new non-admin user by default
 USER sug_user

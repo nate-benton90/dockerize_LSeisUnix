@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  sug_service:
+    build: .
+    volumes:
+      - 'C:/sug_data:/home/sug_user/sug_data'
+    stdin_open: true  # Keep the container running to allow interaction
+    tty: true         # Allocate a pseudo-TTY for the bash session
