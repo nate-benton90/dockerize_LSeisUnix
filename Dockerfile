@@ -58,12 +58,7 @@ RUN cpan Module::Build \
         && cpan Moose \
         && cpanm --notest App::SeismicUnixGui
 
-# Fix the line endings for the install_cwp.exp script
-RUN apt-get update && apt-get install -y dos2unix \
-        && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp
-
-# Placed here to avoid this error >>> "during container run: libpgplot.so: 
-# cannot open shared object file: No such file or directory"
+# Set LD_LIBRARY_PATH including PGPLOT directory early in the file
 ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \
     CWPROOT=/usr/local/cwp_su_all_44R22 \
     LOCAL=/usr/local \
@@ -81,14 +76,14 @@ ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis/sioseis-2024.1.1:$CWPROOT/bi
 # TODO: not sure if this section here is actually needed
 RUN echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/pgplot/" >> /etc/profile
 
+# Add your expect script and other necessary files
+COPY install_cwp.exp /usr/local/cwp_su_all_44R22/src/install_cwp.exp
+
 # Setup this rediculous thing to avoid interactive prompts
 RUN apt-get update && apt-get install -y expect
 
 # Fix the line endings for the install_cwp.exp script
 RUN apt-get install dos2unix && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp
-
-# Add your expect script and other necessary files
-COPY install_cwp.exp /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 
 # Adjust permissions and execute the script as needed
 RUN chmod +x /usr/local/cwp_su_all_44R22/src/install_cwp.exp
