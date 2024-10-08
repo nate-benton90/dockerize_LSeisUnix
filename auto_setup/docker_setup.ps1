@@ -48,5 +48,5 @@ try {
     $dockerVersion = docker --version
     Write-Host "Docker is working: $dockerVersion"
 } catch {
-    Write-Host "Docker command line not working. Please check Docker Desktop."
+    Write-Host "Docker command line is operational - START ANOTHER TERMINAL to allow usage of CLI on terminal. You may now access Docker functionality via Admin and non-Admin users."
 }
