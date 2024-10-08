@@ -1,5 +1,5 @@
 # Use a build stage for cloning the repo with SSH access
-FROM ubuntu:22.04 as builder
+FROM ubuntu:22.04
 
 # Avoid prompts from apt and set CPAN to non-interactive mode
 # TODO: maybe combine with large ENV layer near end of this file
@@ -17,8 +17,7 @@ WORKDIR /usr/local/cwp_su_all_44R22
 
 # Update and install required packages including development tools, X11/Tcl-Tk libraries, 
 # and others as specified Also adding the newly required packages
-RUN apt-get update
-RUN apt-get install --fix-missing -y \
+RUN apt-get update && apt-get install --fix-missing -y \
     aptitude \
     build-essential \
     curl \
@@ -49,17 +48,17 @@ RUN apt-get install --fix-missing -y \
     imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
-# Install cpanminus for easier module installation
-RUN cpan App::cpanminus \
-        && cpanm Tk Tk::JFileDialog Tk::Pod
+# # Install cpanminus for easier module installation
+# RUN cpan App::cpanminus \
+#         && cpanm Tk Tk::JFileDialog Tk::Pod
 
-# Install last 2 packages from DL's docs for CPAN setup
-RUN cpan Module::Build \
-        && cpan TAP::Harness \
-        && cpan Moose \
-        && cpanm --notest App::SeismicUnixGui \
-        && apt-get update \
-        && apt-get install -y expect
+# # Install last 2 packages from DL's docs for CPAN setup
+# RUN cpan Module::Build \
+#         && cpan TAP::Harness \
+#         && cpan Moose \
+#         && cpanm --notest App::SeismicUnixGui \
+#         && apt-get update \
+#         && apt-get install -y expect
 
 # Add your expect script and other necessary files
 COPY install_cwp.exp /usr/local/cwp_su_all_44R22/src/install_cwp.exp
@@ -69,8 +68,7 @@ RUN chmod +x /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 
 # Fix the line endings for the install_cwp.exp script
 RUN apt-get update && apt-get install -y dos2unix \
-        && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp \
-        && rm -rf /var/lib/apt/lists/*
+        && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 
 # Placed here to avoid this error >>> "during container run: libpgplot.so: 
 # cannot open shared object file: No such file or directory"
@@ -91,7 +89,25 @@ ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis/sioseis-2024.1.1:$CWPROOT/bi
 # TODO: not sure if this section here is actually needed
 RUN echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/pgplot/" >> /etc/profile
 
-# Optional final downloads from SeismicUnix download/config docs - not all these download successfully
+# Setup this rediculous thing to avoid interactive prompts
+RUN apt-get update && apt-get install -y expect
+
+# Add your expect script and other necessary files
+COPY install_cwp.exp /usr/local/cwp_su_all_44R22/src/install_cwp.exp
+
+# Adjust permissions and execute the script as needed
+RUN chmod +x /usr/local/cwp_su_all_44R22/src/install_cwp.exp
+# RUN /usr/local/cwp_su_all_44R22/src/install_cwp.exp
+
+# Fix the line endings for the install_cwp.exp script
+RUN apt-get install dos2unix && dos2unix /usr/local/cwp_su_all_44R22/src/install_cwp.exp
+
+# Execute the expect script for installing CWP and specifically the prompt for the 
+# user to accept the license
+RUN cd /usr/local/cwp_su_all_44R22/src \
+        && ./install_cwp.exp
+
+# # Execute commands without failing the build if one fails
 RUN cd /usr/local/cwp_su_all_44R22/src \
         && make xtinstall || true \
         && make xminstall || true \
@@ -99,40 +115,40 @@ RUN cd /usr/local/cwp_su_all_44R22/src \
         && make finstall || true \
         && make sfinstall || true
 
-# Testing seoseis package...
-RUN mkdir -p /usr/local/sioseis
-COPY sioseis-2024.1.1 /usr/local/sioseis/sioseis-2024.1.1/
+# # Testing seoseis package...
+# RUN mkdir -p /usr/local/sioseis
+# COPY sioseis-2024.1.1 /usr/local/sioseis/sioseis-2024.1.1/
 
-# Run MAKE on the sioseis package
-RUN cd /usr/local/sioseis/sioseis-2024.1.1 \
-        && make all
+# # Run MAKE on the sioseis package
+# RUN cd /usr/local/sioseis/sioseis-2024.1.1 \
+#         && make all
 
-# Optional: Extract the tar file inside the image (if needed)
-# Ensure the data directory exists
-RUN mkdir -p /usr/local/data \
-        && mkdir -p /home/sug_user
+# # Optional: Extract the tar file inside the image (if needed)
+# # Ensure the data directory exists
+# RUN mkdir -p /usr/local/data \
+#         && mkdir -p /home/sug_user
 
-# Copy the large zipped tar file from the build context to the image
-COPY data/Servilleta.tz /usr/local/data/Servilleta.tz
+# # Copy the large zipped tar file from the build context to the image
+# COPY data/Servilleta.tz /usr/local/data/Servilleta.tz
 
-# Untar/decrompress the tar file
-RUN tar -xzf /usr/local/data/Servilleta.tz -C /home/sug_user
+# # Untar/decrompress the tar file
+# RUN tar -xzf /usr/local/data/Servilleta.tz -C /home/sug_user
 
-# Create non-admin user
-RUN groupadd -r sug_ug || true \
-    && useradd -r -g sug_ug -m -s /bin/bash sug_user
+# # Create non-admin user
+# RUN groupadd -r sug_ug || true \
+#     && useradd -r -g sug_ug -m -s /bin/bash sug_user
 
-# Set the correct home directory
-ENV HOME=/home/sug_user
+# # Set the correct home directory
+# ENV HOME=/home/sug_user
 
-# Ensure sug_user has ownership of their home directory
-RUN chown -R sug_user:sug_ug /home/sug_user
+# # Ensure sug_user has ownership of their home directory
+# RUN chown -R sug_user:sug_ug /home/sug_user
 
-# Create a symbolic link from /home/username to /home/sug_user
-RUN ln -s /home/sug_user /home/username
+# # Create a symbolic link from /home/username to /home/sug_user
+# RUN ln -s /home/sug_user /home/username
 
-# Final lazy setup for image config for PWD at startup
-WORKDIR /home/sug_user
+# # Final lazy setup for image config for PWD at startup
+# WORKDIR /home/sug_user
 
-# Run as the new non-admin user by default
-USER sug_user
+# # Run as the new non-admin user by default
+# USER sug_user
