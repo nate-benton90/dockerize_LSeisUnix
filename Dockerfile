@@ -2,7 +2,6 @@
 FROM ubuntu:22.04
 
 # Avoid prompts from apt and set CPAN to non-interactive mode
-# TODO: maybe combine with large ENV layer near end of this file
 ENV DEBIAN_FRONTEND=noninteractive \
     PERL_MM_USE_DEFAULT=1
 
@@ -48,38 +47,56 @@ RUN apt-get update && apt-get install --fix-missing -y \
     imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
-# Install cpanminus for easier module installation
-RUN cpan App::cpanminus \
-        && cpanm Tk Tk::JFileDialog Tk::Pod
+# # Install cpanminus for easier module installation
+# RUN cpan App::cpanminus \
+#         && cpanm Tk Tk::JFileDialog Tk::Pod
 
-# Install last 2 packages from DL's docs for CPAN setup
-RUN cpan Module::Build \
-        && cpan TAP::Harness \
-        && cpan Moose \
-        && cpanm --notest App::SeismicUnixGui
+# # Install last 2 packages from DL's docs for CPAN setup
+# RUN cpan Module::Build \
+#         && cpan TAP::Harness \
+#         && cpan Moose
+
+# Install cpanminus and the required Perl modules
+RUN cpan App::cpanminus \
+    && cpanm \
+        Module::Refresh \
+        Moose \
+        Clone \
+        File::ShareDir \
+        File::Slurp \
+        Shell \
+        Test::Compile::Internal \
+        Time::HiRes \
+        Tk \
+        Tk::JFileDialog \
+        Tk::Pod \
+        aliased \
+        namespace::autoclean \
+    && cpanm MIME::Base64 \
+    && cpanm PDL::Core
 
 # Set LD_LIBRARY_PATH including PGPLOT directory early in the file
-ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \
-    CWPROOT=/usr/local/cwp_su_all_44R22 \
-    LOCAL=/usr/local \
-    SeismicUnixGui=/usr/local/share/perl/5.34.0/App/SeismicUnixGui \
-    SeismicUnixGui_script=/usr/local/share/perl/5.34.0/App/SeismicUnixGui/script \
-    PGPLOT_DIR=/usr/local/pgplot \
-    PGPLOT_DEV=/XWINDOW \
-    SIOSEIS=/usr/local/sioseis/sioseis-2024.1.1 \
-    DISPLAY=host.docker.internal:0.0
+ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH
+ENV LOCAL=/usr/local
+ENV PL=$LOCAL/pl 
+ENV APP_LIB=$PL/SeismicUnixGui/lib 
+ENV CWPROOT=/usr/local/cwp_su_all_44R22 
+ENV SeismicUnixGui=/usr/local/pl/SeismicUnixGui/lib/App/SeismicUnixGui 
+ENV SeismicUnixGui_script=$SeismicUnixGui/script 
+ENV PGPLOT_DIR=/usr/local/pgplot 
+ENV PGPLOT_DEV=/XWINDOW 
+ENV SIOSEIS=/usr/local/sioseis/sioseis-2024.1.1 
+ENV APP_LIB=$PL/SeismicUnixGui/lib 
+ENV PERL5LIB=$PERL5LIB:$APP_LIB 
+ENV DISPLAY=host.docker.internal:0.0
 
 # Extend PATH to include all required directories
-ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis/sioseis-2024.1.1:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script
-
-# Set LD_LIBRARY_PATH including PGPLOT directory
-# TODO: not sure if this section here is actually needed
-RUN echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/pgplot/" >> /etc/profile
+ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis/sioseis-2024.1.1:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script:$SeismicUnixGui/fortran/bin:$SeismicUnixGui/c/bin
 
 # Add your expect script and other necessary files
 COPY install_cwp.exp /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 
-# Setup this rediculous thing to avoid interactive prompts
+# Setup this to avoid interactive prompts
 RUN apt-get update && apt-get install -y expect
 
 # Fix the line endings for the install_cwp.exp script
@@ -89,12 +106,11 @@ RUN apt-get install dos2unix && dos2unix /usr/local/cwp_su_all_44R22/src/install
 RUN chmod +x /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 RUN /usr/local/cwp_su_all_44R22/src/install_cwp.exp
 
-# Execute the expect script for installing CWP and specifically the prompt for the 
-# user to accept the license
+# Execute the expect script for installing CWP and the prompt for the user to accept the license
 RUN cd /usr/local/cwp_su_all_44R22/src \
         && ./install_cwp.exp
 
-# # Execute commands without failing the build if one fails
+# Execute commands without failing the build if one fails
 RUN cd /usr/local/cwp_su_all_44R22/src \
         && make install || true \
         && make xtinstall || true \
@@ -103,7 +119,7 @@ RUN cd /usr/local/cwp_su_all_44R22/src \
         && make finstall || true \
         && make sfinstall || true
 
-# # Testing seoseis package...
+# Testing seoseis package
 RUN mkdir -p /usr/local/sioseis
 COPY sioseis-2024.1.1 /usr/local/sioseis/sioseis-2024.1.1/
 
@@ -141,5 +157,20 @@ WORKDIR /home/sug_user
 # Create the directory inside the container (if needed)
 RUN mkdir -p /home/sug_user/sug_data
 
-# Run as the new non-admin user by default
+# Copy the clone.sh script into the container
+COPY seismic_unix_gui.sh /usr/local/pl/clone.sh
+
+# Set execution permissions for the script
+RUN chmod +x /usr/local/pl/clone.sh
+
+# Run the clone.sh script as the sug_user user
+RUN /usr/local/pl/clone.sh
+
+RUN cd /usr/local/pl/SeismicUnixGui \
+        && cpan aliased
+
+# Set the WORKDIR back to sug_user's home
+WORKDIR /home/sug_user
+
+# Run as non-admin user
 USER sug_user
