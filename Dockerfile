@@ -14,6 +14,11 @@ COPY pgplot usr/local/pgplot
 # Set WORKDIR
 WORKDIR /usr/local/cwp_su_all_44R22
 
+# Install required packages for PGPLOT
+RUN apt-get update && \
+    apt-get install -y libperl5.34 perl-tk && \
+    rm -rf /var/lib/apt/lists/*
+
 # Update and install required packages including development tools, X11/Tcl-Tk libraries, 
 # and others as specified Also adding the newly required packages
 RUN apt-get update && apt-get install --fix-missing -y \
@@ -76,7 +81,7 @@ RUN cpan App::cpanminus \
     && cpanm PDL::Core
 
 # Set LD_LIBRARY_PATH including PGPLOT directory early in the file
-ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/usr/local/pgplot
 ENV LOCAL=/usr/local
 ENV PL=$LOCAL/pl 
 ENV APP_LIB=$PL/SeismicUnixGui/lib 
@@ -87,7 +92,7 @@ ENV PGPLOT_DIR=/usr/local/pgplot
 ENV PGPLOT_DEV=/XWINDOW 
 ENV SIOSEIS=/usr/local/sioseis/sioseis-2024.1.1 
 ENV APP_LIB=$PL/SeismicUnixGui/lib 
-ENV PERL5LIB=$PERL5LIB:$APP_LIB 
+ENV PERL5LIB=$APP_LIB 
 ENV DISPLAY=host.docker.internal:0.0
 
 # Extend PATH to include all required directories
