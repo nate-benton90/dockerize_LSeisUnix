@@ -1,0 +1,6 @@
+C_SU_SETID,Q
+C_SU_FORMS
+C_SU_ID,%.20g,%.20g,%6.0f,%6.0f,%6.0f,%6.0f,%6.0f,%6.0f,%6.0f,%6.0f,%6.0f,%6.0f
+C_SU_NAMES
+C_SU_ID,cdp,cdpt,offs,tims,offs,tims
+Q,131,1,   300,   200,   500,  1310,  1000,  1810

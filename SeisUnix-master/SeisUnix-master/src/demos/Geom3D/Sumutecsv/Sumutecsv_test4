@@ -1,0 +1,57 @@
+#!/bin/sh
+# Sumutecsv_test2 - for program SUMUTECSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test is similar to test1 except it uses more mute functions.      "
+  echo "---  In fact it uses the same locations as for velocities seen in the       "
+  echo "---  vellocs.png file for SUNMOCSV tests. mute mode=1 is also enabled.      "
+  echo "----------------------------------------------------------------------------"
+#
+# I know the 3d grid is 121 by 23 cells. Make 2783 traces.
+# Make 1 trace per cdp with offset of 500. 
+#
+  sunull nt=1500 ntr=2783 dt=0.004 >tnull4.su
+  sumath <tnull4.su op=add a=100 >tnull4a.su
+  sushw <tnull4a.su >tnull4acdp.su key=cdp a=1 b=1
+  sushw <tnull4acdp.su >tnull4acdpoff.su key=offset a=500 b=0
+#
+# sugethw <tnullbcdpoff.su key=tracl,cdp,offset >afile
+#
+# Similar to test1, if you set extrapi=1 amd extrapc=1 the mute function values
+# will produce a mute time of cdp*10 ms.                             
+#
+  sumutecsv <tnull4acdpoff.su >tnull4acdpoffmute.su rfile=kEFG.csv mode=1 extrapi=0 extrapc=0 \
+        cdp=136,172,182,212,232,257,293,303,333,353,620,656,666,696,716 \
+        offs=300,500,900,2000 \
+        tims=200,1360,1760,2500 \
+        offs=300,500,900,2000,3000 \
+        tims=200,1720,2120,2500,3333 \
+        offs=300,500,900,2000 \
+        tims=200,1820,2220,2500 \
+        offs=300,500,900,2000 \
+        tims=200,2120,2520,2500 \
+        offs=300,500,900,2000 \
+        tims=200,2320,2720,2500 \
+        offs=300,500,900,2000 \
+        tims=200,2570,2970,2500 \
+        offs=300,500,900,2000 \
+        tims=200,2930,3330,2500 \
+        offs=300,500,900,2000 \
+        tims=200,3030,3430,2500 \
+        offs=300,500,900,2000 \
+        tims=200,3330,3730,2500 \
+        offs=100,300,500,900,2000,4444 \
+        tims=100,200,3530,3930,2500,5555 \
+        offs=300,500,900,2000 \
+        tims=200,6200,6600,2500 \
+        offs=300,500,900,2000 \
+        tims=200,6560,6960,2500 \
+        offs=300,500,900,2000 \
+        tims=200,6660,7060,2500 \
+        offs=300,500,900,2000 \
+        tims=200,6960,7360,2500 \
+        offs=300,500,900,2000 \
+        tims=200,7160,7560,2500 \
+#
+  suxwigb <tnull4acdpoffmute.su key=cdp xcur=0.5 

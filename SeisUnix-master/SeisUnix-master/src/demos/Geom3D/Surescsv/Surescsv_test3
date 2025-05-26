@@ -1,0 +1,66 @@
+#!/bin/sh
+# Surescsv_test3 - for program SURESCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Deliberately use bad NMO velocities on second half of survey.          "
+  echo "---  Use surescsv to derive statics.                                        "
+  echo "---  Use sushiftcsv to apply those statics.                                 "
+  echo "---  Make source,receiver,CDP stacks before and after.                      "
+  echo "---  Note: Test to exercise parameters.                                     "
+  echo "---  *** The actual affect of the bad NMO on the STATICS is quite subtle.   "
+  echo "---      Note also that shot 40 and 120 have non-centred layouts.           "
+  echo "---      The useoff and longwave parameters are most likely to be involved. "
+  echo "----------------------------------------------------------------------------"
+#
+  sunmo <fake06.su >fake31.su invert=1 \
+        cdp=1,370,371,740 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 
+#
+  sunmo <fake31.su >fake32.su          \
+        cdp=1,370,371,740 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1500,2000,3000,4000 \
+        vnmo=1500,2000,3000,4000 
+#
+  suxwigb <fake32.su title="traces before surescsv" &
+#
+  sustackup <fake32.su >fake33.su keyloc=fldr
+  suxwigb <fake33.su title="source stack before surescsv" &
+#
+  sustackup <fake32.su >fake34.su keyloc=gaps
+  suxwigb <fake34.su title="receiver stack before surescsv" &
+#
+  sustackup <fake32.su >fake35.su keyloc=cdp
+  suxwigb <fake35.su title="CDP stack before surescsv" &
+#
+# Here are some helpful hints for parameters to test.....
+#
+# surescsv <fake32.su maxsources=169 maxreceivers=397 maxcdps=733 maxtraces=10140
+# surescsv <fake32.su cdivider=4.0 maxshift=40 numiter=5 useoff=1.5av iuseoff=0 longwave=av  srderive=0
+# See the top of the sstat32.csv file for the actual defaulted values of useoff and longwave.                       
+  surescsv <fake32.su sout=sstat32.csv rout=rstat32.csv                               
+#
+  sushiftcsv <fake32.su >fake36.su sin=sstat32.csv rin=rstat32.csv
+#
+  sustackup <fake36.su >fake37.su keyloc=fldr
+  suxwigb <fake37.su title="source stack AFTER surescsv" &
+#
+  sustackup <fake36.su >fake38.su keyloc=gaps
+  suxwigb <fake38.su title="receiver stack AFTER surescsv" &
+#
+  sustackup <fake36.su >fake39.su keyloc=cdp
+  suxwigb <fake39.su title="CDP stack AFTER surescsv" &
+#

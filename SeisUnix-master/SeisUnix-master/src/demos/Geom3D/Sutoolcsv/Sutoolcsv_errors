@@ -1,0 +1,35 @@
+#!/bin/sh
+# Sutoolcsp_errors - for program SUTOOLCSV
+# Author: Andre Latour, July 2021
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "---  Also read this file so you can understand easier.                     "
+  echo "                                                                           "
+  echo "---  This example shows some error/warning messages you will see.          "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+#
+# Run:
+#
+  sutoolcsv rfile=l2xallERRORS.txt setid=x match=sps2 forms=sps2 names=sps2all wfile=l2xallERRORS2.txt
+#
+# Note that fldr 9 has 4 segments specifying channels 1-12 11-22 25-36 37-48.
+# This means channels 11 and 12 are defined to exist twice in the layout for fldr 9.
+#
+# Similarly, fldr 10 has 4 segments specifying channels 1-12 13-24 22-34 37-48.
+# This means channels 22 and 23 are defined to exist twice in the layout for fldr 10.
+#
+# This will cause error messages, and also some related warning messages.
+#
+  echo "                                                                           "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "---  Also read this file so you can understand easier.                     "
+  echo "                                                                           "
+  echo "---  This example shows some error/warning messages you will see.          "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"

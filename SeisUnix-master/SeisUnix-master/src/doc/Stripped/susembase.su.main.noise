@@ -1,0 +1,220 @@
+ SUSEMBASE - Semblance Based Structure-Oriented Interpolate and Smooth.     
+
+ This program performs semblance scanning to derive (apparent) dips in the  
+ direction of cdp numbers (or other key values). It then uses those dips to 
+ align trace sample values while performing interpolation and/or smoothing. 
+
+ susembase    <in.su >out.su  (other parameters)                            
+
+ Parameter overview:                                                        
+
+ lockey=cdp   Trace key that indicates trace location. Input traces must be 
+              in increasing-OR-EQUAL order of these values. This key value  
+              is reset on output. See outputinc and outputalign parameters. 
+        Note: The input locations must be in increasing-OR-EQUAL order.     
+              So, traces can have duplicate lockeys provided the numrolling 
+              parameter is set large enough. Whether these duplicates have  
+              serious effects on the output traces varies with situation.   
+
+ groupkey=    Trace key that indicates the end of a set of lockey values.   ",  
+              If specified, traces must be ordered by lockey and groupkey.  ",  
+              If a 3D stacked dataset is input, this parameter should often ",  
+              be either igi or igc, depending on which direction is being   ",  
+              processed in this run (see program subincvs).                 ",  
+        Note: The keys for susort are listed in reverse order with respect  ",  
+              to lockey and groupkey here.                                  ",  
+
+ outputinc=1.0    Increment for output locations. Example: if a cdp stack   
+                  is input and cdp numbers increment by 1 then setting this 
+                  parameter to 0.5 will output about twice as many traces.  
+            Note: Since lockey is (almost always) integer, it cannot hold   
+                  decimal fractions, so if this outputinc parameter is      
+                  between 0 and 1, the lockey output values are inversed:   
+                   (input_values - outputalign) / outputinc + outputshift   
+                  If outputinc is greater than 1 then the lockey output     
+                  values are:    (input_values - outputalign) + outputshift 
+
+ outputalign=0.0  Alignment for output locations. Example: if a cdp stack   
+                  is input and cdp numbers increment by 1 and outputinc=1.0 
+                  then setting this parameter to 0.25 will create output    
+                  traces at input cdp numbers plus 0.25                     
+
+ outputshift=0.0  Add this value to output location numbers. If lockey is   
+                  cdp and first input cdp number is small, traces may be    
+                  extrapolated to negative cdp numbers. This may be an      
+                  issue for some situations, so you can add this constant.  
+
+ locmaxscan=3 Maximum Relative lockey to include in scanning for dips.      
+              Must be greater than or equal to 0. This program scans traces 
+              from -locmaxscan to locmaxscan (inclusive) at each location.  
+           =0 Do not scan for dips. You must specify parameter locmaxsum    
+              and you cannot specify scanstep, scanmax, scanmin, dipext.    
+
+ scanstep=0.5   Time Step to Scan (milliseconds per 1 lockey unit).         
+ scanmax =12.0  Maximum Time to Scan (milliseconds per 1 lockey unit).      
+ scanmin =-scanmax  Minimum Time to Scan (milliseconds per 1 lockey unit).  
+
+ dipext=12. Dip Extender (milliseconds).                                    
+            At each location the semblance scanning produces an estimate    
+            of the dip at each sample time. This parameter performs a       
+            weighted-average of those estimated dips symmetrically from     
+            -dipext to +dipext. The weights used are the sum of the         
+            squared amplitudes of seismic values along the estimated dip    
+            in the locmaxscan range of input traces. In cruder terms: the   
+            power along the dip value chozen by the semblance scanning.     
+            Effectively, this causes the dip values from large horizons     
+            to be trusted more and extended up and down nearby times.       
+
+ dipuse=1  Estimate and use dips at input locations.                        
+       =0  Estimate and use dips at output locations.                       
+
+ locmaxsum=locmaxscan  Maximum Relative lockey to include in sumopt options.
+                       Must be greater than 0. This program uses the input  
+                       traces from -locmaxsum to locmaxsum (inclusive) at   
+                       each output location.                                
+
+ sumopt=stack All options here only include input traces within -locmaxsum  
+              to +locmaxsum range (inclusive) around each output location.  
+              This default just adds them all together and divides by total.
+              Note that correct dips from the semblance scanning will cause 
+              these traces to be locally flat during stacking and therefore 
+              the output will not have as much smearing as traces stacked   
+              without dip compensation.                                     
+       =sum   Just like option stack but do not divide by total.            
+              (This option is intended to help with parameter setting).     
+       =one   Find the input trace with lockey value nearest the output     
+              location, apply the dips, and output it. Effectively, this    
+              is interpolation using just the nearest trace.                
+       =two   Find the two input traces with lockey value nearest output,   
+              apply the dips, sum both traces and divide by 2, and output.  
+       =twolinear Find the two input traces with lockey values nearest      
+                  output, apply the dips, stack them with linear weight     
+                  based on their locations, and output. (Often one of the   
+                  two traces will get all the weight, of course).           
+       =dadstack  Detect-Amplitude-Differences. You should expect to have   
+                  to do considerable testing of the other dad parameters    
+                  for this option. Precise setting of the dad parameters    
+                  may result in the output traces being sharper at rapid    
+                  amplitude changes (such as locations where horizons start 
+                  or terminate. These dad options search for rapid changes  
+                  in amplitude ACROSS LOCATIONS at each sample time and     
+                  only stacks the sample values from -locmaxsum TO the      
+                  detected location -or- FROM the detected location to the  
+                  +locmaxsum location. Which side is stacked depends on     
+                  WHERE detected location is relative to output location.   
+             ***  If a rapid change in amplitude is not detected at this    
+                  sample time then ALL samples are stacked.                 
+       =dadsum  Just like option dadstack but do not divide by total.       
+                (This option is intended to help with parameter setting).   
+
+ dadscale=1.0 Detect-Amplitude-Differences scaler.                          
+             This parameter can only be set if sumopt=dadstack or dadsum.   
+             When a rapid change in amplitude is detected this parameter    
+             causes the range of locations stacked at this sample to        
+             increase or decrease.                                          
+       Note: Usual range for this value is 0.9 to 1.1                       
+
+ dadnoise=0.0  Detect-Amplitude-Differences Noise Absolute Amplitude.       
+              This parameter can only be set if sumopt=dadstack or dadsum.  
+              If the average absolute amplitude at the sample time across   
+              the range of input traces is less than this value, this       
+              sample time is not considered to have detected a rapid change 
+              in amplitude (so all locations are stacked for output sample).
+
+ dadext=12.   Detect-Amplitude-Differences extender (milliseconds).         
+              This parameter can only be set if sumopt=dadstack or dadsum.  
+              At each output location the amplitude difference detector     
+              estimates if-and-where a rapid difference is located in the   
+              locmaxsum range of input traces. This parameter performs a    
+              weighted-average of those estimated rapid difference locations
+              symmetrically in time from -dadext to +dadext. The weights    
+              used are the sum of absolute amplitudes of the seismic values 
+              at the same samples in the locmaxsum range of input traces.   
+              Effectively, this means the detected-amplitude-difference     
+              locations at large horizons are trusted more, and thus they   
+              are extended up and down in time near those larger horizons.  
+
+ outdip=   Do not output this file.                                         
+       =(file name) Output the dip values chosen by the semblance scanning  
+           into trace samples in this file. The trace header values are     
+           copied from the seismic traces. If dipuse=1 then they are the    
+           input headers, if dipuse=0 then they are the output headers.     
+     Note: These dips are after dipext processing. But even with dipext=0   
+           they will not have scanstep granularity because the scanned      
+           maximum semblance dip undergoes a 3-point interpolation to get   
+           a better approximation of the dip at the true peak in semblance. 
+     Note: It is technically more correct to call the dips made and used    
+           by this program APPARANT dips. The dip values are put into the   
+           trace samples and are in milliseconds per 1 location unit.       
+           That is, if the lockey=cdp then the dips are ms per cdp. There   
+           is no dip azimuth output. The dips are in the direction from one 
+           location to next (if lockey=cdp this is one cdp toward next cdp).
+
+ outpow=   Do not output this file.                                         
+       =(file name) Output the average power along the dip direction chosen 
+           by the semblance scanning. (Same header values as for outdip).   
+
+ outsem=   Do not output this file.                                         
+       =(file name) Output the semblance value computed and chosen by the   
+           semblance scanning. (Same header values as for outdip).          
+
+ indip=    Name of trace file which contains (apparant) dip values.         
+           Dip scanning is disabled if you use this parameter. Thus you     
+           cannot specify parameters scanstep, scanmax, scanmin, dipext,    
+           and locmaxscan - and you must specify parameter locmaxsum.       
+           This file is usually initially made by specifying outdip above.  
+           If dipuse=1 then this file must have the same order as the       
+           order as the seismic traces you are inputting in this run.       
+           If dipuse=0 then this file must have the same INPUT order as     
+           the OUTPUT order of this run.                                    
+     Note: The intention here is to allow you to output dips from one run   
+           of this program and use them in a second run of this program.    
+           The first run can input smoothed, denoised seismic to get dips,  
+           and the second run can input the un-smoothed, noisy seismic and  
+           use the dips from the first run. As well, you can also actually  
+           smooth and denoise the DIP VALUES in this file before input here.
+
+
+ bypass=0  Treat all output locations the same.                             
+       =1  If an input trace exists exactly at the output location, COPY    
+           the input trace without any change except to reset the lockey    
+           to the output location value. Process all other output locations 
+           as indicated by the other options you have specified.            
+       =-1 Only process and output traces where an input trace is exactly   
+           on an output location. Typically you use this option when you    
+           just want to smooth the input, without creating any more output  
+           locations (so set outputalign=0 and usually set outputinc=1).    
+  CAUTION: Options 1 and -1 only retain the first trace with duplicate      
+           input location value. For instance if lockey=offset and          
+           groupkey=cdp then only the first trace with the same offset      
+           within cdps will be copied or processed to output.               
+
+ numrolling=2*locmaxscan+2*locmaxsum+5. This is maximum number of traces    
+              to store internally. Traces are read-in as needed to keep the 
+              output locations centred in this storage (a rolling buffer).  
+          *** For certain setups, this default is too large. For instance,  
+              when lockey=offset and groupkey=cdp this value can be set to  
+              the maximum cdp fold (but must always be set greater than 4). 
+          *** For certain setups, this default is too small. For instance,  
+              when duplicate input lockey values exist.                     
+        Note: This program expects input locations to have approximately    
+              the same interval between them and to be distributed nicely.  
+              The input locations must be in increasing-OR-EQUAL order.     
+              So, traces can have duplicate lockey values provided this     
+              parameter is set large enough. Whether these duplicates have  
+              serious effects on the output traces varies with situation.   
+
+ Note: This program enforces non-hierarchical parameter error checking.     
+       This means if you disable a main option, all parameters related      
+       to it must be removed from the command line. That is, for novice     
+       users this program is sufficiently complex that it refuses to guess  
+       which parameter was specified in error.                              
+
+ ------------------------------------------------------------------------   ", 
+
+
+ Credits:                                                                 
+ Author: Andre Latour, Feb 2023                                            
+                                                                          
+ Trace key usually involved: cdp   (user options: maybe igi,igc others)   
+                                                                          

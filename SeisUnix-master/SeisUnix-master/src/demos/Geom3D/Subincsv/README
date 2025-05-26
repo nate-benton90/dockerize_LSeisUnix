@@ -1,0 +1,29 @@
+SUBINCSV reads a 3D grid definition either via command line parameters
+or in a file. It then sets the cdp key to the number of the 3d cell 
+that contains the midpoint XYs of the input prestack traces. 
+This program also has a poststack option where it will use the 
+cdp (cell) number to update the corresponding cell centre XYs into the
+trace sx,sy,gx,gy keys (where sx,sy are raw,real world XYs and gx,gy
+are grid XYs). This program also has an option to produce 2d cdp 
+numbers from point numbers.     
+
+Most examples herein use 3D grid definitions which fit the 3D survey
+used in the demos/Geom3D/Sutoolcsv and demos/Geom3D/Sugeomcsv examples.
+
+The create scripts below must be run before the examples.
+The creates do not run Subincsv, they run Sugeomcsv.
+
+ sh ./Subincsv_create1   
+ sh ./Subincsv_create2  
+ sh ./Subincsv_create3 
+
+I suggest you review and run the SUBINCSV tests in this order....
+
+ sh ./Subincsv_example1
+
+ sh ./Subincsv_example2
+
+ sh ./Subincsv_example3
+
+ sh ./Subincsv_example4
+

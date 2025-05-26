@@ -1,0 +1,56 @@
+This program (SUTOOLCSV) is equally usefull and useable for 3D and 2D
+geometry situations. And also for handling values such as statics.
+
+But most examples herein concentrate on its use 
+for 3D land/ocean-bottom-cable geometry.
+
+SUTOOLCSV can input fixed-format files and parse them into 
+comma-separated-values (CSV) files and assign values to SU key names.
+As it parses the files, SUTOOLCSV also examines them and reports 
+errors/issues/problems with the values in the input text files. 
+In particular, SUTOOLCSV has high-level options which "know" the
+standard SPS2 and SPS1 files used for 3D and 2D land geometry. 
+The CSV files output by SUTOOLCSV can be input to SpreadSheets
+(Microsoft Excell, libreOffice Calc) and repaired/altered/modified
+if needed to overcome SU limitations. SUTOOLCSV can also perform the
+reverse function (turn these CSV files back into SPS2 or SPS1 
+fixed-format files). But SUTOOLCSV is generic and can perform
+fixed-format to CSV and CSV back to fixed-format for other situations
+and any SU key values.
+
+The ability to use CSV files for geometry leads in the direction of 
+using SpreadSheets or SQL databases to by-pass the 240 byte header
+limitations of SU. Basically you just have to make sure the X, S, 
+and R records of SPS2 format have unique mapping values for their
+equivalent SpreadSheet/SQL tables produced from the CSV files output
+by SUTOOLCSV - and make sure SUGEOMCSV updates those unique mapping
+values to known SU trace keys. Which fits easily within 240 bytes. 
+The mapped SpreadSheet/SQL tables then essentially become external
+headers to contain information that cannot fit in 240 bytes and also
+allow processing of that information without reading the associated
+SU seismic file. 
+But this is an extensive concept, and somewhat further in the future.
+
+Included herein are examples of the 3 SPS2 fixed-format files. And
+examples of problems/issues with SPS2 files, and possible solutions.
+
+First, I suggest you actually display shots.png and receiver.png 
+and review files l2sall.txt l2rall.txt and l2xall.txt
+
+
+Then I suggest you review, and run, the SUTOOLCSV examples/tests in
+the order below. You should also read the information/explanations in
+these files, not just run them.
+
+ sh ./Sutoolcsv_example1
+
+ sh ./Sutoolcsv_errors
+
+ sh ./Sutoolcsv_unrepeat
+
+ sh ./Sutoolcsv_sps2_sps1
+
+ sh ./Sutoolcsv_process
+
+ sh ./Sutoolcsv_simple2d
+

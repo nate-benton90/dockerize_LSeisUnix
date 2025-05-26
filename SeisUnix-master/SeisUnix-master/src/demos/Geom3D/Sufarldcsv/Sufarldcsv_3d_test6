@@ -1,0 +1,96 @@
+#!/bin/sh
+# Sufarldcsv_3d_test6 - for program SUFARLDCSV
+# Author: Andre Latour, Nov 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo " Use subinxxcsv to enlarge and/or flip my usual grid definition in kEFG     "
+  echo " If you change igilow (and so on), you must reset count (n=4731 in xgraph). "
+  echo " Run sufarldcsv:                                                            "
+  echo "   Input l2sall.csv which contains shot values.                             "
+  echo "   Input l2rall.csv which contains receiver values.                         "
+  echo " Display smoothed receiver values (usually statics or elevations).          "
+  echo "   Then apply statics using sushiftcsv. This is a mechanical test to        "
+  echo "   see that the output q-file actually works as input to sushiftcsv.        "
+  echo "                                                                            "
+  echo " *** This test is initially set to same option values as test 5.            "
+  echo " *** But the displays are of the output receiver values.                    "
+  echo "                                                                            "
+  echo " Note:                                                                      "
+  echo "       The 3D Grid definition is deliberately enlarged to help see the      "
+  echo "       affects of various options OUTSIDE the edges of shots and receivers. "
+  echo " Note:                                                                      "
+  echo "       l2rall.csv is all receivers with normal statics,elevations.          "
+  echo "       l2rallr2.csv has 2 recrs with big diffs (line 100, points 102,150)   "
+  echo "       l2rallr2l3.csv has 2 big diffs, and missing receivers on some lines  "
+  echo "    *  l2sall.csv is all shots with normal statics,elevations.              "
+  echo "    *  l2salll3.csv has missing shots near those missing receivers          "
+  echo "       You can interchange those file names here without making other       "
+  echo "       alterations in this script because the xgraph is of cdps (cells).    "
+  echo " Note:                                                                      "
+  echo "       Since a contour plot is produced, why plot the same values versus    "
+  echo "       the cdp NUMBERS and transposed-cdp NUMBERS?                          "
+  echo "        - because these are good ways to judge how well the inline cdp and  "
+  echo "          crossline cdp averaging and smoothing options are working.        "
+  echo "----------------------------------------------------------------------------"
+#
+  subinxxcsv rfile=kEFG.csv wfile=testgrid61.csv igilow=10 igchigh=8
+#
+# sufarldcsv sin=l2sall.csv sstat=selev   rin=l2rall.csv rstat=gelev \
+# sufarldcsv sin=l2sall.csv               rin=l2rall.csv             \
+#
+  sufarldcsv sin=l2sall.csv               rin=l2rall.csv             \
+             rfile=testgrid61.csv                                              dout=testout61.csv   
+#
+#            rfile=testgrid61.csv avrad=1000 navrg=10,10 nsmth=10,10 nback=3,3 dout=testout61.csv   
+#
+# The options below result in outputting nearest values with no smoothing at all.
+#                                 avrad=-1   navrg=0                          
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 2 and 11
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' testout61.csv >testout62.csv
+#
+  cut -d, -f2,11 <testout62.csv >testout63.csv
+  sed '1,$ s/,/ /g' testout63.csv >testout63.txt
+  a2b <testout63.txt >testout63.bin
+  xgraph <testout63.bin n=4371 linecolor=4 mark=6 marksize=5 linewidth=0 \
+          style=normal width=1200 height=600 x1beg=-100 x1end=4500 x2beg=-200 x2end=200 \
+          title=" receiver value at cdp NUMBERS " &
+#
+# Use cut with a deliminator of comma to retain only fields 3 and 11
+#
+  cut -d, -f3,11 <testout62.csv >testout64.csv
+  sed '1,$ s/,/ /g' testout64.csv >testout64.txt
+  a2b <testout64.txt >testout64.bin
+  xgraph <testout64.bin n=4371 linecolor=4 mark=6 marksize=5 linewidth=0 \
+          style=normal width=1200 height=600 x1beg=-100 x1end=4500 x2beg=-200 x2end=200 \
+          title=" receiver value at transposed cdp NUMBERS " &
+#
+# Use cut with a deliminator of comma to retain only field 10 (smoothed shot static at cdp) red
+#                                                          11 (smoothed receiver static at cdp) blue
+#                                                          12 (smoothed (shot+rec) / 2  at cdp) green
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary (note n1=1)                        
+# Use xgraph to plot points with marks of X, and no lines between (note n1=141 inline cells)
+#
+  cut -d, -f11 <testout62.csv >testout65.csv
+  sed '1,$ s/,/ /g' testout65.csv >testout65.txt
+  a2b n1=1 <testout65.txt >testout65.bin
+#
+  xcontour n1=141 d1=25 d2=50 nc=20 wbox=600 hbox=700 ccolor=blue <testout65.bin \
+    title=" receiver value contoured    axes are inline,crossline distances " &
+#
+# Note the skeyloc and rkeyloc parameters. 
+# Their defaults MAY be correct for 2Ds, but always need overrides for 3D.
+#
+  sushiftcsv <testouttraces2.su >testouttraces66.su \
+              sin=l2sall.csv skeyloc=grnofr,grnlof \
+              rin=l2rall.csv rkeyloc=grnors,gaps \
+              cin=testout61.csv cstat=gstat
+#
+  suxwigb <testouttraces66.su title="fake traces after using GSTAT as cdp datum static in sushiftcsv " &
+#

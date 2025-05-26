@@ -1,0 +1,24 @@
+#!/bin/sh
+# Suflex2d_test5 - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test generates some traces in cdp,offset order.                   "
+  echo "---  Similar to test2 except there are some cdps with more than 2 traces    "
+  echo "---  in an offset bin (mostly this is a test of the keepmore=1 option).     "
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=createcdps05.csv setid=m match=cdp,tracl names=c_su_id,cdp,tracl,ep,offset,igi >fakecdps05.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ subfilt <fakecdps05.su >fakecdpsf05.su fpasshi=20
+#
+ sunmo <fakecdpsf05.su >fakecdpsfn05.su invert=1 cdp=1 tnmo=0,0.190,0.450,0.800 vnmo=800,1500,2000,3000
+#
+ suxwigb <fakecdpsfn05.su key=cdp x2beg=0 x2end=19 title="before suflex2d" & 
+#
+ suflex2d <fakecdpsfn05.su >fakecdpsfnf05.su binsize=50 keepmore=1
+#
+ suxwigb <fakecdpsfnf05.su key=cdp x2beg=0 x2end=19 title="after suflex2d" &  
+#
+ sugethw <fakecdpsfnf05.su key=cdp,offset,igi
+#

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Sucleave_test2 - for program SUCLEAVE
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Same as test1 except NOT using absolute value of offsets. ---"
+  echo "-- And exercising some defaults (and not defaults).          ---"
+  echo " "
+#
+  sunull nt=100 ntr=5 >tnull21.su
+  sushw <tnull21.su >tnull22.su key=offset a=-250 b=100
+  sugethw <tnull22.su key=offset
+#
+  sucleave <tnull22.su abs=0 outbase=l2r_ print=1
+#
+  echo " "
+  echo " Print offsets from one of the output files: l2r_50.su           "
+  echo " Note that its file name indicates its offset range.             "
+  echo " "
+  sugethw <l2r_50.su key=offset
+#

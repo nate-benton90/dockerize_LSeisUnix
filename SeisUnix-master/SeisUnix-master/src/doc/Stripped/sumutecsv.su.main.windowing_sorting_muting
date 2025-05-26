@@ -1,0 +1,165 @@
+ SUMUTECSV - MUTE above (or below) bilinearly interpolated polygonal curves 
+
+  sumutecsv <stdin >stdout [required parameters] [optional parameters]      
+
+ Optional Parameters:                                                       
+
+ qin=             Mute functions can be input via this file.                
+                  This file is optional, but if you do not input it,        
+                  you must use parameters cdp=, offs=, tims=.               
+                  See external document Q_FILE_STANDARDS.                   
+
+                  The following 3 parameters cannot be specified if         
+                  you input mute functions via the qin= file.               
+
+ cdp=             CDPs for which offs & tims are specified.                 
+ offs=            offsets corresponding to times in tims.                   
+ tims=            times corresponding to offsets in offs.                   
+                  If any tims value is greater than 100 all times are       
+                  assumed to be milliseconds. Otherwise seconds.            
+            ***   If qin= is not specified, all 3 previous parameters       
+                  must be specified. There must be at least 1 number        
+                  in the cdp= list. There must be the same number of        
+                  tims= parameters as numbers in the cdp= list.             
+                  There must be the same number of offs= parameters         
+                  as numbers in the cdp= list, or, there can be just        
+                  one offs= parameter provided there are the same           
+                  number of tims in all tims= lists.                        ", 
+
+ rfile=           If set, read a K-file containing 3D grid definition.      ", 
+                  Assume 2D if no K-file and no grid definition is          ", 
+                  supplied via command line parameters. The required        ", 
+                  command line parameters are: grid_xa,grid_ya,             ", 
+                  grid_xb,grid_yb, grid_xc,grid_yc, grid_wb, grid_wc.       ", 
+                  (See program SUBINCSV for 3D grid details).               ", 
+                  If this is a 3D then the input CDPs for the mute          ", 
+                  locations and the seismic trace CDP key should be         ", 
+                  3D grid cell numbers as produced by SUBINCSV.             ", 
+                  A 3D also forces restrictions on the locations of         ", 
+                  the input mute locations. Their CDP locations must        ", 
+                  form aligned rectangles (see Notes).                      ", 
+
+ offkey=offset    Key header word specifying trace offset                   
+ abs=1            use the absolute value of offkey.                         
+               =0 do not use absolute value of offkey.                      
+ ntaper=0         number of samples to taper (sine-squared) from            
+                  computed full-mute sample                                 
+ mode=0           mute ABOVE the polygonal curves                           
+               =1 to zero BELOW the polygonal curves                        
+               =2 to mute below AND above a straight line. In this case     
+                  offs,tims describe the total time length of the muted     
+                  zone as a function of offs. the slope of the line is      
+                  given by vel=                                             
+               =3 to mute below AND above a constant velocity hyperbola     
+                  as in mode=2 offs,tims describe the total time length of  
+                  mute zone as a function of offs, the velocity is given by 
+                  the value of vel=                                         
+ vel=330          constant velocity for linear or hyperbolic mute           
+ tzero=0          time shift (ms.) of linear or hyperbolic mute at the      
+                  offkey value of 0. Note: If any tims value is greater     
+                  than 100, tzero must be MILLISECONDS. Otherwise seconds.  
+
+ extrapi=0        do not extrapolate at ends in igi direction.              
+                  (Mute times beyond ends are held constant).               
+               =1 extrapolate at both igi ends                              
+               =2 extrapolate only at lower igi end                         
+               =3 extrapolate only at higher igi end                        
+
+ extrapc=0        do not extrapolate at ends in igc direction.              
+                  (Mute times beyond ends are held constant).               
+               =1 extrapolate at both igc ends                              
+               =2 extrapolate only at lower igc end                         
+               =3 extrapolate only at higher igc end                        
+
+ extrapt=0        do not extrapolate at ends in offset direction.           
+                  (Mute times beyond ends are held constant).               
+               =1 extrapolate at both offset ends                           
+               =2 extrapolate only at lower offset end                      
+               =3 extrapolate only at higher offset end                     
+
+ check=0          Do not print grid checking and function locations.        
+               =1 If grid definition input, run some grid functions on      
+                  the 4 grid corner points and print results. Also print    
+                  input mute function location information by using the     
+                  grid definition and the input cdp= values.                
+                  The output values are:                                    
+                     G,cdp,igi,igc,xgrid,ygrid,xworld,yworld.               
+                  (The format is intended to make it easy to review and     
+                  also to make it easy to load to spreadsheets).            
+                  This information can be written to a file by              
+                  putting 2>yourfile on the command line.                   
+
+ print=0          Do not print INPUT mute functions.                        
+               =1 Print INPUT mute functions. The cdp number and its        
+                  input mute function values are printed. This print is     
+                  not intended to be pretty. It just allows easy checking   
+                  that the q-file contains the expected values.             
+                  It also allows programmers and others to confirm that     
+                  command line input via cdp=,offs=,tims= produces the      
+                  same results as identical input via the qin= file.        
+
+ Notes:								     
+
+ The offsets specified in the offs array must be monotonically increasing.  
+
+ For 3D, user needs to input mute locations (cdp numbers) which form aligned
+ rectangles. That is, how-ever-many grid inlines the user chooses to put    
+ mute locations on, there must always be the same number of mute locations  
+ on each inline and those functions must be located at same grid crosslines.
+ For instance, if user inputs locations for inline 7 at crosslines 15,25,40 
+ then the user must input locations at crosslines 15,25,40 for any other    
+ inlines that the user wants to supply locations for. (If user is lucky     
+ enough that the grid has 100 inlines, then the input locations could be at 
+ CDPs 715,725,740 and 1115,1125,1140 and 2015,2025,2040 and 2515,2525,2540. 
+ Note that the CDP numbers specified on the cdp= parameter and also in the  
+ input seismic trace cdp key are translated to inline and crossline numbers 
+ using the input 3D grid definition - so those cdp numbers need to          
+ correspond to the input 3D grid definition.                                
+
+ For trace CDPs not listed in cdp= parameter or qin= file, bilinear         
+ interpolation is done if the trace CDP location is surrounded by 4 mute    
+ functions specified in the cdp= list. If the trace CDP is not surrounded   
+ by 4 input mute functions, the result depends on the extrapi and extrapc   
+ options. The result can be any combination of linear interpolation and     
+ linear extrapolation and constant extrapolation. If input mute functions   
+ are only located along 1 grid inline or 1 grid crossline, result is linear ", 
+ interpolation in that direction (and linear or constant extrapolation      
+ the outer ending functions).                                               
+
+ The interpolation related to cdp is actually done after the interpolation  
+ related to offset. That is, first the trace offset is used to compute times
+ from the offs,tims arrays for 4, 2, or 1 mute functions and then weighting 
+ based on the cdp locations of those mute functions is applied. Note also   
+ that restricting the mute to the earliest and latest trace time is done    
+ just before application to each trace. A consequence of this is that both  
+ negative offs= and negative tims= values are allowed and honored even if   
+ the abs= option is 1 (the default).                                        
+
+
+ Amalgamated Credits:
+	SEP: Shuki Ronen, Chuck Sword
+	CWP: Shuki Ronen, Jack K. Cohen, Dave Hale, Bjoern Rommel, 
+           Carlos E. Theodoro, Sang-yong Suh, John Stockwell                                 
+      DELPHI: Alexander Koek.
+      USBG: Florian Bleibinhaus. 
+
+      Merged/Modified: Oct 2021: Andre Latour   
+	 1. This program started as a copy of sunmocsv.c which itself
+ 	    started from sunmo.c (yes, NMO). The reason to do this is    
+	    that sumute.c just has input parameters of tmute[],xmute[].     
+	    For 3d muting, this program needs  cdp[], tims[][], offs[][].
+          And, as it happens, sunmocsv.c has cdp[], tnmo[][], vnmo[][]. 
+          So the easiest thing was to start from sunmocsv.c and 
+	    rename input parameters. Parts of sumute.c were then copied
+	    into this program (the code for ntaper= and mode=0,1,2,3).       
+	    The mode=4 option/code was not copied to here since it does  
+	    not seem to make sense combined with bilinear interpolation
+	    of CDP mute function locations (but I could be wrong).          
+	 2. Changed to expect milliseconds for all parameter inputs.               
+	 3. Put in error checks to stop users from accidentally         
+	    trying to use sumute parameter names.                       
+      Modified: Feb 2022: Andre Latour   
+        1. Reworked to use lib routines to get mute function values
+           either from command line parameters or from input q-files.      
+        2. Reworked to use lib routines for bilinear interpolation. 
+

@@ -1,0 +1,69 @@
+ SUCDDECON - DECONvolution with user-supplied filter by straightforward
+ 	      Complex Division in the frequency domain			
+
+ sucddecon <stdin >stdout [optional parameters]			
+
+ Required parameters:							
+ filter= 		ascii filter values separated by commas		
+ 		...or...						
+ sufile=		file containing SU traces to use as filter	
+                       (must have same number of traces as input data	
+ 			 for panel=1)					
+ Optional parameters:							
+ panel=0		use only the first trace of sufile as filter	
+ 			=1 decon trace by trace an entire gather	
+ pnoise=0.001		white noise factor for stabilizing results	
+	 				(see below)		 	
+ sym=0		not centered, =1 center the output on each trace
+ verbose=0		silent, =1 chatty				
+
+ Notes:								
+ For given time-domain input data I(t) (stdin) and deconvolution	
+ filter F(t), the frequency-domain deconvolved trace can be written as:
+
+	 I(f)		I(f) * complex_conjugate[F(f)]			
+ D(f) = ----- ===> D(f) = ------------------------ 			
+	 F(f)		|F(f)|^2 + delta				
+
+ The real scalar delta is introduced to prevent the resulting deconvolved
+ trace to be dominated by frequencies at which the filter power is close
+ to zero. As described above, delta is set to some fraction (pnoise) of 
+ the mean of the filter power spectra. Time sampling rate must be the 	
+ same in the input data and filter traces. If panel=1 the two input files
+ must have the same number of traces. Data and filter traces don't need to
+ necessarily have the same number of samples, but the filter trace length
+ length be always equal or shorter than the data traces. 		
+
+ The time delay 'delrt' of the sufile subtracted from the delrt of each
+ input trace. This is designed to make this program closer to an inverse
+ of suconv, which adds the time delay of the sufile to each trace.	
+
+ Caveats: 								
+ Owing to zero padding by the Fourier transform, the number of samples 
+ on the output traces will likely be greater than on input traces.	
+ The user may wish to use						
+      sucddecon .... |  suwind itmin=0 itmax=NSminus1			
+ where NSminus1 is the numerical value of the number of samples on the 
+ input trace minus 1.							
+
+ The user may need to apply frequency filtering to get acceptable output
+   sucddecon  ...| sufilter f=f1,f2,f3,f4 				
+ where f1,f2,f3,f4 are an acceptable frequency range.			
+
+ The user may need to mute artifacts that appear in previously muted   
+ parts of the input data, as well.					
+
+ Trace header fields accessed: ns, delrt				
+ Trace header fields modified: none, delrt				
+
+
+ Credits:
+	CWP: Ivan Vasconcelos
+              some changes by John Stockwell
+  CAVEATS: 
+	In the option, panel=1 the number of traces in the sufile must be 
+	the same as the number of traces on the input.
+
+ Trace header fields accessed: ns
+ Trace header fields modified: none
+

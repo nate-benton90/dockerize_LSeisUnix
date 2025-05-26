@@ -1,0 +1,40 @@
+#!/bin/sh
+# Susembase_offset - for program SUSEMBASE      
+# Author: Andre Latour, Feb  2023
+#
+  echo "---------------------------------------------------------------------"
+  echo " 1. Conveniently use sunomstreamer to create spiked-traces with   ---"
+  echo "    cdp and offset values similar to land.                        ---"
+  echo " 2. Apply a filter (to make the spikes look like horizons).       ---"
+  echo " 3. Use INVERSE nmo to make traces look like less-processed input.---"
+  echo "    Note: It is generally better to use susembase on nmo corrected---"
+  echo "    traces, but this test shows the dip correction effect.        ---"
+  echo " 4. Use suaddnose.                                                ---"
+  echo " 4. susort to cdp offset                                          ---"
+  echo " 6. Run susembase with lockey=offset and groupkey=cdp and         ---"
+  echo "    regularize the offset intervals to 12.5                       ---"
+  echo "    Note the scanmax and scanstep values are set small because    ---"
+  echo "    they are per 1 unit of offset (that is, per 1 metre or foot). ---"
+  echo "---------------------------------------------------------------------"
+#
+ sunomstreamers >tfake101.su shotkey=cdp shotspacing=50 gunkey=cdp \
+ gunmod=1 gunid=0 guncross=0 guninline=0 streamercross=0,0 streamerinline=0,8 \
+ channelkey=tracf channelstart=1 channelend=100 channelspacing=25,22 \
+ cdpspacing=0 scalco=1 \
+ create=5 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ subfilt <tfake101.su >tfake102.su fpasshi=20
+#
+ sunmo <tfake102.su >tfake103.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+ suaddnoise <tfake103.su >tfake104.su sn=5 seed=1 
+#
+ susort <tfake104.su >tfake105.su cdp offset
+#
+ suxwigb <tfake105.su title="before susembase" &
+#
+ susembase <tfake105.su >tfake106.su lockey=offset groupkey=cdp \
+           scanmax=0.5 scanstep=.05 locmaxscan=75 outputinc=12.5 numrolling=50 
+#
+ suxwigb <tfake106.su title="AFTER susembase with outputinc=12.5 (reduce noise, regularize offset intervals) " &
+#

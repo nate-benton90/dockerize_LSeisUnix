@@ -1,0 +1,45 @@
+#!/bin/sh
+# SuSunomstreamers_test2 - for program SUNOMSTREAMERS
+# Author: Andre Latour, Dec  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This is a test of a reasonably normal towed-streamer situation, except: "
+  echo "---  - shots are further apart than normal (plots are easier to understand)."
+  echo "---  - only 7 streamers of 10 channels each (real layouts are much bigger). "
+  echo "---  - using create= option to make output traces with no input traces.     "
+  echo "--- This actual test is just like test1 except:                             "
+  echo "---  - use all defaults to get the same thing.                              "
+  echo "---  - remove the spikes parameter (test that it makes just 1 sample).      "
+  echo "---                                                                         "
+  echo "--- Note: last shot (5) is given a different colour.                        "
+  echo "---                                                                         "
+  echo "--- Note: DO NOT EXPECT FULL ACCURACY IN THE XGRAPHs.                       "
+  echo "---       The mid XYs are put in sdel,gdel keys (which are integers).       "
+  echo "----------------------------------------------------------------------------"
+#
+# Note that I left the remaining parameters where they are in test1.
+#
+ sunomstreamers >fake21.su \
+              shotspacing=200 \
+                      gunid=0,1 guncross=-25,25 guninline=-40 \
+ streamercross=-300,-200,-100,0,100,200,300 \
+ streamerinline=-100 \
+ channelstart=1 \
+ channelend=10 \
+ channelspacing=10 \
+                                                     \
+ create=5
+#
+ suchw <fake21.su >fake22.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=20,20
+#
+ sugethw <fake22.su output=binary key=sdel,gdel >fake22.bin
+#
+ xgraph <fake22.bin n=280,70 linecolor=3,4 mark=7,8 marksize=5,5 linewidth=0,0 \
+        style=normal width=1200 height=600 x1beg=99500 x1end=101500 x2beg=9500 x2end=10500 &
+#
+ echo "--- diff between test1 and test2 header keys follows (should be nothing)"
+ sugethw <fake11.su key=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake11.txt
+ sugethw <fake21.su key=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake21.txt
+ diff fake11.txt fake21.txt
+ echo "--- after diff                                                          "
+#

@@ -1,0 +1,38 @@
+BHEDTOPAR - convert a Binary tape HEaDer file to PAR file format	
+SU3DCHART - plot x-midpoints vs. y-midpoints for 3-D data	
+SUABSHW - replace header key word by its absolute value	
+SUADDHEAD - put headers on bare traces and set the tracl and ns fields
+SUAHW - Assign Header Word using another header word			
+SUAZIMUTH - compute trace AZIMUTH, offset, and midpoint coordinates    
+SUBINBIGCSV - Make Some CDPs Larger and Delete All Traces Outside Them.    
+SUBINCSV - 3D Grid Resolve and output and assign traces to cdps (cells). 
+SUBINQCSV - Input Q-records or parameters. interpolate, output Q-records.  
+SUBINXXCSV - Expand Size and Exchange Corners of 3D Grid Definition.       
+SUCDPBIN - Compute CDP bin number					
+SUCHART - prepare data for x vs. y plot			
+SUCHW - Change Header Word using one or two header word fields	
+SUCLIPHEAD - Clip header values					
+SUCOUNTKEY - COUNT the number of unique values for a given KEYword.	
+SUDUMPTRACE - print selected header values and data.              
+SUEDIT - examine segy diskfiles and edit headers			
+SUFLEX2D - Duplicate Some Traces Into CDPs From Neighbouring CDPs.         
+SUGEOM - Fill up geometry in trace headers.                              
+SUGEOMCSV - 3D/2D land/OBotm geometry from Comma Separated or fixed text.",
+SUGETHW - sugethw writes the values of the selected key words		
+SUHTMATH - do unary arithmetic operation on segy traces with 	
+SUKEYCOUNT - sukeycount writes a count of a selected key    
+SULCTHW - Linear Coordinate Transformation of Header Words		
+SULHEAD - Load information from an ascii column file into HEADERS based
+SUNEARCSV - Assign Trace Key Values From Nearest Q-file Record.            
+SUNOMSTREAMERS - Nominal Geometry and 2D CDPS for Towed-Streamer Marine.   
+SUPASTE - paste existing SU headers on existing binary data	
+SUPROFCSV - Input Q-file or parameters, make profile, output other Q-file. 
+surandhw - set header word to random variable 		
+SURANGE - get max and min values for non-zero header entries	
+SUSEHW - Set the value the Header Word denoting trace number within	
+SUSHW - Set one or more Header Words using trace number, mod and	
+SUSTRIP - remove the SEGY headers from the traces		
+SUTOOLCSV - Tools for Comma Separated Values and fixed text files.       ",
+SUTRCOUNT - SU program to count the TRaces in infile		
+SUUTM - UTM projection of longitude and latitude in SU trace headers  
+SUXEDIT - examine segy diskfiles and edit headers			

@@ -1,0 +1,48 @@
+#!/bin/sh
+# Sunmocsv_create1 - for program SUNMOCSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some realistic traces for 3D.    "
+  echo "---  The sequence herein is:                                                "
+  echo "---   - use SPS2 X-file and create traces with spikes                       "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - apply inverse-NMO (note: using SUNMO program, not SUNMOCSV).        "
+  echo "----------------------------------------------------------------------------"
+#
+# Create traces from the values in SPS2 X-file (plus spikes)
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fake1.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fake1.su >fake2.su
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fake2.su >fake3.su
+#
+  subfilt <fake3.su >fake4.su fpasshi=20
+#
+  sunmo <fake4.su >fake5.su invert=1 tnmo=0,190,450,800 vnmo=1800,3500,4000,5000
+#
+# The filter and inverse NMO give some nice "horizons", which you can see:
+#
+  suximage <fake5.su &
+#
+# Now, put 3d grid cell numbers to cdp key (as seen in ../Subincsv/Subincsv_example3).
+#
+  subincsv <fake5.su >fake6.su rfile=kEFG.csv check=1 
+#
+  susort <fake6.su >fake7.su cdp offset
+#
+  suximage <fake7.su 
+#
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some realistic traces for 3D.    "
+  echo "---  The sequence herein is:                                                "
+  echo "---   - use SPS2 X-file and create traces with spikes                       "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - apply inverse-NMO (note: using SUNMO program, not SUNMOCSV).        "
+  echo "----------------------------------------------------------------------------"

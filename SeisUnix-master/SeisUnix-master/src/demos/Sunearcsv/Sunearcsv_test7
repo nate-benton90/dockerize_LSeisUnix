@@ -1,0 +1,53 @@
+#!/bin/sh
+# Sunearcsv_test7 - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Similar to test6 except the receiver station number (gaps) is used     "
+  echo "---  to create the profile backwards relative to test6. This means the      "
+  echo "---  cdp numbers will start at 1 at the rightmost cross in the plot.        "
+  echo "---                                                                         "
+  echo "---  NOTE that suprofcsv extrapolates extra points on the profile ends for  "
+  echo "---       its own purposes. So the generated profile does not match that    "
+  echo "---       made by test6 (et al). But that is not a concern of this test.    "
+  echo "---       The idea here is to see that the backwards profile assigns the    "
+  echo "---       correct cdp numbers and igi,igc values (remember that the signs   "
+  echo "---       of igi and igc come from the direction angle to the point with    "
+  echo "---       the next higher cdp number).                                      "
+  echo "---                                                                         "
+  echo "---  Note that gaps comes out first on q-records (before gx and gy), which  "
+  echo "---  requires an adjustment of the fields that cut retains.                 "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps gx=0,1000,1000 gy=0,0,1500 gaps=500,300,200 \
+           chordi=100 nmaxa=3 nmaxs=3 chordf=100 \
+           qout=testout71.csv
+#
+ sunull nt=4 ntr=10 >tnull71.su
+ sushw <tnull71.su >tnull72.su key=sx,sy,gx,gy a=600,-50,600,-50 b=60,125,60,125
+#
+ sunearcsv qin=testout71.csv <tnull72.su dimx=mgx dimy=mgy >tnear71.su keyp=cdp okeys=cdp,gaps
+#
+ suchw <tnear71.su >tnear72.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=2,2 
+ sugethw <tnear72.su key=sx,sy,gx,gy,sdel,gdel,gaps,cdp,igi,igc
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 3 and 4
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use sugethw to output x,y values in binary.                                   
+# Use cat to combine the 2 sets of XYs into one file.                           
+#
+# Use xgraph to plot 2 sets of points with marks of Xs and triangles.
+#
+ sed '/C_SU/d' testout71.csv >testout72.csv
+ cut -d, -f4,5 <testout72.csv >testout73.csv
+ sed '1,$ s/,/ /g' testout73.csv >testout73.txt
+ a2b <testout73.txt >testout73.bin
+#
+ sugethw <tnear72.su output=binary key=sdel,gdel >testout74.bin
+ cat testout73.bin testout74.bin >testout75.bin
+#
+ xgraph <testout75.bin n=40,10 linecolor=2,3 mark=2,6 marksize=10,10 linewidth=0 \
+         width=1000 height=700 x1beg=-800 x1end=1400 x2beg=-100 x2end=2800

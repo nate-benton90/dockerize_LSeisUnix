@@ -1,0 +1,50 @@
+#!/bin/sh
+# Sunmocsv_realistic2 - for program SUNMOCSV
+# Author: Andre Latour, Jan 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This is a realistic test. It takes traces that were created with       "
+  echo "---  an exactly known amount of NMO and corrects them using SUNMOCSV.       "
+  echo "---  The input velocity functions are deliberately over-corrected in        "
+  echo "---  some parts of the 3d and deliberately under-corrected in other parts.  "
+  echo "---  The resulting stack is displayed.                                      "
+  echo "---  This is similar to Sunmocsv_realistic1 except that the input velocity  "
+  echo "---  functions are out-of-order in the input parameters and the velocity    "
+  echo "---  functions have varying amounts of time-velocity values.                "
+  echo "----------------------------------------------------------------------------"
+#
+# The traces are known to have the following velocity since it was applied using the
+# inverse option in sunmo, as follows: 
+# sunmo <fakexsrf.su >fakexsrfn.su invert=1 tnmo=0,190,450,800 vnmo=1800,3500,4000,5000
+#
+  sunmocsv <fake7.su >fake31.su rfile=kEFG.csv check=1 2>tinfo3.txt \
+        cdp=41,101,21,1473,1493,1533,1553,2683,2703,2743,2763,81 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=2800,5500,6000,8000 \
+        tnmo=0,190,450,800 \
+        vnmo=1200,2000,4000,5000 \
+        tnmo=0,200,500 \
+        vnmo=3333,5555,6666 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1200,2000,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800,900 \
+        vnmo=1800,3500,4000,5000,5500 \
+        tnmo=0,190,450,800 \
+        vnmo=2800,5500,6000,8000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+#
+  sustack <fake31.su >fake32.su key=cdp 
+#
+  suxwigb <fake32.su key=cdp
+#

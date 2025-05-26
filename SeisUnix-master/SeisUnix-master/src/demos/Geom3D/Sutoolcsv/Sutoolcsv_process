@@ -1,0 +1,80 @@
+#!/bin/sh
+# Sutoolcsp_process - for program SUTOOLCSV
+# Author: Andre Latour, July 2021
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "---  Also read this file so you can understand easier.                     "
+  echo "                                                                           "
+  echo "---  The idea of this example is to show how to use the process options.   "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+#
+# To get an idea of what the process options do, run:
+#
+  sutoolcsv rfile=l1xPROCESS.txt setid=x match=sps1 forms=sps1 names=sps1all wfile=l1xP.txt
+#
+  echo " --- that was the first run of sutoolcsv ---"
+#
+#
+# Note several field-unreadable errors/warnings occur.
+# Look at the input l1xPROCESS.txt file card-columns. You can see that it is SPS1 format. 
+# A basic problem with SPS1 files is that the shot lines and receiver lines often contain characters.
+# Now run:
+#
+  sutoolcsv rfile=l1xPROCESS.txt setid=x match=sps1 forms=sps1 names=sps1all wfile=l1xP.txt process=14_trimz_29
+#
+  echo " --- that was the second run of sutoolcsv ---"
+#
+# Note that the error field-unreadable as a number (         S100A2 ) is gone.
+# Look at the output l1xP.txt file. The S100A2 has been replaced with 10002.
+#
+#
+# So, try a similar thing for the R-500100 error/warning. Now run:
+#
+  sutoolcsv rfile=l1xPROCESS.txt setid=x match=sps1 forms=sps1 names=sps1all wfile=l1xP.txt process=14_trimz_29,48_trimz_63
+#
+  echo " --- that was the third run of sutoolcsv ---"
+#
+# The R-500100 has been replaced with -500100 but now there are other error/warnings that -500100 
+# is too large to fit in the SU name. The SU name for this field is grnors (set by names=sps1 option).
+# The grnors SU key is a 2-byte integer which means only magnitudes less than 32765 can fit. So run:
+#
+  sutoolcsv rfile=l1xPROCESS.txt setid=x match=sps1 forms=sps1 names=sps1all wfile=l1xP.txt process=14_trimz_29,48_trimz_63,48_mul_-1_63,48_sub_500000_63
+#
+  echo " --- that was the fourth run of sutoolcsv ---"
+#
+# Now look at the output l1xP.txt file and see that R-500100 has now been reduced to 100.
+#
+#----
+#
+# Is this kind of processing OK? Generally yes. Remember that SUGEOMCSV is updating all these
+# values into the SU trace headers. So it "does not matter" what the original field numbering is.
+# But you should try to retain as much of the original numbering as possible so that you can 
+# still identify which field lines your new numbers refer to.
+#
+# You will, of course, need to perform similar process= options for the S and R files to reduce
+# their line numbers the same way as for this X file.  
+#
+# Similar process= options may need to be done for shot and/or receiver point numbers.
+# (Acquisition surveyors loved to put weird characters and unnecessarily large numbers in SPS1 files). 
+#
+# You can, of course, use process= options just to convert S and R files from feet to metres. 
+#
+# But you can also just convert the input file to csv and then read that csv file into a SpreadSheet
+# (libreOffice Calc or whatever) and change the values. As long as you do not mangle the C_SU records
+# at the top, you can then convert back to txt if you want.
+#
+# Note: SUGEOMCSV does not have process= options. That is deliberate. 
+#       You need to review the process= effects and input the changed files to SUGEOMCSV.
+  echo "                                                                           "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "---  Also read this file so you can understand easier.                     "
+  echo "                                                                           "
+  echo "---  The idea of this example is to show how to use the process options.   "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"

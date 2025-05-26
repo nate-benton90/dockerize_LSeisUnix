@@ -1,0 +1,78 @@
+#!/bin/sh
+# SuSunomstreamers_test9 - for program SUNOMSTREAMERS
+# Author: Andre Latour, Dec  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This is a test of a reasonably normal towed-streamer situation, except: "
+  echo "---  - shots are further apart than normal (plots are easier to understand)."
+  echo "--- This actual test is:                                                    "
+  echo "---  - create traces via sunomstreamers                                     "
+  echo "---  - use non-contiguous on streamers                                      "
+  echo "---  - sort oddly (I use offset) to make sure the SECOND sunomstreamers     "
+  echo "---    does not care about trace order                                      "
+  echo "---  - then copy fldr and tracf to other keys to test the other-key-options "
+  echo "---    in the SECOND sunomstreamers                                         "
+  echo "---  - then zero most keys (so as not to fool myself)                       "
+  echo "---  - copy some gun identifiers into igi key and set gunmod=1000           " 
+  echo "---    in the SECOND sunomstreamers. In the FIRST sunomstreamers also set   "
+  echo "---    channel ranges to identical values on all streamers.                 "
+  echo "---  - create some streamer identifiers into igc using FIRST sunomstreamers "
+  echo "---    then use them in the SECOND sunomstreamers. Since the channel ranges "
+  echo "---    are identical on all streamers, this tests the streameridnt logic.   "
+  echo "---  - compare the created values with the updated values (should be same)  "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+ sunomstreamers >fake90.su \
+ shotkey=fldr shotspacing=200 \
+ gunkey=fldr gunmod=2 gunid=0,1 guncross=-25,75 guninline=-40,-100 \
+ streamerkey=igc \
+ streameridnt=8,9,10,11,12,13,14 \
+ streamercross=-400,-200,-100,0,100,160,300 \
+ streamerinline=-100,-100,-140,-100,-100,-100,-80 \
+ channelstart=1 \
+ channelend=10 \
+ channelspacing=10,15,10,10,10,10,10 \
+ cdpspacing=5 offpi=2 linelocs=1 scalco=1 verbose=1 \
+ create=5 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ susort <fake90.su >fake90a.su offset
+#
+ suchw <fake90a.su >fake90b.su key1=ep,tracl,igi \
+        key2=fldr,tracf,grnofr key3=fldr,tracf,grnofr a=0,0,3 b=1,1,1
+#
+# Zero everything output by sunomstreamers except new key values ep,tracl,igi,igc being tested.
+#
+ suchw <fake90b.su >fake90c.su key1=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps \
+                               key2=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps \
+                               key3=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps \
+                               b=0,0,0,0,0,0,0,0,0,0,0,0,0,0
+#
+ sugethw <fake90c.su key=ep,tracl,igi,igc,fldr,tracf >fake90c.txt
+#
+ sunomstreamers <fake90c.su >fake91.su \
+ shotkey=ep shotspacing=200 channelkey=tracl \
+ gunkey=igi gunmod=1000 gunid=4,5 guncross=-25,75 guninline=-40,-100 \
+ streamerkey=igc \
+ streameridnt=8,9,10,11,12,13,14 \
+ streamercross=-400,-200,-100,0,100,160,300 \
+ streamerinline=-100,-100,-140,-100,-100,-100,-80 \
+ channelstart=1 \
+ channelend=10 \
+ channelspacing=10,15,10,10,10,10,10 \
+ cdpspacing=5 offpi=2 linelocs=1 scalco=1 verbose=1
+#
+ subfilt <fake91.su >fake91f.su fpasshi=20
+#
+ sunmo <fake91f.su >fake91fn.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+# The filter and inverse NMO give some nice "horizons", which you can see:
+#
+ suxwigb <fake91fn.su &
+#
+ echo "--- diff between created and updated key values follows (should be nothing)"
+ sugethw <fake90b.su key=ep,tracl,igc,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake90b.txt
+ sugethw <fake91.su key=ep,tracl,igc,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake91.txt
+ diff fake90b.txt fake91.txt
+ echo "--- after diff  "         
+

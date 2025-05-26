@@ -1,0 +1,22 @@
+#!/bin/sh
+# Subinqcsv_fixed_qinput - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo " These are examples where there are the same number of velocities     "
+  echo " in each input q-record and they all have the same time values in     "
+  echo " the input C_SU_NDIMS record. The input g-files contain the same      "
+  echo " values as the parameter sets used in Subinqcsv_fixed_command.        "
+  echo "----------------------------------------------------------------------"
+#
+# The outind= parameter creates 6 tims values to be output in the  
+# C_SU_NDIMS record as well as 6 output vnmo values in each q-record.                             
+#
+# Note: The output q-files should be identical to the q-files output by Subinqcsv_fixed_command.
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin51.csv qout=qvalsout61.csv outind=0,2000,400 iecho=1 \
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin52.csv qout=qvalsout62.csv outind=0,2000,400 extrapi=1 extrapc=1 \
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin53.csv qout=qvalsout63.csv outind=0,2000,400 extrapi=1 extrapc=1 \
+#

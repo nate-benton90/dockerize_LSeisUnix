@@ -1,0 +1,44 @@
+#!/bin/sh
+# Suflex2d_create_and_show_profile - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This script uses the SPS2 R-file (receiver locations)                 "
+  echo "---  and sutoolcsv and suprofcsv to create a cdp profile.                  "
+  echo "---                                                                        "
+  echo "---  It plots the receiver locations (blue) and the cdp locations (red).   "
+  echo "---  This plot shows where the bends are in this fake survey line.         "
+  echo "---                                                                        "
+  echo "---  The profile itself is used in subsequent scripts.                     "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=fakeq.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=fakeq.csv \
+           chordi=12.5 nmaxa=30 nmaxs=30 chordf=12.5 \
+           qout=fakeqp.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 12 and 13
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+#
+  sed '/C_SU/d' fakeq.csv >fakeq02.csv
+  cut -d, -f12,13 <fakeq02.csv >fakeq03.csv
+  sed '1,$ s/,/ /g' fakeq03.csv >fakeq03.txt
+  a2b <fakeq03.txt >fakeq03.bin
+#
+# Repeat for the cdp profile in file fakeqp.csv
+# Except: Use cut with a deliminator of comma to retain only fields 13 and 14
+#
+  sed '/C_SU/d' fakeqp.csv >fakeqp12.csv
+  cut -d, -f13,14 <fakeqp12.csv >fakeqp13.csv
+  sed '1,$ s/,/ /g' fakeqp13.csv >fakeqp13.txt
+  a2b <fakeqp13.txt >fakeqp13.bin
+#
+  cat fakeq03.bin fakeqp13.bin >fakecomparer.bin
+#
+  xgraph <fakecomparer.bin nplot=2 n=399,1125 linecolor=4,2 mark=6,7 marksize=6,3 linewidth=0 \
+          width=1400 height=400 x1beg=338000 x1end=341400 x2beg=5538400 x2end=5551700 \
+          title="receiver locations and cdp profile locations (red)" &

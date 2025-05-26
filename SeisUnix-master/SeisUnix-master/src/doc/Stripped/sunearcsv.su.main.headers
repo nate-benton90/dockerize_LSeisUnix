@@ -1,0 +1,138 @@
+ SUNEARCSV - Assign Trace Key Values From Nearest Q-file Record.            
+
+  sunearcsv [parameters].                                                   
+
+ Parameters:	         						     
+
+ qin=      Input file containing q-records. This parameter is required.     
+
+ dimx=     Dimension name X. (defaults to not used). Name must be a key and 
+           must exist in the qin file, or be a special name below:          
+             mgx = use mid X (sx+gx)/2 from trace, but gx from qin file     
+             msx = use mid X (sx+gx)/2 from trace, but sx from qin file     
+             mgy = use mid Y (sy+gy)/2 from trace, but gy from qin file     
+             msy = use mid Y (sy+gy)/2 from trace, but sy from qin file     
+             mgaps   = use (grnlof+gaps)/2 from trace, but gaps from qin    
+             mgrnlof = use (grnlof+gaps)/2 from trace, but grnlof from qin  
+ dimy=     Dimension name Y. (defaults to not used). Same options as dimx.  
+ dimr=     Dimension name R. (defaults to not used). Same options as dimx.  
+ dima=     Dimension name A. (defaults to not used). Same options as dimx.  
+ dimb=     Dimension name B. (defaults to not used). Same options as dimx.  
+ dimc=     Dimension name C. (defaults to not used). Same options as dimx.  
+ dimd=     Dimension name D. (defaults to not used). Same options as dimx.  
+ dime=     Dimension name E. (defaults to not used). Same options as dimx.  
+ dimf=     Dimension name F. (defaults to not used). Same options as dimx.  
+     Note: At least 1 dimension must be specified.                          
+
+ The following 3 parameters can be used for any of the dimensions.	     
+ Just substitute x,y,r,a,b,c,d,e,f as the ending character,                 
+ for instance: typer,minr,maxr for dimension R.                             
+ Typically these 3 are used just to specify an additional dimension that is 
+ used to restrict the search range (see typer options -1 and -2 below).     
+
+ typer=1 Use in Pythagorean Nearest (squared difference to trace location), 
+         and minr,maxr are unchanging extent ranges for this dimension.     
+      =2 Use in Pythagorean Nearest and minr,maxr are the relative extent   
+         range to include for this dimension (the input trace value for     
+         this dimension is added to minr,maxr to form the extent range).    
+     =-1 Do not use in Pythagorean Nearest, and minr,maxr are unchanging    
+         extent ranges for this dimension.                                  
+     =-2 Do not use in Pythagorean Nearest and minr,maxr are the relative   
+         extent range to include for this dimension (the input trace value  
+         for this dimension is added to minr,maxr to form extent range).    
+    Note: Negative types means the difference between the profile point and ",    
+       the trace is NOT added to Pythagorean sum for specified dimension(s).
+       So, the nearest point is determined as if that dimension was NOT     
+       specified at all. However, the min,max for that dimension are still  ",     
+       used. This results in finding the nearest point considering only the 
+       type>0 dimensions, but restricted by ranges of type<0 dimension(s).  ",     
+       Type=-2 can be used for situations where a profile approaches itself ",     
+       or intersects itself or overlaps itself. In those case, a third      ",     
+       dimension value (such as station number) can be used to restrict the ",     
+       search range for each trace to only the part of the profile with     ",     
+       approximately the same station numbers as the trace midpoint station.",     
+ minr=     Extent Range Min. Typically negative. Default is no min limit.   
+           Greater or equal to this value is in range.                      
+ maxr=     Extent Range Max. Typically positive. Default is no max limit.   
+           Strictly less than this value is in range. The min must be less  
+           than max, but the range does not have to be symmetric or centred 
+           (that is, ranges such as min=-1000 and max=-200 are allowed).    
+
+ keyp=cdp  Point Order Key Name. Name must be in the input Q-file.          
+           This parameter is the difference between a PROFILE and just a    
+           set of points. After the nearest point to a trace is found, this 
+           parameter determines which point is considered the NEXT point.   
+           The angle between the nearest point and the next point is used   
+           in the computation of inline distance to output in the igi key   
+           and the crossline distance to output in the igc key.             
+           (The igi,igc distances are NOT scaled to the trace scalco flag). 
+     Note: To compute the angle, whatever is specified as dimx is used as   
+           the X coordinate, whatever is specified as dimy is used as Y.    
+     =asis The next point to determine angle is the next record in q-file.  
+     =dist Set igi to 0 and igc to the distance between the trace and the   
+           nearest point. The igc distance is NOT scaled by trace scalco.   
+     =none Do not reset the igi and igc output values. This option must be  
+           used if dimx or dimy is not specified.                           
+     Note: Sometimes there are two-or-more points which are equally near    
+           the trace. In those cases, the nearest point is set to the       
+           lower ordered point. For options asis,dist,none the order is     
+           simply the order of points in the qin file.                      
+
+ okeys=cdp Output key names. Name must be in the input Q-file.              
+           These values are copied from qin file to the output traces.      
+           Note: q-files are assumed to contain raw (non-scaled) values.    
+                 The scalco,scalel key values from the input traces are     
+                 used to scale their related keys in this list.             
+           Note: scalco,scalel key names are not allowed in this list.      
+
+ nopoint=1 If no qin point is found within the extents, error-halt (before  
+           outputting the first trace that could not find a qin point).     
+        =0 Continue without any update of the okeys values for traces that  
+           could not find a qin point in extents (print their count at end).
+   Advice: If you choose to use option 0, then you should probably include  
+           a key name in the qin file which has a value that you can check  
+           in the output traces (start with a 0 in the input traces, have a 
+           value of 1 in the qin file, so you can see if trace was updated).
+
+
+ The following 3 parameters affect cpu time, but not results. The search    
+ is done by building a kdtree from the dimension values in the qin file.    
+ The code that builds the kdtree is reasonably standard and simplistic.     
+ But the kdtree search code is slightly unusual due to some typer options.  
+
+ sfunc=2   Search via the cycle_for_near function. This option is usually   
+           fastest. This option uses the sdist and smult parameters.        
+      =1   Search via the find_near function. This option may be faster     
+           if you are specifying small extent ranges.                       
+           This option does not use the sdist and smult parameters.         
+      =0   Search via the brute_near function. This option may be faster    
+           if there are only a small number of points in the qin file.      
+           This option does not use the sdist and smult parameters.         
+           (To keep the code simpler, this option still allocates and       
+            builds the kdtree. But the tree is not used for searching).     
+      =-1  Search via the find_near function and confirm the results using  
+           the brute_near function. This tests the find_near function and   
+           can also be used to determine the speed difference between them. 
+           This option does not use the sdist and smult parameters.         
+      =-2  Search via the cycle_for_near function and confirm the results   
+           using brute_near function. This tests cycle_for_near function    
+           and can also be used to determine speed difference between them. 
+           This option uses the sdist and smult parameters.                 
+ sdist=100 Initial search distance. This parameter is only used             
+           if sfunc=2 or -2. If positive, this value is added to the        
+           distance between the previous trace and its nearest qin point    
+           and used as the initial search distance for the current trace.   
+           If negative, the initial search distance for all traces is set   
+           to this absolute value.                                          
+ smult=2   Search multiplier. This parameter is only used if sfunc=2 or -2. 
+           If the nearest qin point is not found after searching with the   
+           initial search distance, the search distance is multiplied by    
+           this value, and search is performed again. This repeats until    
+           finding the nearest point (or all min,max ranges are exceeded).  
+
+   ------------------------------------------------------------------       
+   ------------------------------------------------------------------       
+
+
+ Created: July 2022: Andre Latour                                          
+ This program started from suprofcsv which can input a q-file.             

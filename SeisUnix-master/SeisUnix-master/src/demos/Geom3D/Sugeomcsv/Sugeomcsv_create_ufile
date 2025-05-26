@@ -1,0 +1,12 @@
+#!/bin/sh
+# Sugeomcsp_create_ufile - for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This tests the ufile= option which reads parameters from another file. "
+  echo "---  (look at l2xallBARE.txt and l2xallTOP.txt).                            "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=l2xallBARE.txt ufile=l2xallTOP.txt >fakex.su create=100 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+# and then continue as in Sugeomcsv_create_realistic if you want....

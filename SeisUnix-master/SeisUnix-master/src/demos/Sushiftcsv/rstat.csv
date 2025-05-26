@@ -1,0 +1,13 @@
+C_SU_MATCH,gaps
+C_SU_SETID,Q
+C_SU_FORMS
+C_SU_ID,%.12g,%.12g
+C_SU_NAMES
+C_SU_ID,gaps,gstat
+Q,101,-10
+Q,102,-20
+Q,103,30
+Q,104,-40
+Q,105,-50
+Q,106,-60
+Q,107,-70

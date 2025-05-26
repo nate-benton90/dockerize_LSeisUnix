@@ -1,0 +1,5 @@
+#!/bin/bash
+
+List=" *.txt rv.* sh.* shots.* shots_* tmp*"
+
+rm -fr $List

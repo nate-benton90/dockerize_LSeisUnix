@@ -1,0 +1,67 @@
+SUNMOCSV reads a 3d grid definition from a K-file (or via command line parameters).
+Using identical parameters as SUNMO you will get linear interpolation of the
+input velocity functions, just like SUNMO. But with a 3d grid input, you get bi-linear
+interpolation of the input velocity functions. The basic way this happens is that 
+the 3d grid is used to translate the cdp= parameter numbers to their 3d grid locations.
+(For a basic idea of the particular 3d grid used in these tests, view worldxy.png).                        
+
+The fact that bi-linear interpolation is being done forces restrictions on where
+the input velocity functions are located. If you choose to input velocity functions  
+along a particular inline then you must put velocity functions at the same crosslines
+at any other inlines that you choose to put velocity functions on.
+
+To see an example of the velocity function location restrictions, view vellocs.png.
+Note that you can have changing gaps between functions in the inline direction and
+changing gaps between functions in the crossline direction. But you cannot put  
+velocity functions at isolated random locations. 
+
+Again, looking at vellocs.png note that function locations for cdps 136,620,716,232
+surround a large area. Within this large area, bi-linear interpolation is done using   
+the surrounding 4 functions of smaller areas. Outside the edges of the large area,
+linear interpolation occurs just using the edge functions (for instance, all cdps  
+above the 620,656,666,696,716 line on the image get the same velocity functions 
+as if they were located exactly on the 620,656,666,696,716 line). All cdps that
+are outside the corners of the large area get the same velocity function as the 
+corner itself.
+
+Note again in vellocs.png that the input velocity functions are all located
+near the bottom of the image. Nothing wrong with that, sometimes surveys only
+need tight velocity control in a limited area. You can, of course, also just have
+one input velocity. Or some input velocities along just 1 inline or 1 crossline.
+
+The examples herein use the 3d grid definition which fits the 3d survey used in the
+demos/Geom3D/Sutoolcsv and demos/Geom3D/Sugeomcsv and demos/Geom3D/Subincsv examples.
+
+ 
+Test names ending in q indicate that the velocity functions input to SUNMOCSV are
+contained in a q-file (see Q_FILE_STANDARDS document). These tests should be run
+after the tests without a q since they perform a comparison with previous output.
+
+I suggest you review and run the SUNMOCSV tests in this order....
+
+sh ./Sunmocsv_create1        (must be run first to create traces)
+
+sh ./Sunmocsv_realistic1 
+
+sh ./Sunmocsv_realistic1q
+
+sh ./Sunmocsv_realistic2
+
+sh ./Sunmocsv_realistic2q
+
+sh ./Sunmocsv_realistic3q
+
+sh ./Sunmocsv_realistic4q
+
+sh ./Sunmocsv_single1
+
+sh ./Sunmocsv_single1q
+
+sh ./Sunmocsv_test1    
+
+sh ./Sunmocsv_test2    
+
+sh ./Sunmocsv_test3    
+
+sh ./Sunmocsv_test3q    
+

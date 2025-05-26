@@ -1,0 +1,35 @@
+#!/bin/sh
+# Sustackup_simple2d_cdps6 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of stacking cdps                                           --"
+  echo "---  - compared to stacking via susort and sustack                        --"
+  echo "---  - note differences because sustackup stacks in double precision.     --"
+  echo "----------------------------------------------------------------------------"
+#
+ sustackup <fakexsrfnbis.su >fake61.su keyloc=cdp  
+#
+ suxwigb <fake61.su key=cdp title="sustackup by cdp key" &
+#
+  echo " Next, stacking to cdp using susort and sustack for comparison. --"
+#
+ susort <fakexsrfnbis.su >fake62.su cdp
+#
+ sustack <fake62.su >fake63.su key=cdp 
+#
+#sugethw <fake23.su key=cdp,nhs,offset,tracf
+#
+ suxwigb <fake63.su key=cdp title="after susort and sustack by cdp key" &
+#
+  echo "--- Maximums in stack by susort and sustack "
+#
+ sumax <fake63.su
+#
+ suop2 fake61.su fake63.su op=diff >fake64.su
+#
+ suxwigb <fake64.su key=cdp title="difference between sustack and sustackup (which stacks in double prec)" &
+#
+  echo "--- Maximums in difference display (not zero since sustackup stacks in double prec)"
+#
+ sumax <fake64.su

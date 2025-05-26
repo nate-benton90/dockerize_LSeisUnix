@@ -1,0 +1,18 @@
+#!/bin/sh
+# NMOandStack3D .   
+# Author: Andre Latour, April 29 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Use picked velocities (in stkvel.p1) and run sunmocsv.                 "
+  echo "----------------------------------------------------------------------------"
+#
+  sunmocsv <fake6.su >fake7.su rfile=kEFG.csv par=stkvel.p1
+#
+  suxwigb <fake7.su 
+#
+# susort <fake7.su >fake8.su cdp offset
+#
+# sustack <fake8.su >fake9.su key=cdp
+#
+# suxwigb <fake9.su key=cdp
+#

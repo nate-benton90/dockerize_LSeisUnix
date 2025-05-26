@@ -1,0 +1,64 @@
+#!/bin/sh
+# Sunearcsv_shift_realistic_profile_and_graph_igi - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This file uses sutoolcsv to convert a realistic 2d SPS2 R-file        "
+  echo "---  into a Q-file.                                                        "
+  echo "---  Then it inputs that Q-file into suprofcsv and outputs a cdp-profile   "
+  echo "---  using some reasonable parameter values for suprofcsv.                 "
+  echo "---  Note in particular that the input R-file interval is about 25 metres  "
+  echo "---  and the output cdp-profile interval is set to 12.5                    "
+  echo "---                                                                        "
+  echo "---  xgraph then plots cdp numbers versus igi key values from sunearcsv.   "
+  echo "---  The igi values are the in-line distances away from the cdp centres    "
+  echo "---  in metres.                                                            "
+  echo "---                                                                        "
+  echo "---  Remember that the cdp numbers are actually 12.5 metres apart,         "
+  echo "---  whereas the igi values are actual metres. And igi key is INTEGER.     "
+  echo "---                                                                        "
+  echo "---  NOTE THAT THE VERTICAL IS INLINE DISTANCE, despite how it plots.      "
+  echo "---                                                                        "
+  echo "---  Note that inline shift of 5 metres of cdps 675 to 840 has caused      "
+  echo "---  the inline igi distances to reduce to a range of -2 to +2.            "
+  echo "---                                                                        "
+  echo "---  *** THE SHIFT IS ACTUALLY DONE IN suprofcsv, not sunearcsv. ***       "
+  echo "---  *** But the narrowing of the igi range shows WHY to do this.***       "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=realistic801.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=realistic801.csv \
+           chordi=12.5 nmaxa=30 nmaxs=30 chordf=12.5 \
+           shiftrec=575,675,1000 shiftdist=0,5,5 \
+           qout=realistic811.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 12 and 13
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' realistic801.csv >realistic802.csv
+  cut -d, -f12,13 <realistic802.csv >realistic803.csv
+  sed '1,$ s/,/ /g' realistic803.csv >realistic803.txt
+  a2b <realistic803.txt >realistic803.bin
+#
+# Use sed to remove the first 5 lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 13 and 14
+#
+  sed '1,5d' realistic811.csv >realistic812.csv
+  cut -d, -f13,14 <realistic812.csv >realistic813.csv
+  sed '1,$ s/,/ /g' realistic813.csv >realistic813.txt
+  a2b <realistic813.txt >realistic813.bin
+#
+# Use sunearcsv to set cdp key to nearest cdp and igi values (inline distance of trace).
+#
+  sunearcsv qin=realistic811.csv <fakexsrfn.su dimx=mgx dimy=mgy >tnear811.su keyp=cdp okeys=cdp
+#
+  sugethw <tnear811.su output=binary key=igi,cdp >fakexsrfn81.bin
+#
+  xgraph <fakexsrfn81.bin nplot=1 n=10140 linecolor=4 mark=8 marksize=3 linewidth=0 \
+          width=1200 height=800 x1beg=-40 x1end=40 x2beg=0 x2end=1000
+#

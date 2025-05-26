@@ -1,0 +1,49 @@
+#!/bin/sh
+# Suprofcsv_realistic1 - for program SUPROFCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This file uses sutoolcsv to convert a realistic 2d SPS2 R-file        "
+  echo "---  into a Q-file.                                                        "
+  echo "---  Then it inputs that Q-file into suprofcsv and outputs a cdp-profile   "
+  echo "---  using some reasonable parameter values for suprofcsv.                 "
+  echo "---  Note in particular that the input R-file interval is about 25 metres  "
+  echo "---  and the output cdp-profile interval is set to 12.5                    "
+  echo "---  xgraph then plots the input R-locations (in blue) as well as          "
+  echo "---  the output cdp-profile locations (in red).                            "
+  echo "---                                                                        "
+  echo "---  This cdp-profile will be pretty good provided the shots are located   "
+  echo "---  along nearly the same line as the R-locations (with reasonable        "
+  echo "---  and consistant shot intervals and cable spread layouts).              "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=realistic01.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=realistic01.csv \
+           chordi=12.5 nmaxa=60 nmaxs=60 chordf=12.5 \
+           qout=realistic11.csv
+#
+# Use sed to remove the first 6 lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 12 and 13
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '1,6d' realistic01.csv >realistic02.csv
+  cut -d, -f12,13 <realistic02.csv >realistic03.csv
+  sed '1,$ s/,/ /g' realistic03.csv >realistic03.txt
+  a2b <realistic03.txt >realistic03.bin
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 13 and 14
+#
+  sed '/C_SU/d' realistic11.csv >realistic12.csv
+  cut -d, -f13,14 <realistic12.csv >realistic13.csv
+  sed '1,$ s/,/ /g' realistic13.csv >realistic13.txt
+  a2b <realistic13.txt >realistic13.bin
+#
+  cat realistic03.bin realistic13.bin >tcomparer.bin
+#
+  xgraph <tcomparer.bin nplot=2 n=399,1125 linecolor=4,2 mark=6,7 marksize=5,5 linewidth=0 \
+          width=800 height=800 x1beg=333700 x1end=347000 x2beg=5538400 x2end=5551700

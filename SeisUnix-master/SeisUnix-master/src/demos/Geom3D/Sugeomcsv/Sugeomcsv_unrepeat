@@ -1,0 +1,51 @@
+#!/bin/sh
+# Sugeomcsp_unrepeat - for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "---------------------------------------------------------------------------"
+  echo "                                                                           "
+  echo "---  This example indicates when to use the unrepeat option.               "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+#
+# To get an idea of what the unrepeat option does, create traces from the following SPS2 X-file:
+# (no need to put spikes= here unless you want to, it just makes the trace file bigger):
+#
+  sugeomcsv rfile=l2xallFLDR_RESET.txt setid=x match=sps2 names=sps2 create=all >fakeRESETz.su unrepeat=1
+  echo " -                                                                    "
+  echo " -------------------------------------------------------------------- "
+  echo " --- that was the first run of sugeomcsv (using the create option)--- "
+#
+# To get an idea of what the unrepeat option does, just use sugeomcsv without the unrepeat option  
+# and try to merge the same information to the created trace file: 
+#
+  sugeomcsv rfile=l2xallFLDR_RESET.txt setid=x match=sps2 names=sps2 <fakeRESETz.su >fakeRESETz2.su
+#
+  echo " -                                                                    "
+  echo " -------------------------------------------------------------------- "
+  echo " --- that was the second run of sugeomcsv (not using unrepeat option)--- "
+#
+  sugeomcsv rfile=l2xallFLDR_RESET.txt setid=x match=sps2 names=sps2 <fakeRESETz.su >fakeRESETz2.su unrepeat=1
+#
+  echo " -                                                                    "
+  echo " -------------------------------------------------------------------- "
+  echo " --- that was the third run of sugeomcsv (using unrepeat=1 option)--- "
+#
+# Note that the fldr values in l2xallFLDR_RESET.txt are 7,8,9,7,8,9,10, and 11 
+# which means the field people chose to re-start fldr numbering at 7. 
+# This kind of thing often happens (but usually after many more records).  
+#
+# Within sutoolcsv and sugeomcsv, all records for each fldr are considered a set, regardless of their order.
+# Which means fldr 7 appears to have 8 segments with overlapping channel ranges, so you get the same kinds 
+# of errors/warnings as in Sutoolcsp_errors     
+#
+# The unrepeat option can often solve this issue. But it is not foolproof. Sometimes you will simply have to
+# edit the SPS2 X-file and the seismic file into separate (unique fldr) pieces before running sugeomcsv.
+#
+  echo "                                                                           "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+  echo "                                                                           "
+  echo "---  This example indicates when to use the unrepeat option.               "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"

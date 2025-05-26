@@ -1,0 +1,48 @@
+#!/bin/sh
+# Sugeomcsp_missing - for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This tests the missing= option. (missing receivers in this case).      "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fakex.su create=100 
+#
+  echo " --- that was first run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su
+#
+  echo " --- that was second run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l2rmissing.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su
+#
+  echo " --- that was third run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l2rmissing.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su missing=pass
+#
+  echo " --- that was fourth run of sugeomcsv ---"
+#
+  sugethw <fakexsr.su key=sx,sy,gx,gy,fldr,tracf,offset
+#
+  echo " --- Notice that gx,gy have 0 value several places. And offset is large. ---"
+#
+# If the Receivers are known to be missing and the corresponding traces are not needed, use missing=delete.
+# 
+  sugeomcsv rfile=l2rmissing.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su missing=delete
+#
+  echo " --- that was fifth run of sugeomcsv ---"
+#
+  sugethw <fakexsr.su key=sx,sy,gx,gy,fldr,tracf,offset
+#
+  echo " --- Notice that those traces have been deleted. ---"
+#
+# Similar issues can occur for S-files.
+# 
+# And also X-files (when actual data is input, not create=). 
+# In that case you might have fldr's for test seismic records that are not in the X-file. 
+# 
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+  echo "---  This tests the missing= option. (missing receivers in this case).      "
+  echo "----------------------------------------------------------------------------"

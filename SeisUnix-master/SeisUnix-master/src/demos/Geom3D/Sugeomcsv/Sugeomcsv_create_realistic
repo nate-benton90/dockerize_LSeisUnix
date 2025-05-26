@@ -1,0 +1,82 @@
+#!/bin/sh
+# Sugeomcsp_create_realistic - for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "---  For initial geometry from SPS2 files, 3 runs of sugeomcsv are required."
+  echo "                                                                            "
+  echo "---  The idea of this example is to show novice users how to create some    "
+  echo "---  realistic traces. The sequence herein is:                              "
+  echo "---   - use SPS2 X-file and create traces with spikes                       "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - apply inverse NMO                                                   "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Create traces from the values in SPS2 X-file (plus spikes)
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fakex.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su
+# rm -f fakex.su 
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su
+# rm -f fakexs.su 
+#
+  subfilt <fakexsr.su >fakexsrf.su fpasshi=20
+# rm -f fakexsr.su 
+#
+  sunmo <fakexsrf.su >fakexsrfn.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+# rm -f fakexsrf.su 
+#
+#--------
+#
+# Even more realistic would be to put a linear horizon on to make a refraction first break, 
+# but I could not immediately see how to do that easily.
+#
+# Tests of surface-consistent residual statics programs would be easy with this dataset
+# (just apply the negative of the static values). 
+# Also easy to test surface-consistant amplitude compensation and surface-consistant de-signature 
+# and deconvolution (just apply some different ones for selected shot gathers and receiver gathers,
+# and the programs should find the inverse).
+#
+# But I digress.
+#
+#--------
+#
+# The filter and inverse NMO give some nice "horizons", which you can see:
+#
+  suximage <fakexsrfn.su
+#
+# But keep in mind that the main purpose of the create= option is not the production
+# of synthetic seismic amplitudes. The main purpose is to allow testing and QC 
+# of geometry updating from fixed-format or csv files into SU headers.
+# For much of that, it is not needed to use the spikes= option.
+#
+#--------
+#
+# In order not to fool yourself in further testing, zero-out most of the header key values in the fake dataset:
+# (but the seismic amplitudes correspond to the geometry that is getting zeroed-out)
+#
+  sugeomcsv rfile=l2z.csv setid=z match=igi names=c_su_id,igi,grnofr,grnlof,grnors,gaps,sstat,sdel,sut,swdep,sx,sy,selev,gstat,gdel,gut,gwdep,gx,gy,gelev,offset,cdp <fakexsrfn.su >fakeall.su
+# rm -f fakeall.su 
+#
+# Note that I used match=igi because I know that igi still contains 0 in headers
+# (you do not actually have to zero anything, it depends what your intentions are).
+#
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "---  For initial geometry from SPS2 files, 3 runs of sugeomcsv are required."
+  echo "                                                                            "
+  echo "---  The idea of this example is to show novice users how to create some    "
+  echo "---  realistic traces. The sequence herein is:                              "
+  echo "---   - use SPS2 X-file and create traces with spikes                       "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - apply inverse NMO                                                   "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"

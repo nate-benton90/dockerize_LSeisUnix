@@ -1,0 +1,47 @@
+#!/bin/sh
+# Sunearcsv_test12_intersection - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Same as test11 except:                                                 "
+  echo "---   - station range in sunearcsv is too narrow, causing error-halt.       "
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=asis gx=1000,2000,2000,1220,1220 gy=1000,1000,2000,2000,800 \
+           gaps=101,201,301,371,541 \
+           chordi=100 nmaxa=3 nmaxs=3 chordf=100 \
+           qout=testout121.csv
+#
+ sunull nt=4 ntr=10 >tnull121.su
+ sushw <tnull121.su >tnull122.su key=sx,sy,gx,gy,grnlof,gaps a=650,1000,650,1000,65,65 b=100,0,100,0,10,10
+#
+ sunearcsv qin=testout121.csv <tnull122.su dimx=mgx dimy=mgy >tnear121.su keyp=cdp okeys=cdp \
+           dimr=mgaps typer=-2 minr=-4 maxr=4 nopoint=1
+#
+# Use suchw to compute the midpoint XYs and put them into sdel,gdel. 
+# And also the midpoint station number and put it into swdep.        
+# Note that this is done AFTER sunearcsv just so you are sure that sunearcsv is not using them itself.
+# (We just want to be able to print/plot them).
+#
+ suchw <tnear121.su >tnear122.su key1=sdel,gdel,swdep key2=sx,sy,grnlof key3=gx,gy,gaps b=1,1,1 c=1,1,1 d=2,2,2 
+ sugethw <tnear122.su key=sx,sy,gx,gy,sdel,gdel,swdep,cdp,igi,igc
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 4 and 5
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use sugethw to output x,y values in binary.                                   
+# Use cat to combine the 2 sets of XYs into one file.                           
+#
+# Use xgraph to plot 2 sets of points with marks of Xs and triangles.
+#
+ sed '/C_SU/d' testout121.csv >testout122.csv
+ cut -d, -f4,5 <testout122.csv >testout123.csv
+ sed '1,$ s/,/ /g' testout123.csv >testout123.txt
+ a2b <testout123.txt >testout123.bin
+#
+ sugethw <tnear122.su output=binary key=sdel,gdel >testout124.bin
+ cat testout123.bin testout124.bin >testout125.bin
+#
+ xgraph <testout125.bin n=51,10 linecolor=2,3 mark=2,6 marksize=10,10 linewidth=0 \
+         width=1000 height=900 x1beg=0 x1end=2400 x2beg=-400 x2end=2200

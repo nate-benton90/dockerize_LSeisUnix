@@ -1,0 +1,81 @@
+#!/bin/sh
+# Subinqcsv_tuples_command - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo " These are examples where there are tuple values at a list of cdps.   "
+  echo " These examples are typical for time,velocity pairs obtained from     "
+  echo " semblance-scans (velans).                                            "
+  echo "----------------------------------------------------------------------"
+#
+# Note that there are a varying number of pairs (tuples) at the cdps.  
+# There is a limited list of these names recognized by subinqcsv when  
+# using command line parameter input (but not when using q-file input).
+# Since vnmo starts with a v, the default behavior is to use           
+# inverse-squared-VALUE-weighting (not inverse-squared-distance).      
+# The iecho option is 1 here, which just outputs at the input locations.  
+# But outind= still causes the independent dimension (tims for this example)     
+# to output vels at 20,220,420,620,820,1020 for each cdp.                    
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout14.csv outind=20,1020,200 iecho=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        tims=0,190,850,1800 \
+        vnmo=1200,2000,4000,5000 \
+        tims=0,200,900,1800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,200,700,1600 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,100,750,1700 \
+        vnmo=2800,5500,6000,8000 \
+        tims=0,200,500 \
+        vnmo=3333,5555,6666 \
+        tims=0,190,454,1200 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,855,1800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,888,1680 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,290,777,1400 \
+        vnmo=1200,2000,4000,5000 \
+        tims=0,190,453,1100 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,290,454,1200,1900 \
+        vnmo=1800,3500,4000,5000,5500 \
+        tims=0,190,755,1800 \
+        vnmo=2800,5500,6000,8000 \
+#
+# Same setup, but with iecho=0, so this will spatially interpolate.
+# But the range of output cdps will be reduced by igiout= and igcout=.
+# Also added a non-tuple value for output (named numa). Note that numa has  
+# a value which is cdp + 100, making it relatively easy to tell that the 
+# interpolation and extrapolation is working.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout15.csv extrapi=1 extrapc=1 iecho=0 \
+            igiout=5,15,5 igcout=10,20,10 outind=20,1020,200 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        numa=121,141,181,201,1573,1593,1633,1653,2783,2803,2843,2863 \
+        tims=0,190,450,800 \
+        vnmo=1200,2000,4000,5000 \
+        tims=0,190,451,800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,452,800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,453,800 \
+        vnmo=2800,5500,6000,8000 \
+        tims=0,200,500 \
+        vnmo=3333,5555,6666 \
+        tims=0,190,454,800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,455,800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,456,800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,457,800 \
+        vnmo=1200,2000,4000,5000 \
+        tims=0,190,453,800 \
+        vnmo=1800,3500,4000,5000 \
+        tims=0,190,454,800,900 \
+        vnmo=1800,3500,4000,5000,5500 \
+        tims=0,190,455,800 \
+        vnmo=2800,5500,6000,8000 \
+#

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Sunmocsv_single1 - for program SUNMOCSV
+# Author: Andre Latour, Jan 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This is a realistic test. It takes traces that were created with       "
+  echo "---  an exactly known amount of NMO and corrects them using SUNMOCSV with   "
+  echo "---  just 1 input velocity function.                                        "
+  echo "----------------------------------------------------------------------------"
+#
+# The traces are known to have the following velocity since it was applied using the
+# inverse option in sunmo, as follows: 
+# sunmo <fakexsrf.su >fakexsrfn.su invert=1 tnmo=0,190,450,800 vnmo=1800,3500,4000,5000
+#
+  sunmocsv <fake7.su >fake71.su rfile=kEFG.csv \
+        cdp=41 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+#
+  suxwigb <fake71.su 
+#

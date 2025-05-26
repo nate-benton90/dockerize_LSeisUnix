@@ -1,0 +1,131 @@
+
+SUNEARCSV - Assign Trace Key Values From Nearest Q-file Record.            
+
+You might find it interesting that the sunearcsv program includes some
+kdtree find-nearest code written specifically for crooked lines which
+approach-or-intersect themselves (coil surveys are an extreme example of this).
+
+The sunearcsv program is part of a set of 3 programs which were primarily
+written for surveys which are usually refered to as "crooked lines". 
+These 3 programs also can be used for straight, bent, or coil surveys.
+The 3 programs are:
+
+  suprofcsv - create cdp locations (coordinates) at intervals along a profile
+  sunearcsv - assign traces the cdp number of the nearest cdp of a profile
+  suflex2d  - duplicate traces of nearby cdps for offset bin fold requirements 
+              (Using the suflex2d program is not required for crooked lines,
+               but it uses values that are output by sunearcsv).
+ 
+These 3 programs are under development. Should be available end of 2022.
+ 
+ 
+------------------------------------------------------------------------------
+  I advise running the scripts in the following order.
+------------------------------------------------------------------------------
+
+The following script creates traces from SPS2 geometry files.
+This script must be run before (some of) the subsequent scripts.
+---
+
+sh ./Sunearcsv_create_realistic_traces
+
+---
+The following 4 scripts do not use the sunearcsv program at all,
+they just show you some plots so you know what is going on...
+---
+
+sh ./Sunearcsv_create_realistic_profile
+
+sh ./Sunearcsv_graph_XYmidpoints_of_traces                  
+
+sh ./Sunearcsv_create_realistic_profile_and_graph_all
+
+sh ./Sunearcsv_create_realistic_profile_and_graph_with_color_offsets
+
+---
+The following scripts actually assign traces to the cdp which is nearest 
+the midpoint coordinates computed from the sx,sy,gx,gy trace keys.
+---
+
+sh ./Sunearcsv_create_realistic_profile_and_assign_cdps_graph_3
+
+sh ./Sunearcsv_create_realistic_profile_and_graph_igc
+
+sh ./Sunearcsv_create_realistic_profile_and_graph_igi
+
+sh ./Sunearcsv_shift_realistic_profile_and_graph_igi
+
+sh ./Sunearcsv_compare78
+
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+The following script actually assigns traces to the cdp which is nearest 
+the midpoint coordinates computed from the sx,sy,gx,gy trace keys 
+and then proceeds with normal processing (sort,nmo,stack,display).
+
+sh ./Sunearcsv_create_realistic_profile_and_assign_cdps_stack
+
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+The following scripts test specific option choices.  
+They are not intended to be realistic...  
+
+The following set of scripts basically:
+  generate cdp profiles, 
+  creates some null traces, 
+  sets the coordinate keys (sx,sy,gx,gy) in those null traces,    
+  then employs various options of the sunearcsv program.
+Then those scripts print the cdp,igi,igc key values and
+plots the locations of the profile and trace midpoints.
+
+The plots made by the test1 to test5 scripts do not change. 
+The printed values of cdp,igi,igc are what you need to look at.
+The tops of the scripts echo explanations of what is being tested.
+
+sh ./Sunearcsv_test1      
+
+sh ./Sunearcsv_test2      
+
+sh ./Sunearcsv_test3      
+
+sh ./Sunearcsv_test4      
+
+sh ./Sunearcsv_test5      
+
+---
+Scripts 6-9 test use of a third value to sort a profile, and some minor options.
+---
+
+sh ./Sunearcsv_test6      
+
+sh ./Sunearcsv_test7      
+
+sh ./Sunearcsv_test8      
+
+sh ./Sunearcsv_test9      
+
+---
+Scripts 10-14_intersection test options for a profile which intersects itself.                             
+Which are also options needed for coil surveys, overlapping surveys, and                                
+crooked surveys in which a section of the survey gets NEAR another section.                       
+---
+
+sh ./Sunearcsv_test10_intersection
+
+sh ./Sunearcsv_test11_intersection
+
+sh ./Sunearcsv_test12_intersection
+
+sh ./Sunearcsv_test13_intersection
+
+---
+Scripts a-b test some options for the range extents.                                  
+---
+
+sh ./Sunearcsv_testa
+
+sh ./Sunearcsv_testb
+
+---

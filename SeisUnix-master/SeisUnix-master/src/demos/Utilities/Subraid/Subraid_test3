@@ -1,0 +1,40 @@
+#!/bin/sh
+# Subraid_test3 - for program SUBRAID
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- This test is similar to test2 except it makes 3 input files.     --"
+  echo "-- (Also inputs files using different inMM parameters on SUBRAID).  --"
+  echo " "
+#
+  sunull nt=3 ntr=40 >tnull31.su
+  sushw <tnull31.su >tnull32.su key=cdp,offset,selev a=1,-299,1 b=3,200,0 j=5,4,1000
+  suhtmath <tnull32.su >tnull33.su key=cdp op=add 
+  suhtmath <tnull33.su >tnull34.su key=offset op=add scale=100 
+  susort <tnull34.su >tnull35.su cdp offset
+#
+  sunull nt=3 ntr=30 >tnull36.su
+  sushw <tnull36.su >tnull37.su key=cdp,offset,selev a=2,-297,2 b=2,200,0 j=5,4,1000
+  suhtmath <tnull37.su >tnull38.su key=cdp op=add 
+  suhtmath <tnull38.su >tnull39.su key=offset op=add scale=100 
+  susort <tnull39.su >tnull40.su cdp offset
+#
+  sunull nt=3 ntr=40 >tnull41.su
+  sushw <tnull41.su >tnull42.su key=cdp,offset,selev a=4,-295,1 b=5,100,0 j=5,4,1000
+  suhtmath <tnull42.su >tnull43.su key=cdp op=add 
+  suhtmath <tnull43.su >tnull44.su key=offset op=add scale=100 
+  susort <tnull44.su >tnull45.su cdp offset
+#
+  subraid key=cdp,offset in11=tnull35.su in52=tnull40.su in83=tnull45.su >tnull46.su 
+  suascii <tnull46.su >info46.txt
+#
+# Now combine the 3 files by concatenate and full resort. Should be same.
+#
+  cat tnull35.su tnull40.su tnull45.su >tnull47.su
+  susort <tnull47.su >tnull48.su cdp offset
+  suascii <tnull48.su >info48.txt
+  echo " "
+  echo "  diff -q info46.txt info48.txt follows. Should be blank."
+  echo " "
+  diff -q info46.txt info48.txt
+

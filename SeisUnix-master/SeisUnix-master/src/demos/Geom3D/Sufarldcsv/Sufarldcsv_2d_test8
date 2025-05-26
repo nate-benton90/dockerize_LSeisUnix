@@ -1,0 +1,70 @@
+#!/bin/sh
+# Sufarldcsv_2d_test8 - for program SUFARLDCSV
+# Author: Andre Latour, Nov 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo " Input l2rlong.csv to suprofcsv to produce the needed cdp q-file locations. "
+  echo "   Note suprofcsv has a special setup here. This setup generates a profile  "
+  echo "   with the same cdp numbers computed and updated to traces by subincsv     "
+  echo "   (as long as you also use the same point_crz and point_cru values here).  "
+  echo "   Note that nmaxa=0 (no profile smoothing wanted in this case).            "
+  echo "   Note dextra=20 to extrapolate extra cdps just in case some shots exist   "
+  echo "   beyond receiver extent.                                                  "
+  echo " But, if you have used suprofcsv to create a (crooked or straight) profile  "
+  echo " and then used sunearcsv to update the trace cdp nuumbers, then THAT        "
+  echo " profile should be used as the cin file in sufaldcsv.                       "
+  echo "                                                                            "
+  echo " Then run sufarldcsv:                                                       "
+  echo "   Input l2slong.csv which contains values of all shots.                    "
+  echo "   Input l2rlong.csv which contains values of all receivers.                "
+  echo "   Input l2plong81.csv which contains the cdp locations made above.         "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+  suprofcsv qin=l2rlong.csv keyp=gaps keyx=gaps keyy=none \
+            chordi=0.5 point_crz=1 point_cru=2 nmaxa=0 dextra=20. qout=l2plong81.csv  
+#
+# Input shot file with all shots and receiver file with all receivers.  
+#
+  sufarldcsv sin=l2slong.csv sloc=sx,sy \
+             rin=l2rlong.csv rloc=gx,gy \
+             cin=l2plong81.csv cloc=gx,gy cseq=cdp                     dout=testout81.csv   
+#            cin=l2plong81.csv cloc=gx,gy cseq=cdp avrad=-1 navrg=2 nsmth=0 formxy=%.10g  
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 2 and 5,6,7
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use cat                                                   
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' testout81.csv >testout82.csv
+#
+  cut -d, -f2,5 <testout82.csv >testout83.csv
+  sed '1,$ s/,/ /g' testout83.csv >testout83.txt
+  a2b <testout83.txt >testout83.bin
+#
+  cut -d, -f2,6 <testout82.csv >testout84.csv
+  sed '1,$ s/,/ /g' testout84.csv >testout84.txt
+  a2b <testout84.txt >testout84.bin
+#
+  cut -d, -f2,7 <testout82.csv >testout85.csv
+  sed '1,$ s/,/ /g' testout85.csv >testout85.txt
+  a2b <testout85.txt >testout85.bin
+#
+  cat testout83.bin testout84.bin testout85.bin >testout86.bin 
+#
+  xgraph <testout86.bin nplot=3 n=873,873,873 linecolor=2,4,3 mark=1,6,7 marksize=5,5,5 linewidth=0 \
+          style=normal width=1200 height=600 x1beg=0 x1end=1200 x2beg=-300 x2end=100 \
+          title="averaged,smoothed shot,receiver,cdpdatum statics (read,blue,green) at cdp NUMBERS using ALL shots,receivers" & 
+#
+# Note the skeyloc and rkeyloc parameters. 
+# Their defaults MAY be correct for 2Ds, but always need overrides for 3D.
+#
+  sushiftcsv <testouttraces2.su >testouttraces86.su \
+              sin=l2slong.csv skeyloc=grnlof \
+              rin=l2rlong.csv rkeyloc=gaps \
+              cin=testout81.csv 
+#
+  suxwigb <testouttraces86.su title="traces after shifting by sushiftcsv (just a mechanical test)" &
+#

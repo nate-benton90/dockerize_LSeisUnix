@@ -1,0 +1,30 @@
+#!/bin/sh
+# Sustackup_simple2d_shots3 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of stacking traces of shots together (using fldr as shot)  --"
+  echo "---  - but sort to different order before sustackup                       --"
+  echo "---  - compare to previous sustackup from original order                  --"
+  echo "---    Since sustackup stacks into double precision buffers,              --"
+  echo "---    the order of input traces should not have much affect on results   --"
+  echo "---    (unlike sustack, which stacks into float (single precision).       --"
+  echo "----------------------------------------------------------------------------"
+#
+ susort <fakexsrfnbis.su >fake31.su offset
+#
+ sustackup <fake31.su >fake32.su keyloc=fldr 
+#
+ suxwigb <fake32.su key=fldr title="sustackup by fldr from offset ordered traces" &
+#
+  echo "--- Maximums in stack by sustackup "
+#
+ sumax <fake32.su
+#
+ suop2 fake21.su fake32.su op=diff >fake33.su
+#
+ suxwigb <fake33.su key=fldr title="difference between sustackups (original order and offset sorted)" &
+#
+  echo "--- Maximums in difference display (original order and offset sorted)"
+#
+ sumax <fake33.su

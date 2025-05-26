@@ -1,0 +1,83 @@
+#!/bin/sh
+# Subinbigcsv_test2 - for program SUBINBIGCSV
+# Author: Andre Latour, April 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This is a test for 3D. This test creates some traces (using sunull).   "
+  echo "---  Then it sets the sx,sy,gx,gy keys to 3D Grid cdp cell centers.         "
+  echo "---  Then SUBINBIGCSV renumbers adjacent cdps (both inline and crossline)   "
+  echo "---  to incrementing center cdps AND deletes all traces not adjacent.       "
+  echo "----------------------------------------------------------------------------"
+#
+# I know the kEFG.csv 3d grid is 121 by 23 cells. 
+# Reduce it to 100 by 23 to make the output values easier to understand. 
+#
+  subinxxcsv rfile=kEFG.csv wfile=kEFG100.csv igihigh=-21
+#
+# Make cdp numbers starting at 1, incrementing by 1, ending at 2300.
+# Replicate the cdp numbers in cdpt so you can see how cdp gets reset. 
+#
+  sunull nt=50 ntr=2300 dt=0.004 >tnull1.su
+  sushw <tnull1.su >tnull2.su key=cdp,cdpt a=1,1 b=1,1
+#
+# bintype -30 means use cdp number to update traces with igi,igc,sx,sy
+#
+  subincsv <tnull2.su >tnull3.su rfile=kEFG100.csv bintype=-30 
+#
+# Must copy sx,sy to gx,gy since bintype -30 only puts cell XYs into sx,sy
+# (bintype -30 is intended for actual stacked traces, not to make fake traces).
+#
+  suchw <tnull3.su >tnull4.su key1=gx key2=sx 
+  suchw <tnull4.su >tnull5.su key1=gy key2=sy 
+#
+# To make sure not to fool myself, now set cdp=igi=igc=0. 
+# So only intype=3 will be OK in subinbigcsv (the default when a grid is input).
+#
+  suchw <tnull5.su >tnull6.su key1=cdp key2=ep 
+  suchw <tnull6.su >tnull7.su key1=igi key2=ep 
+  suchw <tnull7.su >tnull8.su key1=igc key2=ep 
+#
+# So now you can run a bunch of tests similar to what you see next.
+#
+  subinbigcsv <tnull8.su >tnull9.su rfile=kEFG100.csv igiout=40,80,20 igcout=5,20,15 \
+               igiext=2 igcext=1 qout=qtest9.csv
+#
+  sugethw <tnull9.su key=cdp,cdpt > gethw9
+#
+#
+#
+#
+  subinbigcsv <tnull8.su >tnull9a.su rfile=kEFG100.csv igilist=40,60,80 igclist=5,20 \
+               igiext=2 igcext=1 qout=qtest9a.csv
+#
+  echo "---  diff qtest9.csv qtest9a.csv follows ---   "
+  diff qtest9.csv qtest9a.csv
+#
+  sugethw <tnull9a.su key=cdp,cdpt > gethw9a
+#
+  echo "---  diff gethw9 gethw9a follows ---   "
+  diff gethw9 gethw9a
+#
+  subinbigcsv <tnull8.su >tnull9b.su rfile=kEFG100.csv igiout=40,80,20 igclist=5,20 \
+               igiext=2 igcext=1 qout=qtest9b.csv
+#
+  echo "---  diff qtest9.csv qtest9b.csv follows ---   "
+  diff qtest9.csv qtest9b.csv
+#
+  sugethw <tnull9b.su key=cdp,cdpt > gethw9b
+#
+  echo "---  diff gethw9 gethw9b follows ---   "
+  diff gethw9 gethw9b
+#
+  subinbigcsv <tnull8.su >tnull9c.su rfile=kEFG100.csv igilist=40,60,80 igcout=5,20,15 \
+               igiext=2 igcext=1 qout=qtest9c.csv
+#
+  echo "---  diff qtest9.csv qtest9c.csv follows ---   "
+  diff qtest9.csv qtest9c.csv
+#
+  sugethw <tnull9c.su key=cdp,cdpt > gethw9c
+#
+  echo "---  diff gethw9 gethw9c follows ---   "
+  diff gethw9 gethw9c
+#
+  echo "---  end  ---   "

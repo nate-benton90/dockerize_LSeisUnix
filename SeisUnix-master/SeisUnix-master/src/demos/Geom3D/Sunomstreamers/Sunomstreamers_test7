@@ -1,0 +1,55 @@
+#!/bin/sh
+# SuSunomstreamers_test7 - for program SUNOMSTREAMERS
+# Author: Andre Latour, Dec  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This is a test of a reasonably normal towed-streamer situation, except: "
+  echo "---  - shots are further apart than normal (plots are easier to understand)."
+  echo "---  - only 7 streamers of 10 channels each (real layouts are much bigger). "
+  echo "---  - using create= option to make output traces with no input traces.     "
+  echo "--- This actual test is similar to test0 except:                            "
+  echo "---  - unusual inline and crossline offsets and channel spacing.            "
+  echo "---                                                                         "
+  echo "--- Note: using scalco=1 to make things easier                              "
+  echo "--- Note: subtracted 100000 from X coordinates and 10000 from Y coordinates "
+  echo "---       to make distance between things easier to confirm.                "
+  echo "----------------------------------------------------------------------------"
+#
+ sunomstreamers >fake71.su \
+ shotkey=fldr shotspacing=200 \
+ gunkey=fldr gunmod=2 gunid=0,1 guncross=-25,75 guninline=-40,-100 \
+ streamercross=-400,-200,-100,0,100,160,300 \
+ streamerinline=-100,-100,-140,-100,-100,-100,-80 \
+ channelstart=1,11,21,31,41,51,59 \
+ channelend=10,20,30,40,50,56,64 \
+ channelspacing=10,15,10,10,10,10,10 \
+ cdpspacing=5 offpi=2 linelocs=1 scalco=1 verbose=0 \
+ create=5 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+# Compute midpoint X,Y for xgraph.   
+#
+ suchw <fake71.su >fake71a.su key1=sx,gx,sy,gy key2=sx,gx,sy,gy key3=sx,gx,sy,gy a=-100000,-100000,-10000,-10000 b=1,1,1,1
+#
+ suchw <fake71a.su >fake72.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=2,2
+#
+ sugethw <fake72.su output=binary key=sdel,gdel >fake73.bin
+#
+ sugethw <fake72.su output=binary key=sx,sy >fake73a.bin
+#
+ sugethw <fake72.su output=binary key=gx,gy >fake73b.bin
+#
+ cat fake73.bin fake73a.bin fake73b.bin >fake74.bin
+#
+ xgraph <fake74.bin n=310,310,310 linecolor=3,2,4 mark=7,8,6 marksize=5,9,7 linewidth=0,0,0 \
+        style=normal width=1200 height=600 x1beg=-500 x1end=1500 x2beg=-500 x2end=500 \
+        title="locations:  5 shots (red), their 7 streamers (blue), their midpoints (green)"  &
+#
+# Carry on and compare offset computed by sunomstreamers with suazimuth
+#
+  suazimuth <fake71.su >fake75.su offset=1 
+#
+ echo "--- diff between sunomstreamers and suazimuth keys (primarily offset) should be nothing"
+ sugethw <fake71.su key=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake71.txt
+ sugethw <fake75.su key=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake75.txt
+ diff fake71.txt fake75.txt
+ echo "--- after diff  "        

@@ -1,0 +1,54 @@
+#!/bin/sh
+# Subinbigcsv_test3 - for program SUBINBIGCSV
+# Author: Andre Latour, April 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This is a test for 3D. This test creates some traces (using sunull).   "
+  echo "---  Then it sets the sx,sy,gx,gy keys to 3D Grid cdp cell centers.         "
+  echo "---  Then SUBINBIGCSV renumbers adjacent cdps (both inline and crossline)   "
+  echo "---  to incrementing center cdps AND deletes all traces not adjacent.       "
+  echo "----------------------------------------------------------------------------"
+#
+# I know the kEFG.csv 3d grid is 121 by 23 cells. 
+# Reduce it to 100 by 23 to make the output values easier to understand. 
+#
+  subinxxcsv rfile=kEFG.csv wfile=kEFG100.csv igihigh=-21
+#
+# Make cdp numbers starting at 1, incrementing by 1, ending at 2300.
+# Replicate the cdp numbers in cdpt so you can see how cdp gets reset. 
+#
+  sunull nt=50 ntr=2300 dt=0.004 >tnull21.su
+  sushw <tnull21.su >tnull22.su key=cdp,cdpt a=1,1 b=1,1
+#
+# bintype -30 means use cdp number to update traces with igi,igc,sx,sy
+#
+  subincsv <tnull22.su >tnull23.su rfile=kEFG100.csv bintype=-30 
+#
+# For this test, deliberately do not update gx,gy (which makes a mess
+# if intype=3 is used or defaults).
+# To make sure not to fool myself, now set cdp or igi to 0. 
+# Only intype=2 will be OK when igi is 0.
+# Only intype=1 will be OK when cdp is 0.
+#
+  suchw <tnull23.su >tnull24.su key1=cdp key2=ep 
+#
+# So now you can run a bunch of tests similar to what you see next.
+#
+  subinbigcsv <tnull24.su >tnull25.su rfile=kEFG100.csv igiout=40,9999,20 igcout=5,9999,5 \
+               igiext=1 igcext=2 intype=1 qout=qtest3.csv
+#
+  sugethw <tnull25.su key=cdp,cdpt > gethw3
+#
+  subinbigcsv <tnull24.su >tnull26.su rfile=kEFG100.csv igilist=40,60,80,100 igclist=5,10,15,20 \
+               igiext=1 igcext=2 intype=1 qout=qtest3list.csv
+#
+  echo "---  diff qtest3.csv qtest3list.csv follows ---   "
+  diff qtest3.csv qtest3list.csv
+#
+  sugethw <tnull26.su key=cdp,cdpt > gethw3list
+#
+  echo "---  diff gethw3 gethw3list follows ---   "
+  diff gethw3 gethw3list
+#
+  echo "---  end  ---   "
+

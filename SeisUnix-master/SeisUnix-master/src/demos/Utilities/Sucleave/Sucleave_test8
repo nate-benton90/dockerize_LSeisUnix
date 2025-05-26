@@ -1,0 +1,22 @@
+#!/bin/sh
+# Sucleave_test8 - for program SUCLEAVE
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Make null traces, set offset to centre of ranges. Use absolute. ---"
+  echo "-- Specify 1 range only. Note that you cannot get just 1 negative  ---"
+  echo "-- range, you always have symmetry if you set abs=0.               ---"
+  echo " "
+#
+  sunull nt=100 ntr=5 >tnull81.su
+  sushw <tnull81.su >tnull82.su key=offset a=-250 b=100
+  sugethw <tnull82.su key=offset
+#
+  sucleave <tnull82.su key=offset low=50 size=100 high=50 print=1       
+#
+  echo " "
+  echo " Print offsets from one of the output files: cleave_offset_50.su "
+  echo " Note that its file name indicates its offset range.             "
+  echo " "
+  sugethw <cleave_offset_50.su key=offset
+#

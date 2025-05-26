@@ -1,0 +1,21 @@
+#!/bin/sh
+# Sucleave_test5 - for program SUCLEAVE
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Same as test4 except Absolute and use different key name (cdp). ---"
+  echo " "
+#
+  sunull nt=100 ntr=20 >tnull51.su
+  sushw <tnull51.su >tnull52.su key=cdp a=-750 b=100
+  sugethw <tnull52.su key=cdp 
+#
+  sucleave <tnull52.su key=cdp low=50 size=100 high=250 abs=1 print=1 
+#
+  echo " "
+  echo " Print cdps from the extra out-of-range file (high).             "
+  echo " Note you cannot get an out-of-range low file when abs=1 because "
+  echo " lowest range always includes 0 (since low parameter <= size/2). "
+  echo " "
+  sugethw <cleave_cdp_350.su key=cdp
+#

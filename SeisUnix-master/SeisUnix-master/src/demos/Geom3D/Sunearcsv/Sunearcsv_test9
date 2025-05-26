@@ -1,0 +1,36 @@
+#!/bin/sh
+# Sunearcsv_test9 - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Generate a profile similar to tests 1 to 6.                         ---"
+  echo "---  But add some other values in order to test the code in sunearcsv    ---"
+  echo "---  which uses the scalco and scalel key values from the traces.        ---"
+  echo "---  No plots here, just look at the sugethw prints.                     ---"
+  echo "---    The scalco,scalel key values in the input traces                  ---"
+  echo "---    are honored both on input and on output.                          ---"
+  echo "---    Note that Q-file standards are that their values are unscaled.    ---"
+  echo "---    (They can be floating point, so there is no need for scaling).    ---"
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=asis gx=0,1000,1000 gy=0,0,1500 \
+           chordi=100 nmaxa=3 nmaxs=3 chordf=100 \
+           numa=517,317,217 sx=22,1022,1022 \
+           qout=testout91.csv
+#
+# Note that suprofcsv does not allow gelev to be generated. 
+# Therefore numa values are generated in the output q-file. 
+# Next, sed is used to substitute numa with gelev in line 5.
+#
+ sed '5 s/numa/gelev/' testout91.csv >testout92.csv
+#
+ sunull nt=4 ntr=10 >tnull91.su
+ sushw <tnull91.su >tnull92.su key=sx,sy,gx,gy,gelev,scalco,scalel a=5500,-500,6500,-500,800,-10,-10 b=600,1250,600,1250,0,0,0
+ suazimuth <tnull92.su >tnull93.su az=0 offset=1 
+ sugethw <tnull93.su key=sx,sy,gx,gy,gelev,scalco,scalel,offset
+#
+ sunearcsv qin=testout92.csv <tnull93.su dimx=mgx dimy=mgy >tnear91.su keyp=cdp okeys=cdp,gelev,sx
+#
+ suazimuth <tnear91.su >tnear92.su az=0 offset=1  
+ sugethw <tnear92.su key=sx,sy,gx,gy,gelev,scalco,scalel,offset,cdp,igi,igc
+#

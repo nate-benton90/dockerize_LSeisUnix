@@ -1,0 +1,31 @@
+SUBRAID inputs multiple files that have the same order (such as cdp order) 
+and outputs all their traces into 1 file that has the same order.
+It does this by a process similar to braiding hair or braiding strands of rope.
+This process only stores one trace at a time from each input file.             
+
+SUBRAID requires that the input files have the same order, but that order
+can be anything (not just cdp order). The input order can also be combinations
+such as cdp,offset. The order you specify is checked on-the-fly and error-halt
+will occur if input traces are not actually in that order
+
+
+Note that program SUCLEAVE can be considered the opposite of this program since
+it can separate 1 input file into multiple same-ordered output files.    
+
+The tests below contain details of how they are setup, and what they are  
+intended to do and show.
+
+I suggest you review and run the SUBRAID tests in this order....
+
+ sh ./Subraid_test1    
+
+ sh ./Subraid_test2    
+
+ sh ./Subraid_test3    
+
+ sh ./Subraid_test4    
+
+ sh ./Subraid_test5    
+
+ sh ./Subraid_test6    
+

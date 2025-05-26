@@ -1,0 +1,53 @@
+#!/bin/sh
+# Susemgroup_offset3 - for program SUSEMGROUP    
+# Author: Andre Latour, Mar  2023
+#
+  echo "---------------------------------------------------------------------"
+  echo " 1. Conveniently use sunomstreamer to create spiked-traces with   ---"
+  echo "    cdp and offset values similar to land.                        ---"
+  echo " 2. Apply a filter (to make the spikes look like horizons).       ---"
+  echo " 3. Use INVERSE nmo to make traces look like less-processed input.---"
+  echo "    Note: It is generally better to use susemgroup on nmo         ---"
+  echo "    corrected traces, but this test shows dip correction effect.  ---"
+  echo " 4. Use suaddnose.                                                ---"
+  echo " 5. susort to cdp (and offset, just to understand easier)         ---"
+  echo " 6. Run susemgroup with lockey=offset and groupkey=cdp            ---"
+  echo "    and make all output files (including dip).                    ---"
+  echo "                                                                  ---"
+  echo "---------------------------------------------------------------------"
+#
+ sunomstreamers >tfake31.su shotkey=fldr shotspacing=50 gunkey=fldr \
+ gunmod=1 gunid=0 guncross=0 guninline=0 streamercross=0,0,0,0,0 streamerinline=0,30,50,44,22 \
+ channelkey=tracf channelstart=1 channelend=20 channelspacing=25,33,14,19,11 \
+ cdpspacing=45 scalco=1 \
+ create=10 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+#sugethw <tfake31.su key=cdp,offset
+ subfilt <tfake31.su >tfake32.su fpasshi=20
+#
+ sunmo <tfake32.su >tfake33.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+ suaddnoise <tfake33.su >tfake34.su sn=5 seed=1 
+#
+ susort <tfake34.su >tfake35.su cdp offset
+#
+ suxwigb <tfake35.su title="before susemgroup, input sorted to cdp (and offset)" &
+#
+ susemgroup <tfake35.su >tfake36.su outdip=tfake36d.su outpow=tfake36p.su outsem=tfake36s.su 
+#susemgroup <tfake35.su >tfake36.su lockey=offset groupkey=cdp 
+#susemgroup <tfake35.su >tfake36.su lockey=offset groupkey=cdp locmaxscan=0 locmaxsum=75 
+#
+ suxwigb <tfake36.su title="seismic after first susemgroup" &
+ suxwigb <tfake36d.su title="dip after first susemgroup" &
+ suxwigb <tfake36p.su title="power after first susemgroup" &
+ suxwigb <tfake36s.su title="semblance after first susemgroup" &
+#
+ susemgroup <tfake35.su >tfake37.su indip=tfake36d.su 
+#
+ suxwigb <tfake37.su title="seismic after second susemgroup (inputting dip from first susemgroup)" &
+#
+#
+ echo "--- diff between first and second susemgroup outputs Should be 0."
+ suop2 tfake36.su tfake37.su op=diff >tfake38.su
+ sumax <tfake38.su
+#

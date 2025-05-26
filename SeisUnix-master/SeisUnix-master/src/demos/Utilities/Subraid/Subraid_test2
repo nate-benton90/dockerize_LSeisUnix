@@ -1,0 +1,48 @@
+#!/bin/sh
+# Subraid_test2 - for program SUBRAID
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- This test makes the same cdp,offset,selev key values as test1    --"
+  echo "-- and also makes the same number of traces in the 2 input files.   --"
+  echo "--   But it is more sophisticated and automatic.                    --"
+  echo "-- First, it sets all the sample values to cdp + offset*100.        --"
+  echo "-- Then it uses SUBRAID to put the 2 inputs together.               --"
+  echo "-- Then it uses CAT and SUSORT to put those same 2 inputs together. --"
+  echo " "
+  echo "-- So now there are 2 outputs, one that has been combined by        --"
+  echo "-- SUBRAID and one that has been combined by a full resort.         --"
+  echo "-- This test then uses SUASCII and DIFF to show they are identical. --"
+  echo " "
+  echo "--   So why bother setting the sample values to cdp + offset*100 ?  --"
+  echo "--   Because then you can tell that the sample buffer is actually   --"
+  echo "--   still attached to its correct trace header. This is not a big  --"
+  echo "--   worry in SUBRAID because of how it handles the traces, but it  --"
+  echo "--   is a good idea to check.                                       --"
+  echo " "
+#
+  sunull nt=3 ntr=40 >tnull11.su
+  sushw <tnull11.su >tnull12.su key=cdp,offset,selev a=1,-299,1 b=3,200,0 j=5,4,1000
+  suhtmath <tnull12.su >tnull13.su key=cdp op=add 
+  suhtmath <tnull13.su >tnull14.su key=offset op=add scale=100 
+  susort <tnull14.su >tnull15.su cdp offset
+#
+  sunull nt=3 ntr=30 >tnull16.su
+  sushw <tnull16.su >tnull17.su key=cdp,offset,selev a=2,-297,2 b=2,200,0 j=5,4,1000
+  suhtmath <tnull17.su >tnull18.su key=cdp op=add 
+  suhtmath <tnull18.su >tnull19.su key=offset op=add scale=100 
+  susort <tnull19.su >tnull20.su cdp offset
+#
+  subraid key=cdp,offset in1=tnull15.su in2=tnull20.su >tnull21.su 
+  suascii <tnull21.su >info21.txt
+#
+# Now combine the 2 files by concatenate and full resort. Should be same.
+#
+  cat tnull15.su tnull20.su >tnull22.su
+  susort <tnull22.su >tnull23.su cdp offset
+  suascii <tnull23.su >info23.txt
+  echo " "
+  echo "  diff -q info21.txt info23.txt follows. Should be blank."
+  echo " "
+  diff -q info21.txt info23.txt
+

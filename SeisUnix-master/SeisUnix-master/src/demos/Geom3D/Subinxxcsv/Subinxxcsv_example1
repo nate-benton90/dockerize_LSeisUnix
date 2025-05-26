@@ -1,0 +1,12 @@
+#!/bin/sh
+# Subinxxcsv_example1 - for program SUBINXXCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Simple example that inputs a grid and outputs a larger grid.           "
+  echo "----------------------------------------------------------------------------"
+#
+# check=1 prints some helpful details.
+#
+  subinxxcsv rfile=kEFG.csv wfile=kEFGout1.csv check=1 igilow=2 igihigh=3 igclow=4 igchigh=5
+#

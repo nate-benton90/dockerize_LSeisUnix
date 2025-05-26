@@ -1,0 +1,27 @@
+#!/bin/sh
+# Susembase_cdp3dcrossline - for program SUSEMBASE      
+# Author: Andre Latour, Feb  2023
+#
+  echo "---------------------------------------------------------------------"
+  echo " 1. Must run Susembase_cdp3dinline before this script.            ---"
+  echo " 2. Sort to igi igc grid indexes.                                 ---"
+  echo " 3. Run susembase with lockey=igc groupkey=igi (reversed order)   ---"
+  echo " 4. Use subincsv to get cdp number from igi igc indexes.          ---"
+  echo "    Note that susembase only sets the lockey correctly when it    ---"
+  echo "    creates traces. Which in this case is igc. To get correct     ---"
+  echo "    correct cdp numbers, you must use subincsv with bintype=-32   ---"
+  echo " 5. Sort to cdp.                                                  ---"
+  echo " 6. Note even less noise than just using Susembase_cdp3dinline    ---"
+  echo "---------------------------------------------------------------------"
+#
+ susort <tfake87.su >tfake88.su igi igc
+#
+ susembase <tfake88.su >tfake89.su lockey=igc groupkey=igi 
+#
+ subincsv <tfake89.su >tfake90.su bintype=-32 \
+          grid_xa=338800 grid_ya=5540700 grid_xb=340299 grid_yb=5538101 \
+          grid_xc=339753 grid_yc=5541250 grid_wb=25 grid_wc=50 
+#
+ susort <tfake90.su >tfake91.su cdp
+ suxwigb <tfake91.su key=cdp title="AFTER crossline susembase (then sorted back to cdp order)" &
+#

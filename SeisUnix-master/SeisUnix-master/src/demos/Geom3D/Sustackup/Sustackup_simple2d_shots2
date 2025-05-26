@@ -1,0 +1,35 @@
+#!/bin/sh
+# Sustackup_simple2d_shots2 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of stacking traces of shots together (using fldr as shot)  --"
+  echo "---  - compared to stacking via susort and sustack                        --"
+  echo "---  - note differences because sustackup stacks in double precision.     --"
+  echo "----------------------------------------------------------------------------"
+#
+ sustackup <fakexsrfnbis.su >fake21.su keyloc=fldr 
+#
+ suxwigb <fake21.su key=fldr title="sustackup by fldr" &
+#
+  echo " Next, stacking to fldr using susort and sustack for comparison. --"
+#
+ susort <fakexsrfnbis.su >fake22.su fldr
+#
+ sustack <fake22.su >fake23.su key=fldr 
+#
+#sugethw <fake23.su key=cdp,nhs,offset,tracf
+#
+ suxwigb <fake23.su key=fldr title="after susort and sustack by fldr" &
+#
+  echo "--- Maximums in stack by susort and sustack "
+#
+ sumax <fake23.su
+#
+ suop2 fake21.su fake23.su op=diff >fake24.su
+#
+ suxwigb <fake24.su key=fldr title="difference between sustack and sustackup (which stacks in double prec)" &
+#
+  echo "--- Maximums in difference display (not zero since sustackup stacks in double prec)"
+#
+ sumax <fake24.su

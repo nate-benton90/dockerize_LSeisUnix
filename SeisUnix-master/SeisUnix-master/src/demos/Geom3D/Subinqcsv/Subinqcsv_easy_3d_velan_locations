@@ -1,0 +1,37 @@
+#!/bin/sh
+# Subinqcsv_easy_3d_velan_locations - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This example outputs q-files with JUST the standard 3d grid values.     "
+  echo "--- And just at intervals that you decide to use for semblance-scanning to  "
+  echo "--- get time,velocity pairs (velans). This also tests the range options.    "
+  echo "--- The set of output locations (cdp numbers) will form aligned-rectangles  "
+  echo "--- which can be used to satisfy the bilinear interpolation routines within "
+  echo "--- this program as well as sunmocsv and sumutecsv. But it is not necessary "
+  echo "--- that this be done, aligned-rectangles do not have to be located as      "
+  echo "--- completely regular as this setup produces. You can, for instance,       "
+  echo "--- output these locations and then remove entire sets of q-records that    "
+  echo "--- have the same igi value or the same igc value.                          "
+  echo "----------------------------------------------------------------------------"
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout7.csv igiout=10,9999,20 igcout=5,9999,10 \
+        cdp=1 \
+#
+# The next test is the kind of thing that is known as a corner-case, where the
+# test involves a small or unusual situation.                                    
+# As an added bonus, the following test outputs a q-file which is ready to be
+# updated via a Spreadsheet with varying amounts of time,velocity pairs.               
+# But you must delete the C_SU_NDIMS record from Spreadsheet before using it 
+# for time,velocity work otherwise the inputting program will think that 
+# the tupa values on C_SU_NDIMS are still part of the tuples.                                       
+#  If you do not understand this, just start from the input q-file examples                          
+#  included in these demos.                                                                          
+#
+  subinqcsv qout=qvalsout8.csv \
+        outind=1,2,1 \
+        cdp=1 \
+        tupa=1 \
+        tims=0 \
+        vels=1500 \
+#

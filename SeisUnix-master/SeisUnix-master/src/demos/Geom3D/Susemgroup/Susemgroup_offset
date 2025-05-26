@@ -1,0 +1,66 @@
+#!/bin/sh
+# Susemgroup_offset - for program SUSEMGROUP    
+# Author: Andre Latour, Mar  2023
+#
+  echo "---------------------------------------------------------------------"
+  echo " 1. Conveniently use sunomstreamer to create spiked-traces with   ---"
+  echo "    cdp and offset values similar to land.                        ---"
+  echo " 2. Apply a filter (to make the spikes look like horizons).       ---"
+  echo " 3. Use INVERSE nmo to make traces look like less-processed input.---"
+  echo "    Note: It is generally better to use susemgroup on nmo         ---"
+  echo "    corrected traces, but this test shows dip correction effect.  ---"
+  echo " 4. Use suaddnose.                                                ---"
+  echo " 5. susort to cdp       (Note: NOT sorted to offset within cdps)  ---"
+  echo " 6. Run susemgroup with lockey=offset and groupkey=cdp            ---"
+  echo "    Note the scanmax and scanstep values are set small because    ---"
+  echo "    they are per 1 unit of offset (that is, per 1 metre or foot). ---"
+  echo "                                                                  ---"
+  echo " 7. input from (4) again. susort to cdp AND offset within cdps    ---"
+  echo " 8. Run susemgroup with same setup as (6).                        ---"
+  echo " 9. Compare sesembgroup output from (6) and (8). Should be        ---"
+  echo "    no difference (except small remainders caused by              ---"
+  echo "    floating point computations being done in different order).   ---"
+  echo "---------------------------------------------------------------------"
+#
+ sunomstreamers >tfake101.su shotkey=fldr shotspacing=50 gunkey=fldr \
+ gunmod=1 gunid=0 guncross=0 guninline=0 streamercross=0,0,0,0,0 streamerinline=0,30,50,44,22 \
+ channelkey=tracf channelstart=1 channelend=20 channelspacing=25,33,14,19,11 \
+ cdpspacing=45 scalco=1 \
+ create=10 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+#sugethw <tfake101.su key=cdp,offset
+ subfilt <tfake101.su >tfake102.su fpasshi=20
+#
+ sunmo <tfake102.su >tfake103.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+ suaddnoise <tfake103.su >tfake104.su sn=5 seed=1 
+#
+ susort <tfake104.su >tfake105.su cdp 
+#
+ suxwigb <tfake105.su title="before susemgroup, input sorted to cdp (not offset)" &
+#
+ susemgroup <tfake105.su >tfake106.su 
+#susemgroup <tfake105.su >tfake106.su lockey=offset groupkey=cdp 
+#susemgroup <tfake105.su >tfake106.su lockey=offset groupkey=cdp locmaxscan=0 locmaxsum=75 
+#
+ suxwigb <tfake106.su title="AFTER susemgroup, input sorted to cdp (not offset)" &
+#
+#
+#
+ susort <tfake104.su >tfake107.su cdp offset 
+#
+ suxwigb <tfake107.su title="before susemgroup, input sorted to cdp AND offset" &
+#
+ susemgroup <tfake107.su >tfake108.su  
+#
+ suxwigb <tfake108.su title="AFTER susemgroup, input sorted to cdp AND offset" &
+#
+ susort <tfake106.su >tfake109.su cdp offset 
+ suxwigb <tfake109.su title="AFTER susemgroup, input not sorted to offset, but now output is sorted" &
+#
+ echo "--- diff between sorting to offsets before and after. Should be 0 (but just small, due to summation order)."
+ suop2 tfake108.su tfake109.su op=diff >tfake110.su
+ suxwigb <tfake110.su title="diff between sorting to offsets before and after. Should be near 0 remainders) " &
+ sumax <tfake110.su
+#
+

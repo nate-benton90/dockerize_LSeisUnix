@@ -1,0 +1,40 @@
+#!/bin/sh
+# Sunearcsv_create_realistic_traces - for program SUNEARCSV
+# Author: Andre Latour, Oct 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "---  For initial geometry from SPS2 files, 3 runs of sugeomcsv are required."
+  echo "                                                                            "
+  echo "---  The idea here is to create some realistic traces from SPS2 files.      "
+  echo "---  The sequence herein is:                                                "
+  echo "---   - use SPS2 X-file and create traces with spikes                       "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - apply inverse NMO (yes, inverse NMO).                               "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Create traces from the values in SPS2 X-file (plus spikes)
+#
+  sugeomcsv rfile=l2xcrook.txt setid=x match=sps2 names=sps2 >fakex.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l2scrook.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su
+#
+  sugeomcsv rfile=l2rcrook.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su
+#
+  subfilt <fakexsr.su >fakexsrf.su fpasshi=20
+#
+  sunmo <fakexsrf.su >fakexsrfn.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+#--------
+#
+# The filter and inverse NMO give some nice "horizons", which you can see:
+#
+  suximage <fakexsrfn.su
+#
+# The main purpose of the create= option is not the production of synthetic 
+# seismic amplitudes. The main purpose is to allow testing and QC of geometry.
+# For much of that, the spikes= option is not even needed.
+#
+#--------

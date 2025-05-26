@@ -1,0 +1,32 @@
+#!/bin/sh
+# Susembase_test2 - for program SUSEMBASE
+# Author: Andre Latour, Feb 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Test using a reasonable (fake) cdp stack situation.                  ---"
+  echo "---  - with 2 simple dipping horizons.                                   ---"
+  echo "---  - removed cdps 21,22,23,24                                          ---"
+  echo "---  - added noise                                                       ---"
+  echo "---  - display input file                                                ---"
+  echo "---  - Turned off dip estimation and correction.                         ---"
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=cdps11.csv >tfake21a.su create=all spikes=4,0.00,100,2000,104,2400,108,1800,400,0 
+ subfilt <tfake21a.su >tfake22a.su fpasshi=60
+ suchw <tfake22a.su >tfake23a.su key1=gstat key2=tracf b=2
+ sustatic <tfake23a.su >tfake24a.su hdrs=1 sign=-1
+#
+ sugeomcsv rfile=cdps11.csv >tfake21b.su create=all spikes=4,0.00,100,1200,104,2000,108,1600,400,0 
+ subfilt <tfake21b.su >tfake22b.su fpasshi=40
+ suchw <tfake22b.su >tfake23b.su key1=gstat key2=tracf b=-2 a=300
+ sustatic <tfake23b.su >tfake24b.su hdrs=1 sign=-1
+#
+ suop2 tfake24a.su tfake24b.su op=sum >tfake24r.su
+ suaddnoise <tfake24r.su >tfake24n.su sn=5 seed=1 
+ suwind <tfake24n.su >tfake24.su key=cdp reject=21,22,23,24
+ suxwigb <tfake24.su key=cdp title="input " &
+#
+ susembase <tfake24.su >tfake25.su locmaxscan=0 locmaxsum=3 
+#
+ suxwigb <tfake25.su key=cdp title="output (dip correction is OFF) " &
+#

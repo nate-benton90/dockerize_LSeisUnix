@@ -1,0 +1,57 @@
+#!/bin/sh
+# Sugeomcsp_scalco_scalel - for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This tests the scalco= and scalel= options.                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Create some traces and test coordinate scalar and elevation (and related) scalar:
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fakex.su create=100 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  echo " --- that was first run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su  
+#
+  echo " --- that was second run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su 
+#
+  echo " --- that was third run of sugeomcsv ---"
+#
+  sugethw <fakexsr.su key=sx,sy,gx,gy,offset,scalco,selev,gelev,scalel,ep,cdp,otrav
+#
+  echo " --- that was print of some key values ---"
+#
+#--------
+#
+# The default scalco and scalel values are 10 in sugeomcsv (and sutoolcsv). So, use 100 and 1000
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su scalco=100 scalel=1000 
+#
+  echo " --- that was fourth run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su scalco=100 scalel=1000
+#
+  echo " --- that was fifth run of sugeomcsv ---"
+#
+  sugethw <fakexsr.su key=sx,sy,gx,gy,offset,scalco,selev,gelev,scalel,ep,cdp,otrav
+#
+  echo " --- that was print of some key values after scalco and scalel options ---"
+#
+# Recompute offset using suazimuth to make sure sugeomcsv is not fooling itself by setting the correct x,y,offset in
+# output traces but setting wrong scalco value (and so on). Note that signedflag=1 makes little sense for 3D offsets but
+# makes it easy to tell that suazimuth has recomputed offset. 
+#
+  suazimuth <fakexsr.su >fakexsrazimuth.su az=0 offset=1 signedflag=1 cmp=1
+#
+  sugethw <fakexsrazimuth.su key=sx,sy,gx,gy,offset,scalco,selev,gelev,scalel,ep,cdp,otrav
+#
+  echo " --- that was print of some key values using suazimuth to recompute them ---"
+#
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+  echo "---  This tests the scalco= and scalel= options.                            "
+  echo "----------------------------------------------------------------------------"

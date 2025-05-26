@@ -1,0 +1,28 @@
+#!/bin/sh
+# Suflex2d_test3 - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test generates some traces in cdp,offset order.                   "
+  echo "---  Same input as test2. But binfold is set to 3 rather than 2.            "
+  echo "---  Input cdps have a maximum of 2 traces in a bin (typical split-spread). "
+  echo "---  This test shows that traces to fulfill binfold=3 are duplicated from   "
+  echo "---  neighbouring cdps on both sides of target cdp. For instance, the       "
+  echo "---  printout shows cdp 4 gets traces duplicated from both cdps 3 and 5     "
+  echo "---  and cdp 6 gets traces duplicated from cdps 5 and 7.                    "
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=createcdps02.csv setid=m match=cdp,tracl names=c_su_id,cdp,tracl,ep,offset,igi >fakecdps03.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ subfilt <fakecdps03.su >fakecdpsf03.su fpasshi=20
+#
+ sunmo <fakecdpsf03.su >fakecdpsfn03.su invert=1 cdp=1 tnmo=0,0.190,0.450,0.800 vnmo=800,1500,2000,3000
+#
+ suxwigb <fakecdpsfn03.su key=cdp x2beg=0 x2end=19 title="before suflex2d" & 
+#
+ suflex2d <fakecdpsfn03.su >fakecdpsfnf03.su binsize=50 binalign=25 binfold=3
+#
+ suxwigb <fakecdpsfnf03.su key=cdp x2beg=0 x2end=19 title="after suflex2d" &  
+#
+ sugethw <fakecdpsfnf03.su key=cdp,offset,igi
+#

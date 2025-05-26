@@ -1,0 +1,31 @@
+#!/bin/sh
+# Subinqcsv_notuples_qinput_2d - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo " These are tests/examples where there are no tuple values, just       "
+  echo " single values on each input q-record. This test is 2d.               "
+  echo " Note: There are no different q-file STANDARDS for 2d or 3d,          "
+  echo "       the difference between 2d and 3d is entirely within subinqcsv. "
+  echo "----------------------------------------------------------------------"
+#
+# Note extrapi and igiout are allowed to be specified for 2d,    
+# but  extrapc and igcout are not.                                            
+# Note also that, for 2d, igiout is allowed to be outside the range of        
+# cdps contained within qvalsinNOTUPLE2D.csv - which is needed here            
+# to show the effects of extrapi=1 versus extrapi=0.                          
+# Note also that a value name within qvalsinNOTUPLE2D.csv is velocity, which   
+# starts with a v and therefore by default uses inverse-squared-VALUE weighting.
+# But justanumber does not use inverse-squared-VALUE weighting.                     
+#
+# If you look inside qvalsinNOTUPLE2D.csv you will see that the numbers are
+# carefully chozen to be just the cdp number plus 1000 or 2000 or whatever.            
+# This makes it easy to see that the linear interpolation is working correctly.        
+# This same technique is used for 3d, but the 3d results are not as obvious.    
+#
+  subinqcsv qin=qvalsinNOTUPLE2D.csv qout=qvalsout31.csv extrapi=1 \
+            igiout=100,400,1 \
+#
+  subinqcsv qin=qvalsinNOTUPLE2D.csv qout=qvalsout32.csv extrapi=0 \
+            igiout=100,400,1 \
+#

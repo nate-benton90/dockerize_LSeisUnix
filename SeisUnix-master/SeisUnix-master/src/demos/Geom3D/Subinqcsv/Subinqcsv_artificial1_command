@@ -1,0 +1,183 @@
+#!/bin/sh
+# Subinqcsv_artificial_command - for program SUBINQCSV.
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo "-  This test uses unusual values in the input parameters to make it   "
+  echo "-  (relatively) easy to confirm that subinqcsv is working as intended."
+  echo "----------------------------------------------------------------------"
+#
+# Subinqcsv will translate cdp= parameter values to their inline and crossline
+# locations using 3d grid defined in kEFG.csv (see locations in vellocs.png).
+# Subinqcsv will interpolate and output values for all 2783 input trace cdps. 
+# The interpolation will be bilinear, linear, or constant depending on where 
+# the output cdp is located relative to the input locations.             
+#
+# To check that interpolation is bilinear, linear, or constant as appropriate, 
+# note that first  vnmo= value of each input function is 10000 + cdp number, 
+#           second vnmo= value of each input function is 20000 + igi number,
+#           third  vnmo= value of each input function is 30000 + igc number,
+#           fourth vnmo= value of each input function is 40000.                
+# And, for each location, there is a dpth=, which duplicates the input vnmo=.    
+#
+# Since all input locations have vnmo= and dpth= that match their cdp,igi,igc
+# plus 10000,20000,30000 the INTERPOLATED output values should match. 
+# Actually, the output vnmo values will not match exactly because they are          
+# inverse-square-value-weighted by default because their names start with v    
+# (the addition of 10000,20000,30000 reduces effect of 1/vel-squared).                  
+# But dpth= is not inverse-square-value-weighted by default, so its output
+# values should match exactly cdp,igi,igc + 10000,20000,30000.       
+#
+# This test is essentially copied from Geom3D/Sunmocsv/Sunmocsv_test1 
+# except that vuma= and numa= are added
+# and dpth= is also added in order to test tuples of size 3 (with an additional
+# 5000 so that it is easy to tell that code has not entangled vnmo and dpth).
+# and varying number of tuples are created.               
+#
+# Along with everthing else, in the output q-file notice the C_SU_NDIMS record.
+# It has the name tnmo, some commas, then the outind values are duplicated.
+# THESE ARE Q-FILE STANDARDS. If you look at the records after inputting them
+# to a Spreadsheet, you will see why these standards exist. The commas ensure     
+# that the first column containing vnmo gets the correct outind value at top.
+# And each column to the right also gets its corresponding outind value.
+# In other words, these q-file standards exist so that you can easily SEE which 
+# output time value corresponds to each vnmo and dpth column.                     
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout11.csv extrapi=1 extrapc=1 \
+            outind=0.000,0.016,0.004 iecho=0 \
+        cdp=136,172,182,212,232,257,293,303,333,353,620,656,666,696,716  \
+        vuma=1136,1172,1182,1212,1232,1257,1293,1303,1333,1353,1620,1656,1666,1696,1716  \
+        numa=3136,3172,3182,3212,3232,3257,3293,3303,3333,3353,3620,3656,3666,3696,3716  \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10136,20015,30002,40000 \
+        dpth=15136,25015,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10172,20051,30002,40000 \
+        dpth=15172,25051,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10182,20061,30002,40000 \
+        dpth=15182,25061,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012,0.2 \
+        vnmo=10212,20091,30002,40000,50000 \
+        dpth=15212,25091,35002,45000,55000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10232,20111,30002,40000 \
+        dpth=15232,25111,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10257,20015,30003,40000 \
+        dpth=15257,25015,35003,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10293,20051,30003,40000 \
+        dpth=15293,25051,35003,45000 \
+        tnmo=0.000,0.004,0.008 \
+        vnmo=10303,20061,30003 \
+        dpth=15303,25061,35003 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10333,20091,30003,40000 \
+        dpth=15333,25091,35003,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10353,20111,30003,40000 \
+        dpth=15353,25111,35003,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10620,20015,30006,40000 \
+        dpth=15620,25015,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10656,20051,30006,40000 \
+        dpth=15656,25051,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10666,20061,30006,40000 \
+        dpth=15666,25061,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10696,20091,30006,40000 \
+        dpth=15696,25091,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10716,20111,30006,40000 \
+        dpth=15716,25111,35006,45000 \
+#
+# Same setup except iecho=1 so that only the input cdps get output q-records.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout12.csv extrapi=1 extrapc=1 \
+            outind=0.000,0.016,0.004 iecho=1 \
+        cdp=136,172,182,212,232,257,293,303,333,353,620,656,666,696,716  \
+        vuma=1136,1172,1182,1212,1232,1257,1293,1303,1333,1353,1620,1656,1666,1696,1716  \
+        numa=3136,3172,3182,3212,3232,3257,3293,3303,3333,3353,3620,3656,3666,3696,3716  \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10136,20015,30002,40000 \
+        dpth=15136,25015,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10172,20051,30002,40000 \
+        dpth=15172,25051,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10182,20061,30002,40000 \
+        dpth=15182,25061,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012,0.2 \
+        vnmo=10212,20091,30002,40000,50000 \
+        dpth=15212,25091,35002,45000,55000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10232,20111,30002,40000 \
+        dpth=15232,25111,35002,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10257,20015,30003,40000 \
+        dpth=15257,25015,35003,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10293,20051,30003,40000 \
+        dpth=15293,25051,35003,45000 \
+        tnmo=0.000,0.004,0.008 \
+        vnmo=10303,20061,30003 \
+        dpth=15303,25061,35003 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10333,20091,30003,40000 \
+        dpth=15333,25091,35003,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10353,20111,30003,40000 \
+        dpth=15353,25111,35003,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10620,20015,30006,40000 \
+        dpth=15620,25015,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10656,20051,30006,40000 \
+        dpth=15656,25051,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10666,20061,30006,40000 \
+        dpth=15666,25061,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10696,20091,30006,40000 \
+        dpth=15696,25091,35006,45000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10716,20111,30006,40000 \
+        dpth=15716,25111,35006,45000 \
+#
+# This test inputs function locations at the 4 corners of the input 3d grid    
+# (to make sure that having input function locations at the maximum extent
+# of the 3d grid does not have bugs.          
+#
+# Since all 4 input functions have values that match their cdp,igi,igc  
+# plus 10000,20000,30000 the INTERPOLATED output values should match. 
+# But actually, output values for vnmo will not match exactly because
+# inverse-squared-VALUE-weighting is being done for it by default since
+# its name starts with the letter v. But the addition of 10000,20000,30000
+# reduces effect of 1/(v*v).                   
+#
+# This test is essentially copied from Geom3D/Sunmocsv/Sunmocsv_test2 
+# except that vuma= and numb= are added
+# and dpth= is also added in order to test tuples of size 3.   
+# and formtv= and formxy= added to test them and also help see 1/(v*v) effects.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout13.csv \
+            outind=0.000,0.012,0.004 formtv=%.3f formxy=%.4f \
+        cdp=1,121,2663,2783  \
+        vuma=1001,1121,3663,3783  \
+        numb=3001,3121,5663,5783  \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10001,20001,30001,40000 \
+        dpth=10001,20001,30001,40000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10121,20121,30001,40100 \
+        dpth=10121,20121,30001,40100 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=12663,20001,30023,40300 \
+        dpth=12663,20001,30023,40300 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=12783,20121,30023,40400 \
+        dpth=12783,20121,30023,40400 \
+#

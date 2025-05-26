@@ -1,0 +1,71 @@
+#!/bin/sh
+# Sutoolcsp_sps2_sps1 - for program SUTOOLCSV
+# Author: Andre Latour, July 2021
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "---  Also read this file so you can understand easier.                     "
+  echo "                                                                           "
+  echo "---  The idea of this example is to show how to convert from sps2 to sps1  "
+  echo "---  and vice-versa.                                                       "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+#
+# How to convert from sps2 to sps1 and vice-versa.
+#
+# Remember back in Sutoolcsp_example1 you did this:
+#
+  sutoolcsv rfile=l2xall.txt setid=x match=sps2 forms=sps2 names=sps2all wfile=l2xall2.csv
+#
+  echo " --- that was the first run of sutoolcsv ---" 
+#
+# And then:
+#
+  sutoolcsv rfile=l2xall2.csv wfile=l2xall2.txt
+#
+  echo " --- that was the second run of sutoolcsv ---" 
+#
+# That converted the SPS2 fixed format X file to csv and then back to SPS2 fixed format.
+#
+# This happened because the second run of sutoolcsv used the C_SU records at the top of the csv file.
+# But notice that those C_SU records do not contain any explicit reference to SPS2. 
+# When it converted back, sutoolcsv simply followed the instructions within the C_SU records.
+#
+# So, instead of converting back to SPS2, you can convert back to SPS1. Run:
+#
+  sutoolcsv rfile=l2xall2.csv setid=x match=sps1 forms=sps1 names=sps1all wfile=l1xall.txt
+#
+  echo " --- that was the third run of sutoolcsv ---" 
+#
+# Look at the output l1xall.txt which is now in sps1 format. 
+# This works because the names=sps2all and names=sps1all options make the same number
+# of fields in the same order (and using the same SU key names of course).
+# This functions for S and R type files as well. But the names=sps2 and names=sps1 options
+# do NOT have the same number of fields. You need to use the sps2all and sps1all options.
+#
+# The conversion from SPS1 to SPS2 also works. But the SPS1 format allows characters in
+# line names and so on, and may require process= options before this will give acceptable results.
+# See Sutoolcsp_process for how to use process= options.
+#
+#----
+#
+# Converting from SPS2 to SPS1 or vice-versa is an example of a generic functionality.
+# In the output csv files above you should notice that the specific forms and names exist in 
+# the same column as their data values (in a SpreadSheet or csv editor). 
+# By altering the forms or names, you can change the output format of the numbers as well as 
+# their card-column locations. You can also change the name of the SU key associated
+# with the values, or use "numb1,numb2,..." as the names. This allows you to manipulate
+# fixed format and csv files which have nothing to do with seismic or geophysics.
+#
+  echo "                                                                           "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "---  Also read this file so you can understand easier.                     "
+  echo "                                                                           "
+  echo "---  The idea of this example is to show how to convert from sps2 to sps1  "
+  echo "---  and vice-versa.                                                       "
+  echo "                                                                           "
+

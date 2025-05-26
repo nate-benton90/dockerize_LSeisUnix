@@ -1,0 +1,70 @@
+#!/bin/sh
+# Sustackup_simple2d_cdpoff8 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Test of stacking by binbig cdps AND offset bins                       --"
+  echo "---  - compared to stacking via susort and sustack                        --"
+  echo "---    For clarity, these input traces have NOT had the statics applied.  --"
+  echo "---    REMEMBER, purpose here is to test using 2 keylocs in sustackup.    --"
+  echo "---    But the technique here is partial-stack-by-offset-in-super-cdps    --"
+  echo "---    which starts from crudely nmo-corrected traces, resets some nearby --"
+  echo "---    cdps to the central cdp number, resets offsets to multiples of 50, --"
+  echo "---    and sustackup by cdp and offset (super cdp, offsets multiples 50). --"
+  echo "---    And then inverses the crude nmo velocity correction.               --"
+  echo "---    This regularizes the offset distances within these super-cdps and  --"
+  echo "---    also reduces the number of tracesR, which makes it easier for some --"
+  echo "---    programs to perform velocity analysis.                             --"
+  echo "---  - note this test uses traces where the crude nmo velocity does not   --"
+  echo "---    fit the traces. That demonstrates that this technique works anyway.--"
+  echo "---  - After that, the same thing is done using susort and sustack.       --"
+  echo "---    Note differences because sustackup stacks in double precision.     --"
+  echo "----------------------------------------------------------------------------"
+#
+ subinbigcsv <fakexsrfnbi.su >fake81.su igiout=10,9999,20 igiext=5
+#
+# Reset offset values to nearest multiple of 50
+#
+ suchw <fake81.su >fake82.su key1=offset key2=offset b=0.02
+ suchw <fake82.su >fake83.su key1=offset key2=offset b=50
+#
+#sugethw <fake83.su key=cdp,offset
+#
+ sustackup <fake83.su >fake84.su keyloc=cdp,offset  
+#
+ suxwigb <fake84.su title="sustackup by (binbig) cdp and (near 50) offset" &
+#
+# Reverse the nmo.     
+#
+ sunmo <fake84.su invert=1 >fake85.su tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+ suxwigb <fake85.su title="after inverse nmo after sustackup" &
+#
+  echo " Next, stacking using susort and sustack for comparison. --"
+#
+ susort <fake83.su >fake86.su cdp offset
+#
+# Note that I have to sustack on change of offset since it only allows 1 key
+# (which is part of the reason for writing sustackup).
+# Lucky that no cdp starts with the same offset as last offset of previous cdp.
+#
+ sustack <fake86.su >fake87.su key=offset
+#
+ suxwigb <fake87.su title="after susort and sustack " &
+#
+ sunmo <fake87.su invert=1 >fake88.su tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+ suxwigb <fake88.su title="after inverse nmo after susort and sustack " &
+#
+  echo "--- Maximums in inverse nmo after susort and sustack "
+#
+ sumax <fake88.su
+#
+ suop2 fake85.su fake88.su op=diff >fake89.su
+#
+ suxwigb <fake89.su title="difference between sustack and sustackup (which stacks in double prec)" &
+#
+  echo "--- Maximums in difference display (not zero since sustackup stacks in double prec)"
+#
+ sumax <fake89.su
+#

@@ -1,0 +1,294 @@
+SU News 45 - 30 April 2023
+
+by John Stockwell
+
+This is the first official release (not an incremental) since 2018.
+
+John Stockwell retired from the Colorado School of Mines effective
+1 Jan 2018. He continues to work with Seismic Unix. 
+Please email: john.19071969@gmail.com
+if you have questions, or if you want to supply bug fixes or new SU code.
+
+Summer 2018 - Thanks to Dominque Rousset of the University of Pau,
+Seismic Unix distributions and other information may be found at
+https://wiki.seismic-unix.org
+
+Largest contributers to this release:  Andre Latour and Adnand Bitri.
+
+Update 23 March 2023:
+Ongoing issues: The GNU people have separated the tirpc library and include
+files from the main part of libgcc. These are now in a developers' package
+on many systems called libtirpc.a. The TRPC materials are used for the XDR
+part of the installation. There seem to be two stages of this change. The
+first stage left the RPC include files in the old location. Releases 
+GCC 2.32 and later have removed the rpc files and replaced them with 
+a version called tirpc.
+
+In response to this issue I have added a paragraph in select 
+$CWPROOT/src/configs/Makefile.config_Linu_... near
+lines 40-50.
+(begin quote)"
+.......
+# if the include files  are under  /usr/include/rpc use this for XDR
+# whether or not you had to install libtrpc.a
+# make sure
+XDRFLAG =  -DSUXDR
+XDRLFLAGS =
+XDRIFLAGS =
+
+# else if you had to install libtirpc and the rpc include files are under
+# /usr/include/tirpc/rpc or if you get an error about <types.h> not found,
+#  and you want to use XDR, then make sure the next three lines are uncommented
+XDRFLAG = -DSUXDR -DSUTIRPC
+XDRIFLAGS = -I/usr/include/tirpc/rpc -I/usr/include/tirpc
+XDRLFLAGS = -ltirpc
+
+# else if you do not want to use XDR, uncomment the next three lines
+#XDRFLAG =
+#XDRLFLAGS =
+#XDRIFLAGS =
+
+.......
+"(end quote)
+
+The tirpc issue has been a bit of a moving target but seems to be
+stabilizing now. Eventually all systems that use the gcc compiler will
+make this change. 
+
+What's new in SU:
+
+Update: Nov 2021 and again in March 2023 The following items in
+src/configs/
+	Makefile.config_Linux_x86_64
+	Makefile.config_Linux_i686
+	Makefile.config_Linux_Ubuntu_20.04
+	Makefile.config_Linux_Ubuntu_22.04
+	Makefile.config_Linux_Ubuntu
+	Makefile.config_Linux_Fedora_32
+	Makefile.config_Linux_ARCH
+	Makefile.config_MacOSX_Big_Sur
+	Makefile.config_MacOSX_Catalina
+
+have been modified with compile time flags to handle the rpc and tirpc issue
+discussed above, so you can use XDR without a problem.
+
+Fixes:
+A number of // C++ style comments have now been changed to /*... */ style
+comments. This used to just give a warning, but now actually breaks the code
+under GCC 2.32 and higher releases of the gcc compilter. This and a 
+number of other compiler warnings have been silenced.
+
+Many thanks to Dominique Rousset for working on this.
+
+An old issue:
+The last tmpnam calls were removed from suedit.c and suxedit.c
+
+
+I have restructured the mains so that programs are grouped by topic. This should make it easier for users to find specific source codes.
+
+par/main 
+
+is now:
+
+par/main/apertures            
+par/main/cellular_automata
+par/main/data_conversion
+par/main/material_parameters
+par/main/ordinary_differential_equations
+par/main/parameter_file_utilities
+par/main/plotting_utilities
+par/main/ray_theory
+par/main/refraction
+par/main/resampling
+par/main/smoothing
+par/main/statistics
+par/main/velocity_model_building
+par/main/velocity_perturbation
+par/main/wavelet_transform
+
+and
+
+su/main
+
+su/main/amplitudes
+su/main/attributes_parameter_estimation
+su/main/convolution_correlation
+su/main/dip_moveout
+su/main/data_compression
+su/main/data_conversion
+su/main/datuming
+su/main/decon_shaping
+su/main/filters
+su/main/headers
+su/main/interp_extrap
+su/main/gocad
+su/main/migration_inversion
+su/main/multicomponent
+su/main/noise
+su/main/operations
+su/main/picking
+su/main/stacking
+su/main/statics
+su/main/synthetics_waveforms_testpatterns
+su/main/transforms
+su/main/velocity_analysis
+su/main/well_logs
+su/main/windowing_sorting_muting
+su/main/stretching_moveout_resamp
+su/main/supromax
+su/main/tapering
+
+New Codes
+
+
+New:
+par/main/ray_theory/rayt2dtopo - a version of RAYT2D with topography
+                                  Thanks to Trino Salinas
+New:
+su/main/statics/surescsv - Surface Consistent Residual Statics determination. 
+  Derives surface-consistent residual statics for sources and receivers.
+ The method here is based on stack-power maximization as described by: 
+ Ronen, J. and Claerbout, J., 1985, Geophysics, vol. 50, 2759-2767.
+				 Thanks to Andre Latour.
+
+New:
+su/main/filters/sudeghost.c - Deghosting and ghost modeling based on 
+				Masoomzahdeh, et al. (2014)
+				  John Stockwell
+
+New:
+		Tools for 3D geometry by Andre Latour:
+su/main/headers/sutoolcsv.c - Tools for Comma Separated Values and 
+                                fixed text files. 
+                sugeomcsv.c - 3D/2D land/OBotm geometry from Comma 
+                                Separated or fixed text. 
+		subinqcsv.c -  3D Grid Resolve and output and 
+                                assign traces to cdps (cells)
+                subinxxcsv.c - Expand Size and Exchange Corners of 
+                                3D Grid Definition.
+                subincsv.c -  3D Grid Resolve and output and assign
+                                traces to cdps (cells)
+                sutoolcsv.c - Tools for Comma Separated Values and 
+                               fixed text files. 
+		sunomstreamers.c - Nominal Geometry and 2D CDPS for 
+                                Towed-Streamer Marine. 
+su/main/stacking/sustackup.c - Input Any Trace Order and Stack To 
+                                Any Key Combination
+
+New:
+su/main/transforms/sust.c
+	SUST -  Outputs a time-frequency representation of seismic data via
+           	the Stockwell transform (S- transform)
+            Thanks to Adnand Bitri (note that the Stockwell here is
+              is R. G. Stockwell, not me)
+
+su/main/noise/
+        sugroll.c  - Ground roll supression using Karhunen-Loeve transform
+	    Thanks to Adnand Bitri
+        susembase.c - Semblance Based Structure-Oriented Interpolate and Smooth
+	    Thanks to Andre Latour
+
+su/main/stretching_moveout_resamp/
+		sudlmo.c  - Dynamic Linear Move Out Correction for 
+    				Surface Waves
+			Thanks to Adnand Bitri
+
+		sunmocsv - NMO for an arbitrary velocity function 
+                           of time and 3D or 2D CDP 
+			Thanks to Andre Latour
+
+su/main/windowing_sorting_muting
+	Andre Latour's additions:
+		sumutecsv.c - MUTE above (or below) bilinearly 
+                               interpolated polygonal curves
+		subraid.c - Braid traces from files together and output.
+                       (combine multiple ordered inputs into 1 ordered output)
+		sucleave.c - Cleave traces from 1 input into multiple output
+                         files.  
+           		  (split to multiple output files, retaining 
+                              input order). 
+
+su/shell/ramac2su.sh - converts RAMAC GPR files to su format with a 
+        nominal geometry
+	Thanks to: Hervé Perroud  2000 and Dominique Rousset,  2019 
+              of the Universith of Pau
+
+configs/Makefile.config_Linux_Ubuntu_20.04
+        Makefile.config_Linux_Ubuntu
+        Makefile.config_Mac_OSX_Mojave
+        Makefile.config_Linux_Fedora_32
+        Makefile.config_Linux_ARCH
+        Makefile.config_MacOSX_Catalina
+        Makefile.config_Mac_OSX_Big_SUR
+
+New:
+par/main/ordinary_differential_equations
+	 logisticfit.c - extract growth and carrying capacity for logistic
+			 model
+	 seirepidemic.c - SEIR epidemic model
+	 sirepidemic.c - SIR epidemic model
+	 sirdepidemic.c - SIRD epidemic model
+	 voltlotka.c - classic Lotka Volterra predator-prey model
+
+New demos:
+demos/Ordinary_differential_equations
+	 Epidemiology
+	 Logistic_Equation
+	 Predator_Prey
+
+demos/Sudeghost - Demos for sudeghost.c
+
+New demos: (Andre Latour has a You Tube channel with greater explanation)
+demos/Geom3D/ - demos for Andre Latour's csv codes
+	Subincsv
+	Subinxxcsv
+	Sumutecsv
+	Sutoolcsv
+	Subinqcsv
+	Sugeomcsv
+	Sunmocsv
+	Sunomstreamers
+
+demos/Utilities/
+	Subraid
+	Sucleave
+	
+
+Fixed:
+su/main/amplitudes/surange.c - fixed sign error in output ranges 
+	        Thanks to Marc Schaming of Institut Terre et Environnement 
+                de Strasbourg Ecole et Observatoire des Sciences de la Terre
+su/main/amplitudes/sugain.c - fixed a bug in the AGC function seen on GPR 
+                data but not apparent on seismic data
+		Thanks to Dominique Rousset of the University of Pau
+
+su/lib/getSPSfile.c - replaced // comments with  /* comments */ owing to
+			a problem on CENTOS version 7.
+Fortran/Vzest/vzestf.f - changed (about line 1119) to
+        	character*120 fnames(2) from fnames(3)
+		Thanks to Fernando Roxo da Motta
+Fortran/Raytrace3d/ktime_3d_rayq.f - ERROR of argument mismatch in two 
+   		locations. 
+		fix: added -fallow-argument-mismatch to the 
+                FFLAGS in Makefile.config_Big_Sur  this might need to
+		be propagated to all of the Makefile.config_* and this
+                likely takes care of the vzestf.f error as well. 
+
+Sfio/
+	Replaced these files with versions from the 2002 release of sfio.
+	./src/lib/sfio/Stdio_b/sprintf.c
+	./src/lib/sfio/Stdio_b/vsprintf.c
+	./src/lib/sfio/Stdio_s/stdsprintf.c
+        The make sfio should work now.
+	 Some people are having difficulty with this version. There is
+	a gzipped tarfile of the 15 Sept 2021 version of Sfio. Try that
+        one or take the Sfio directory from an older release
+
+As always, many thanks to SU users everywhere for your interest in SU
+and for your questions, comments, suggestions, and code fixes..
+
+
+
+John Stockwell	 | john.19071969@gmail.com
+https://wiki.Seismic-Unix.org 
+(The New Home of Seismic Un*x)

@@ -1,0 +1,49 @@
+#!/bin/sh
+# Sugeomcsp_input_simple2d - for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "                                                                            "
+  echo "---  This example indicates how you can proceed with a simple 2d survey     "
+  echo "---  that has limited information (perhaps just observor notes).            "
+  echo "---  This sequence uses 3 runs of SUGEOMCSV and proceeds in much the        "
+  echo "---  same way as when you have 3 SPS2 files for a 3D survey.                "
+  echo "---  See Sutoolcsv/Sutoolcsv_simple2d to make the 3 needed csv files.       "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=l0xall.csv setid=x match=fldr,tracf names=c_su_id,match1,grnlof,matche1_cf,matche1_ct,matche1_ci,gaps_rf,gaps_rt <fakesimple2d.su >fakeallx.su
+#
+  echo " --- that was first run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l0sall.csv setid=s match=grnlof names=c_su_id,grnlof,sx,sy,selev <fakeallx.su >fakeallxs.su
+# rm -f fakeallx.su 
+#
+  echo " --- that was second run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l0rall.csv setid=r match=gaps names=c_su_id,gaps,gx,gy,gelev <fakeallxs.su >fakeallxsr.su
+# rm -f fakeallxs.su 
+#
+  echo " --- that was third run of sugeomcsv ---"
+#
+  sunmo <fakeallxsr.su >fakeallxsrn.su tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+# rm -f fakeallxsr.su 
+#
+  echo " --- applying forward nmo and displaying ---"
+#
+#--------
+#
+  suximage <fakeallxsrn.su
+#
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "                                                                            "
+  echo "---  This example indicates how you can proceed with a simple 2d survey     "
+  echo "---  that has limited information (perhaps just observor notes).            "
+  echo "---  This sequence uses 3 runs of SUGEOMCSV and proceeds in much the        "
+  echo "---  same way as when you have 3 SPS2 files for a 3D survey.                "
+  echo "---  See Sutoolcsv/Sutoolcsv_simple2d to make the 3 needed csv files.       "
+  echo "----------------------------------------------------------------------------"

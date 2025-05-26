@@ -1,0 +1,46 @@
+#!/bin/sh
+# Susemgroup_test7 - for program SUSEMGROUP
+# Author: Andre Latour, Mar 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Test using a reasonable (fake) cdp stack situation.                  ---"
+  echo "---  - with 2 simple dipping horizons.                                   ---"
+  echo "---  - removed cdps 21,22,23,24                                          ---"
+  echo "---  - added noise                                                       ---"
+  echo "---  - display input file                                                ---"
+  echo "---  - output dip and then input it in another susemgroup (both dipuse=0)---"
+  echo "---  - output dip and then input it in another susemgroup (both dipuse=1)---"
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=cdps11.csv >tfake71a.su create=all spikes=4,0.00,100,2000,104,2400,108,1800,400,0 
+ subfilt <tfake71a.su >tfake72a.su fpasshi=60
+ suchw <tfake72a.su >tfake73a.su key1=gstat key2=tracf b=2
+ sustatic <tfake73a.su >tfake74a.su hdrs=1 sign=-1
+#
+ sugeomcsv rfile=cdps11.csv >tfake71b.su create=all spikes=4,0.00,100,1200,104,2000,108,1600,400,0 
+ subfilt <tfake71b.su >tfake72b.su fpasshi=40
+ suchw <tfake72b.su >tfake73b.su key1=gstat key2=tracf b=-2 a=300
+ sustatic <tfake73b.su >tfake74b.su hdrs=1 sign=-1
+#
+ suop2 tfake74a.su tfake74b.su op=sum >tfake74r.su
+ suaddnoise <tfake74r.su >tfake74n.su sn=5 seed=1 
+ suwind <tfake74n.su >tfake74.su key=cdp reject=21,22,23,24
+ suxwigb <tfake74.su key=cdp title="input " &
+#
+ susemgroup <tfake74.su >tfake75.su lockey=cdp groupkey=none outdip=tfake75dip.su dipuse=1 \
+             locmaxscan=3 scanstep=0.5 scanmax=12               
+ suxwigb <tfake75.su key=cdp title="output from first (dipuse=1)" &
+ suxwigb <tfake75dip.su key=cdp title="output dips from first (dipuse=1)" &
+#
+ susemgroup <tfake74.su >tfake76.su lockey=cdp groupkey=none indip=tfake75dip.su dipuse=1 \
+             locmaxsum=3               
+ suxwigb <tfake76.su key=cdp title="output from second (indip from first, dipuse=1)" &
+#
+ susemgroup <tfake74.su >tfake77.su lockey=cdp groupkey=none outdip=tfake77dip.su dipuse=0 \
+             locmaxscan=3 scanstep=0.5 scanmax=12               
+ suxwigb <tfake77.su key=cdp title="output from third (DIPUSE=0)" &
+ suxwigb <tfake77dip.su key=cdp title="output dips from third (DIPUSE=0)" &
+#
+ susemgroup <tfake74.su >tfake78.su lockey=cdp groupkey=none indip=tfake77dip.su dipuse=0 \
+             locmaxsum=3               
+ suxwigb <tfake78.su key=cdp title="output from fourth (indip from third, DIPUSE=0)" &

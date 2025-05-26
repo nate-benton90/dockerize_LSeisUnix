@@ -1,0 +1,26 @@
+#!/bin/sh
+# Suflex2d_test4 - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test generates some traces in cdp,offset order.                   "
+  echo "---  Same input as test2 and same setup except maxflex=2 (default is 1).    "
+  echo "---  This makes the range of neighbouring cdps -2 to +2 instead of -1 to +1."
+  echo "---  Noteworthy: output cdp 9 has duplicate traces from both 7 and 11       "
+  echo "---              and output cdp 10 is getting traces from cdps 11 and 12.   "
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=createcdps02.csv setid=m match=cdp,tracl names=c_su_id,cdp,tracl,ep,offset,igi >fakecdps04.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ subfilt <fakecdps04.su >fakecdpsf04.su fpasshi=20
+#
+ sunmo <fakecdpsf04.su >fakecdpsfn04.su invert=1 cdp=1 tnmo=0,0.190,0.450,0.800 vnmo=800,1500,2000,3000
+#
+ suxwigb <fakecdpsfn04.su key=cdp x2beg=0 x2end=19 title="before suflex2d" & 
+#
+ suflex2d <fakecdpsfn04.su >fakecdpsfnf04.su binsize=50 binalign=25 maxflex=2  
+#
+ suxwigb <fakecdpsfnf04.su key=cdp x2beg=0 x2end=19 title="after suflex2d" &  
+#
+ sugethw <fakecdpsfnf04.su key=cdp,offset,igi
+#

@@ -1,0 +1,71 @@
+#!/bin/sh
+# SuSunomstreamers_test5 - for program SUNOMSTREAMERS
+# Author: Andre Latour, Dec  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This is a test of a reasonably normal towed-streamer situation, except: "
+  echo "---  - shots are further apart than normal (plots are easier to understand)."
+  echo "---  - only 7 streamers of 10 channels each (real layouts are much bigger). "
+  echo "---  - using create= option to make output traces with no input traces.     "
+  echo "--- This actual test is same as test1 except:                               "
+  echo "---  - use non-contiguous and reversed channel numbering on streamers       "
+  echo "---    (another test: exchange channelstart,end and sort tracf increasing)  "
+  echo "---                                                                         "
+  echo "--- The result should be the same except for the channel numbers.           "
+  echo "--- But these created traces are always output in increasing channels       "
+  echo "--- within their streamers. So, sort to shots,steamers,reversed channels.   "
+  echo "--- That puts the trace order the same as test1.                            "
+  echo "---                                                                         "
+  echo "---                                                                         "
+  echo "--- Note: last shot (5) is given a different colour.                        "
+  echo "---                                                                         "
+  echo "--- Note: DO NOT EXPECT FULL ACCURACY IN THE XGRAPHs.                       "
+  echo "---       The mid XYs are put in sdel,gdel keys (which are integers).       "
+  echo "---                                                                         "
+  echo "--- Note: Also display the actual fake seismic to show spikes= is working.  "
+  echo "---       (will not always show this on subsequent tests).                  "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+ sunomstreamers >fake51.su \
+ shotkey=fldr shotspacing=200 \
+ gunkey=fldr gunmod=2 gunid=0,1 guncross=-25,25 guninline=-40,-40 \
+ streamercross=-300,-200,-100,0,100,200,300 \
+ streamerinline=-100,-100,-100,-100,-100,-100,-100 \
+ channelstart=15,25,35,45,60,72,91 \
+ channelend=6,16,26,36,51,63,82 \
+ channelspacing=10,10,10,10,10,10,10 \
+ cdpspacing=5 offpi=2 linelocs=1 scalco=10 verbose=0 \
+ create=5 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+# To get easy comparison, sort by shots, streamers, and reverse channel order within streamers
+#
+  susort <fake51.su >fake51s.su fldr grnors -tracf
+#
+# Compute midpoint X,Y for xgraph.   
+#
+ suchw <fake51s.su >fake52.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=20,20
+#
+ sugethw <fake52.su output=binary key=sdel,gdel >fake52.bin
+#
+ xgraph <fake52.bin n=280,70 linecolor=3,4 mark=7,8 marksize=5,5 linewidth=0,0 \
+        style=normal width=1200 height=600 x1beg=99500 x1end=101500 x2beg=9500 x2end=10500 &
+#
+ subfilt <fake52.su >fake52f.su fpasshi=20
+#
+ sunmo <fake52f.su >fake52fn.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+# The filter and inverse NMO give some nice "horizons", which you can see:
+#
+ suxwigb <fake52fn.su &
+#
+ echo "--- diff between test1 and test5 seismic samples follows (should be 0  0)"
+ suop2 fake52fn.su fake12fn.su op=diff >fake53fno.su
+#
+ sumax <fake53fno.su
+#
+ echo "--- diff between test1 and test4 header keys except tracf follows (should be nothing)"
+ sugethw <fake11.su key=fldr,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake11.txt
+ sugethw <fake51s.su key=fldr,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake51s.txt
+ diff fake11.txt fake51s.txt
+ echo "--- after diff  "         

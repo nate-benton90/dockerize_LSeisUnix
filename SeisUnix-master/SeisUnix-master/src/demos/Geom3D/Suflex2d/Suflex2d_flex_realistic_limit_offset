@@ -1,0 +1,63 @@
+#!/bin/sh
+# Suflex2d_flex_realistic_limit_offset - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This script is the same as Suflex2d_flex_realistic except that        "
+  echo "---  it deletes traces not within offset range of 90 to 610 metres.        "
+  echo "---                                                                        "
+  echo "---  The reason to limit the offset range is that the far offsets in       "
+  echo "---  a crooked line become smaller near bends. That makes it harder to     "
+  echo "---  see that suflex2d is filling-in offset bins that have missing traces. "
+  echo "---                                                                        "
+  echo "---  Note that you can still see some fold disturbance caused by the       "
+  echo "---  deletion of the shots near cdp 430. Looking at this plot and          "
+  echo "---  comparing it to the profile plot (Suflex2d_create_and_show_profile)   "
+  echo "---  you can also clearly see where the bends in the line caused the       "
+  echo "---  disturbance in the non-flexed fold.                                   "
+  echo "---                                                                        "
+  echo "---  Of course this plot is still just a crude indication that             "
+  echo "---  the cdps have more regular offset distribution.                       "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+# Use sunearcsv to set cdp key to nearest cdp and igi values (inline distance of trace).
+#
+  sunearcsv qin=fakeqp.csv <fakexsrfn.su dimx=mgx dimy=mgy >fakeoxsrfnn.su keyp=cdp okeys=cdp
+#
+  suwind <fakeoxsrfnn.su >fakeoxsrfnnw1.su key=fldr reject=70,72,74,76
+#
+  suwind <fakeoxsrfnnw1.su >fakeoxsrfnnw.su key=offset min=90 max=610
+#
+  susort <fakeoxsrfnnw.su >fakeoxsrfnnws.su cdp offset
+#
+  sunmo <fakeoxsrfnnws.su >fakeoxsrfnnwsn.su tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+  sustack <fakeoxsrfnnwsn.su >fakeoxsrfnnwsns.su key=cdp verbose=1 2>fakeobefore.txt
+#
+  suxwigb <fakeoxsrfnnwsns.su key=cdp title='cdp STACK (limited offsets) before flex' &
+#
+  suflex2d <fakeoxsrfnnwsn.su >fakeoxsrfnnwsnf.su binsize=100 binalign=0 binfold=2 
+#
+  sustack <fakeoxsrfnnwsnf.su >fakeoxsrfnnwsnfs.su key=cdp verbose=1 2>fakeoafter.txt
+#
+  suxwigb <fakeoxsrfnnwsnfs.su key=cdp title='cdp STACK (limited offsets) after flex' &
+#
+# Use sed to remove first line, also replace val= and fold= with blanks.
+# Use a2b to convert to binary.                                          
+#
+  sed '1d' fakeobefore.txt >fakeobefore1.txt  
+  sed '1,$ s/val=/ /g' fakeobefore1.txt >fakeobefore2.txt
+  sed '1,$ s/fold=/ /g' fakeobefore2.txt >fakeobefore3.txt
+  a2b <fakeobefore3.txt >fakeobefore3.bin
+#
+  sed '1d' fakeoafter.txt >fakeoafter1.txt  
+  sed '1,$ s/val=/ /g' fakeoafter1.txt >fakeoafter2.txt
+  sed '1,$ s/fold=/ /g' fakeoafter2.txt >fakeoafter3.txt
+  a2b <fakeoafter3.txt >fakeoafter3.bin
+#
+  cat fakeobefore3.bin fakeoafter3.bin >fakeocompare.bin
+#
+  xgraph <fakeocompare.bin nplot=2 n=706,9999 linecolor=6,3 mark=3,8 marksize=1,1 linewidth=3 \
+          style=normal width=1000 height=300 x1beg=100 x1end=900 x2beg=0 x2end=40 \
+          title="cdp fold (limited offsets) before flexing and after flexing (green)" &

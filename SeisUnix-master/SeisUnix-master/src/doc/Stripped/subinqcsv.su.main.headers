@@ -1,0 +1,216 @@
+ SUBINQCSV - Input Q-records or parameters. interpolate, output Q-records.  
+
+  subinqcsv [parameters].   (No traces in or out).                          
+
+ Parameters:	         						     
+
+ qin=       Input file containing q-records. This parameter is optional,    
+            but if you do not specify it, you must specify a set of         
+            parameters which you can see lower down in this document.       
+            Those parameters allow specification similar to sunmo.          
+
+ qout=      Output file for q-records. Must be specified.                   
+
+ rfile=     If set, read a K-file containing 3D grid definition. Assumed 2D ", 
+            if no file is specified here. A 3D forces restrictions on the   ", 
+            input locations (they have to form aligned rectangles).         ", 
+            A 2D means that parameters for the igi component of 3Ds will be 
+            honored, but parameters for the igc component are not allowed.  
+
+ check=0   Do not print checking details. The options of this program       
+           cannot repair a corrupt input grid. Grid checking is always      
+           done on input grid definition and will error-halt if corrupt.    
+      =1   print checking details.                                          
+
+ inloc=1   Location options. The option here determines which input names   
+           contain the locations of all other input values. The option here 
+           must find the corresponding names within the non-tuple names in  
+           the input q-file or in the parameter names you specify (later).  
+      =1   cdp (default). Option 1 is required if no grid is input.         
+      =2   cdpt (grid transposed cdp numbers).                              
+      =3   igi,igc (grid index numbers).                                    
+      =4   gx,gy (grid coordinates).                                        
+      =5   sx,sy (world coordinates).                                       
+           You may want to use iecho=1 initially with these options since   
+           the output q-records will contain the cell centre values         
+           corresponding to your choice here (giving you a chance to        
+           adjust your input values before going through the error-check    
+           that forces the input locations to be in aligned rectangles).    
+
+ keyloc=   Location key. Can only be specified if inloc=1 and 2D (no rfile).
+           Name must be in the input Q-file (or parameters listed below).   
+           This allows linear interpolation based on values such as point   
+           numbers, station numbers, reciever numbers, or shot numbers.     
+           Parameters extrapi and igiout refer to these values.             
+
+ extrapi=0        do not extrapolate at ends in igi direction.              
+                  (values beyond outer functions are held constant).        
+               =1 extrapolate beyond outer functions at both ends           
+               =2 extrapolate beyond outer functions only at lower end      
+               =3 extrapolate beyond outer functions only at higher end     
+               For 2D, this parameter controls extrapolation at line ends.  
+
+ extrapc=0        do not extrapolate at ends in igc direction.              
+                  (values beyond outer functions are held constant).        
+               =1 extrapolate beyond outer functions at both ends           
+               =2 extrapolate beyond outer functions only at lower end      
+               =3 extrapolate beyond outer functions only at higher end     
+
+ extrapt=0        do not extrapolate at ends in independent values.         
+                  (values outside range of functions are held constant).    
+               =1 extrapolate outside range of functions                    
+               =2 extrapolate when less than range of functions             
+               =3 extrapolate when greater than range of functions          
+
+ igiout=1   Output igi range (default is entire igi range of grid).         
+            List with one, two, or three integers.                          
+       =f     start at f, increment by 1, end at maximum igi of grid.       
+       =f,l   start at f, increment by 1, end at l or maximum igi of grid.  
+       =f,l,i start at f, increment by i, end at l or nearest igi that      
+              is not greater than maximum igi of grid.                      
+             For 2D, f and l default to minimum and maximum numbers within  
+             the cdp= list or in the q-records input via qin=. For 2D, they 
+             are allowed to be set outside that range (you can extrapolate  
+             to the true first and last cdp of line).                       
+
+ igcout=1   Output igc range (default is entire igc range of grid).         
+            Same options as the previous igiout parameter.                  
+
+ outind=0   Output independent dimension range. One, two, or three numbers. 
+            No default, but outlist can be specified instead.               
+            Cannot be specified if input has no tuples.                     
+       =f,l,i start at f, increment by i, end at last value <= l.           
+       =f,l   start at f, increment by 1000, end at last value <= l.        
+       =f     start at f, increment by 1000, end at last value <= 3000.     
+            The i value cannot be 0, but can be negative, which requires    
+            an l value less than or equal to f.                             
+
+ outlist=   Output independent dimension value list. Cannot be specified    
+            if outind is used. Cannot be specified if input has no tuples.  
+
+ invp2=v    Square and inverse values before applying bilinear weighting.   
+            (This is how velocities are treated in sunmo and sunmocsv).     
+            The sequence is: linear interpolate to outind or outlist values,
+            square and inverse, perform weighted-sum based on location,     
+            then inverse square-root that sum. The default is to do this if 
+            the value name starts with v. You can also specify any other    
+            characters such as vq, tzm, qtal and so on.                     
+       =all use square and inverse for all values.                          
+      =none use square and inverse for no values.                           
+     =tuple use square and inverse for all values in the tuples.            
+  =nontuple use square and inverse for all values not in the tuples.        
+
+ ename=     Names to eliminate. These names will be ignored in the input    
+            q-records and therefore not be in the output q-records (note    
+            that standard 2d and 3d names will still be output even if you  
+            specify them here). A primary purpose of this option is to get  
+            rid of names in input tuples in order to reduce the complexity  
+            of output q-records (in case certain programs cannot handle it).
+            But you can also get rid of non-tuple names here.               
+
+ iecho=0    Full spatial output (do not just output at the input locations).
+      =1    Just output at the same locations as input.                     
+            This still performs interpolation in the independent dimension  
+            as specified by outind or outlist. (This option bypasses the    
+            error check that input locations must form aligned rectangles). 
+              Parameters igiout= and igcout= cannot be specified.           
+
+ formtv=%.2f The C format code for printing all values in the q-records     
+             except the standard names cdp,cdpt,igi,igc.                    
+             These names are specially handled within this program.         
+             For 3D, they are generated for output using grid definition.   
+             For 2D, igi,igc are not output.                                
+             The default is 2 digits below the decimal point.               
+
+ formxy=%.2f The C format code for printing gx,gy,sx,sy in the q-records.   
+             These names are specially handled within this program.         
+             For 3D, they are generated for output using grid definition.   
+             For 2D, they are not output.                                   
+             The default is 2 digits below the decimal point.               
+
+   ------------------------------------------------------------------       
+   ------------------------------------------------------------------       
+   The following parameters can only be specified if you                    
+   do not specify an input q-file using parameter qin=.                     
+
+ cdp=             The parameters to the left are all optional but at least  
+ cdpt=            one of them must be specified. These are the names which  
+ fldr=            contain single values at each location (also known as     
+ grnors=    	   the non-tuple names). Typically, cdp= is the most likely  
+ grnofr=    	   name to specify. Each name specified here must have the   
+ grnlof=    	   same amount of values (separated by commas).              
+ gaps=      	   For example: cdp=2,7,23,44 means that you must also       
+ igi=       	   list 4 values if you specify numa=.                       
+ igc=       	                                                             
+ gx=                                                                        
+ gy=                                                                        
+ sx=              Note the names specified must include the names needed    
+ sy=              for your inloc= option (by default inloc= requires cdp).  
+ numa=                                                                      
+ numb=                                                                      
+ vuma=            (See invp2= for why some names here start with v).        
+ vumb=                                                                      
+
+ tupa=            The parameters to the left are all optional. These are    
+ offs=            the names which have multiple values at each location     
+ tims=            (also known as the tuple names). Typically, tims= and     
+ tnmo=            vnmo= are the most likely names to specify. Each name     
+ dpth=      	   specified here must be repeated same number of times as   
+ vels=            amount of values in non-tuple names above (except Note 1).
+ vnmo=            (See invp2= for why some names here start with v).        
+ tupb=    Note 1: Usually, any of the previous parameter names must be      
+ vupa=            repeated for each value in the non-tuple lists. But the   
+                  independent dimension name can also be specified just one 
+                  time if all the other names here have the same amount of  
+                  values as that single set of independent dimension values.
+          Note 2: The independent dimension defaults to first name that is  
+            	   found in order here (NOT their order on the command line).
+
+	Example using 3 cpds with velocity semblance scan picks:             
+
+         cdp=7,27,57                                                        
+         tims=500,780,1240,2100,4000                                        
+         vels=1500,1930,2260,3100,4400                                      
+         tims=400,680,2400,3800                                             
+         vels=1300,1730,3700,4300                                           
+         tims=400,680,880,1140,2400,3800                                    
+         vels=1300,1500,1730,2300,3700,4300                                 
+
+       And, if you have a static value at these 3 cdps, then also:          
+         numa=5.30,17.44,12.63                                              
+
+   ------------------------------------------------------------------       
+
+  Notes:                                                       	     
+
+   All input values are stored in double-precision (8 byte float).          
+
+   This program does not care if the values are seconds or milliseconds     
+   or feet or metres. To this program they are all just numbers. However,   
+   default of parameter invp2= treats names starting with v differently     
+   for weighting.                                                           
+
+
+ For 3D, user needs to input locations which form aligned rectangles.       
+ That is, how-ever-many grid inlines the user chooses to put locations on,  
+ there must always be the same number of locations on each inline and those 
+ functions must be located at the same grid crosslines. For instance, if    
+ the user inputs locations for inline 7 at crosslines 15,25,40 then the     
+ the user must alos input locations at crosslines 15,25,40 for any other    
+ inlines that the user wants to supply locations for. (If user is lucky     
+ enough that the grid has 100 inlines, then the input locations could be at 
+ CDPs 715,725,740 and 1115,1125,1140 and 2015,2025,2040 and 2515,2525,2540. 
+ Note that the inloc= option allows different values to be used to specify  
+ locations but they are all translated to inline and crossline numbers      
+ of the cell centre using the input 3D grid definition.                     
+
+ Bilinear interpolation is done if the output location is surrounded by 4   
+ input locations. If the output location is not surrounded by 4 input       
+ locations, the result depends on the extrapi and extrapc options.          
+ The result can be any combination of linear interpolation, linear          
+ extrapolation, and constant extrapolation. If input locations only exist   
+ along 1 inline or 1 crossline the result is linear interpolation in that   ", 
+ direction (and linear or constant extrapolation at locations beyond ends). 
+
+
+   Created: Nov 2021: Andre Latour                                         

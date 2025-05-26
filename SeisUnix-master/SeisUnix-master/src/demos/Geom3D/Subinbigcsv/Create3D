@@ -1,0 +1,31 @@
+#!/bin/sh
+# Create3D - traces for BinBig.   
+# Author: Andre Latour, April 29 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some realistic traces for 3D.    "
+  echo "---  The sequence herein is:                                                "
+  echo "---   - use SPS2 X-file and create traces with spikes                       "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - set cdp numbers using 3D Grid                                       "
+  echo "---   - apply inverse-NMO                                                   "
+  echo "---   - make a display (still shot ordered, see the fake horizons)          "
+  echo "----------------------------------------------------------------------------"
+#
+# Create traces from the values in SPS2 X-file (plus spikes)
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fake1.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fake1.su >fake2.su
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fake2.su >fake3.su
+#
+  subfilt <fake3.su >fake4.su fpasshi=20
+#
+  subincsv <fake4.su >fake5.su rfile=kEFG.csv check=1 
+#
+  sunmocsv <fake5.su >fake6.su invert=1 cdp=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+  suxwigb <fake6.su 
+#

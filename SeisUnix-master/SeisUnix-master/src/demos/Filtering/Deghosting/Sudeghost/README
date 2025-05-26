@@ -1,0 +1,42 @@
+Demo for SUDEGHOST  copyright 2021 Colorado School of Mines
+
+ SUDEGHOST - applies a DEGHOSTING filter in (t,x) or (tau,p) data
+
+ Technical reference:
+   Perz, M. J., & Masoomzadeh, H. (2014). Deterministic marine 
+      deghosting: tutorial and recent advances. GeoConvention. 
+        Expanded Abstracts.
+
+Sudeghost may be used either for modeling ghosts or removing ghosts
+
+About the demo. A synthetic shot gather is generated using MakeData.
+This script uses suaddevent to generate a synthetic shot gather that
+is inspired by shot ep=200 in the Mobil Line 12 AVO (Viking Graben) dataset.
+
+MakeData   -   make a synthetic shot gather 
+
+Sudeghost.sh  -  Uses sudeghost in mode deghost=0 to put ghosts on the
+          the synthetic shot gather from MakeData, using the ghosting operator
+          described in Perz and Masoomzadeh (2014).  Then the deghosting
+          operator is applied to remove the ghosts from the synthetic.
+
+          Differences are applied to generate:
+             ghost.su = sudiff ghost+synthetic_shot.su synthetic_shot.su
+             ghost_estimate.su =  sudiff  ghost+synthetic_shot.su deghosted.su
+	     residual.su =  sudiff synthetic_shot.su deghosted.su 
+
+	Plots made:
+             synthetic_shot.su 
+             ghost+synthetic_shot.su
+             ghost.su
+             deghosted.su
+             ghost_estimate.su
+	     residual.su
+
+These are plotted individually and concatenated together for comparison.
+	  
+
+John Stockwell	 | john.19071969@gmail.com
+https://wiki.Seismic-Unix.org 
+(The New Home of Seismic Un*x)
+

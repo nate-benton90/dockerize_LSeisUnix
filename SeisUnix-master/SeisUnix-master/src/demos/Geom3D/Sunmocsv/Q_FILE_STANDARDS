@@ -1,0 +1,129 @@
+
+Q-file and q-record standards. Dec 2021.  
+
+   Example A:
+
+   C_SU_SETID,Q
+   C_SU_FORMS
+   C_SU_ID,%.20g,%.20g,%.2f,%.2f,%.2f,%.2f
+   C_SU_NAMES
+   C_SU_ID,cdp,numa,tims,vels,tims,vels
+   Q,1,17,0.00,1500.00,500.00,2000.0,1200.00,2500.00,1600.00,3300.00
+   Q,7,14,0.00,1555.00,400.00,1990.0,1700.00,3500.00
+   Q,12,24,0.00,1435.00,444.00,1555.0,1777.00,3600.00,,,,,,
+
+
+ 1. Q-files are comma-seperated-values files.
+
+ 2. Header records starting with C_SU_ preceed all records starting with Q.
+
+ 3. The first 3 records above are optional. But some q-files can be input 
+    to sugeomcsv and sutoolcsv programs, which require those 3 records. 
+    The record after C_SU_FORMS must start with C_SU_ID and then contain
+    c-language formats for floating point numbers.
+
+ 4. The record containing the names must be the record after C_SU_NAMES
+    and must start with C_SU_ID before the first comma.
+
+ 5. The comma-location of the names must match the comma-location of  
+    their values on the q-records.    
+    So, in Example A, the cdp on the first q-record has a value of 1, 
+    whereas numa has a value of 17.
+
+ 6. Tuples are identified by repeating their names on the record containing
+    the names. In Example A, this is: tims,vels,tims,vels
+    Tupled names only need to be duplicated once on the record containing
+    the names. That is: tims,vels,tims,vels even though there are 4 sets of
+    time-velocity pairs on the first q-record and 3 sets of time-velocity pairs
+    on the second q-record.
+
+ 7. Tupled values occur after all single values and there are no single values 
+    after tupled values.                                                        
+
+ 8. Tupled names and their values can be singlets, pairs, triplets and so on.
+    But tupled names and values do not need to exist. 
+
+ 9. Other than the Q, values on q-records must be numbers.
+    Blanks between commas on q-records are assumed to be zero unless they
+    occur continuously at the end of the q-record, in which case they are
+    assumed to mean non-existance (tuple input stops at previous non-blank).
+
+----
+
+   Example B:
+
+   C_SU_SETID,Q
+   C_SU_FORMS
+   C_SU_ID,%.20g,%.20g,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f
+   C_SU_NDIMS,tims,,0,100,200,300,400,500
+   C_SU_NAMES
+   C_SU_ID,cdp,cdpt,vels,vels,vels,vels,vels,vels
+   Q,21,1,1200.00,1621.05,2076.92,2846.15,3615.38,4142.86
+   Q,41,1,1800.00,2694.74,3519.23,3711.54,3903.85,4142.86
+   Q,81,1,1800.00,2694.74,3519.23,3711.54,3903.85,4142.86
+
+
+10. Q-files also have a variant that contains a C_SU_NDIMS record.
+    This variant can be used for situations such as Example B where all
+    cdps have the same number of velocity values and the set of times
+    for those velocities are the same for each cdp. 
+
+11. When a C_SU_NDIMS record is used, the name of the independent dimension
+    value is put after the first comma on that record (tims, in Example B).
+    
+12. When a C_SU_NDIMS record is used, the independent dimension values 
+    are put in the same comma-location as the values they refer to.    
+    In Example B, this means that tims=0 occurs at the same comma as
+    the first vels in the q-records.                                  
+    
+----
+
+   Example C:
+
+   C_SU_SETID,Q
+   C_SU_FORMS
+   C_SU_ID,%.20g,%.20g,%.2f,%.2f,%.2f,%.2f
+   C_SU_NDIMS,tupa,,100,100,500,500
+   C_SU_NAMES
+   C_SU_ID,cdp,cdpt,dpth,vels,dpth,vels
+   Q,1,1,230.00,1534.70,340.00,1823.14
+   Q,7,1,233.00,1588.30,356.00,1815.28
+
+
+13. When a C_SU_NDIMS record is used, and there are pairs or triplets 
+    (or more) of values in each q-record, then the independent dimension 
+    values are duplicated in the C_SU_NDIMS record as in Example C.
+    In other words, the associated independent dimension value is always 
+    at the same comma-location as its related values in the q-records. 
+       
+Note: The reason for the C_SU_NDIMS record standards becomes obvious if
+      you look at the q-file in a Spreadsheet. You will see that each
+      tupled value in the q-records gets its correct independent dimension 
+      value at the top of the column.                
+    
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+Things that are not Q-file standards:
+
+ The subinqcsv program employs q-files and has some restrictions and options.
+ To clarify things:
+
+  a. There is no difference between 2d and 3d as far as q-files are concerned.
+     But subinqcsv automatically populates some 3d grid names and values into
+     its output q-files.
+
+  b. The subinqcsv program requires the independent dimension to be
+     in increasing order (the times in time-velocity pairs must increase).
+     That is checked by subinqcsv itself. But q-files do not care about that.
+
+  c. By default, subinqcsv automatically assumes that names starting with v
+     are velocities and uses inverse-square-VALUE-weighting just like is 
+     done within sunmocsv. But q-files do not care about that.
+
+  d. It may be tempting to think of q-files containing C_SU_NDIMS records as 
+     output q-files, and not containing C_SU_NDIMS records as input q-files.
+     But this is not true, it is just the usual situation for subinqcsv. 
+     (Currently, subinqcsv can input both types, but will only output q-files
+      containing C_SU_NDIMS records).
+

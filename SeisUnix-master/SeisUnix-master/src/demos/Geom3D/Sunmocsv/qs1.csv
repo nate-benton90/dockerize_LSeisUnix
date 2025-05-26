@@ -1,0 +1,6 @@
+C_SU_SETID,Q
+C_SU_FORMS
+C_SU_ID,%.20g,%.20g,%g,%g,%g,%g,%g,%g,%g,%g
+C_SU_NAMES
+C_SU_ID,cdp,tnmo,vnmo,tnmo,vnmo,tnmo,vnmo,tnmo,vnmo
+Q,41,0,1800,190,3500,450,4000,800,5000

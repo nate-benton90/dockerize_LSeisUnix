@@ -1,0 +1,110 @@
+#!/bin/sh
+# Sutoolcsp_simple2d - for program SUTOOLCSV
+# Author: Andre Latour, July 2021
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "                                                                           "
+  echo "---  This example indicates how you can proceed with a simple 2d survey    "
+  echo "---  that has limited information (perhaps just observor notes).           "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+#
+# The sequence herein essentially mimics the SPS2 situation.
+# Just like for SPS2, there are 3 input files used herein, the X-file, S-file, and R-file.                        
+# The S-file and R-file are easy to understand and create in a Spreadsheet program 
+# like libreOffice Calc or Microsoft Excel. Put S or R in first column, followed by
+# point number, X-coordinate, Y-coordinate, and elevation in the next columns.                             
+#
+# The X-file is also similar to SPS2 X-file. The example herein is for a split-spread layout.
+# Since it is split-spread, there are 2 X-records for every field record number (fldr).
+# Looking at x0all.csv you can see the first 2 records have a 7 right after the X. 
+# Next field is the point number of the shot (fldr 7 is on point 101, fldr 8 is on point 103,...).                      
+# For fldr 7, channels 1-12 are on one side of the split-spread and are located on 
+# receiver points 101-112. Channels 13-24 are on the other side of the split-spread
+# and are located on receiver points 115-126. This channel-to-receiver-point mapping
+# is maintained until fldr 14, when the point range changes to 103-114 and 117-128.
+# The layout then rolls-along with the shot centred in the split-spread until fldr 28.
+# 
+# Note that the split-spread has a gap of receiver-points. For instance, for fldr 7
+# it is 101-112 and 115-126, so 113 and 114 are skipped. When the shot gets into the
+# middle of the split-spread, this seems to make the offset values a-symmetrical.
+# But often the shots were skidded by one-half the distance to the next receiver so
+# even though the shot point is 115 at fldr 14, it is actually located at 115.5
+# This can be seen by looking closely at the S-file coordinates compared to the
+# R-file coordinates that have the same point number.
+#
+# In the following specifications, I use SU key grnlof as the name of shot point number
+# and SU key gaps as the name of the receiver point number because those are what I chose 
+# to use for the same values in my SPS2 options. Also note that names= contains tracf
+# appended with _ct, _cf, _ci (channel-from, channel-to, and channel-increment). 
+# Similarly, gaps_rf and gaps_rt are the receiver point-from and receiver point-to values 
+# of that channel range. (See the self-docs for SUTOOLCSV and SUGEOMCSV).
+#
+  sutoolcsv rfile=l0xall.csv setid=x match=fldr,tracf forms=c_su_id,%.2f names=c_su_id,fldr,grnlof,tracf_cf,tracf_ct,tracf_ci,gaps_rf,gaps_rt wfile=l0xall2.csv
+  echo " --- that was the first run of sutoolcsv ---"
+#
+# As seen next, match1 and matche1 can be used in names= list instead (match1 is the first key 
+# in match= list and matche1 is end key in match= list). Review names= details in self-docs.
+#
+# sutoolcsv rfile=l0xall.csv setid=x match=fldr,tracf forms=c_su_id,%.2f names=c_su_id,match1,grnlof,matche1_cf,matche1_ct,matche1_ci,gaps_rf,gaps_rt wfile=l0xall2.csv
+#
+#
+#
+# Now look at the output l0xall2.csv in a simple text editor (like "vi"). 
+# Or look at l0xall2.csv in a Spreadsheet such as libreOffice Calc or Microsoft Excel.
+# Note that C_SU records exist at the top of the file. These C_SU records contain the
+# options you specified on the command line. 
+#
+# *** Note in particular that the forms= specification results in 2 decimal places in output file.
+# *** But most SU keys are integers, so more decimal places does not help when using these files
+#     in SUGEOMCSV (but you should review options scalco and scalel).
+#
+  sutoolcsv rfile=l0sall.csv setid=s match=grnlof forms=c_su_id,%.2f names=c_su_id,grnlof,sx,sy,selev wfile=l0sall2.csv
+  echo " --- that was the second run of sutoolcsv ---"
+#
+  sutoolcsv rfile=l0rall.csv setid=r match=gaps forms=c_su_id,%.2f names=c_su_id,gaps,gx,gy,gelev wfile=l0rall2.csv
+  echo " --- that was the third run of sutoolcsv ---"
+#
+# You can also convert the csv files to fixed-format by using .txt on the output wfile name 
+# and putting your desired card-columns around the names= keys, as demonstrated next:
+#
+  sutoolcsv rfile=l0rall.csv setid=r match=gaps forms=c_su_id,%.2f names=c_su_id,2_gaps_10,11_gx_25,26_gy_40,46_gelev_50 wfile=l0rall3.txt
+  echo " --- that was the fourth run of sutoolcsv ---"
+#
+# But you can still use .csv for the output wfile which means your desired card-column values are 
+# copied to the C_SU records in the output wfile even though they have no other effect (yet).       
+#
+  sutoolcsv rfile=l0rall.csv setid=r match=gaps forms=c_su_id,%.2f names=c_su_id,2_gaps_10,11_gx_25,26_gy_40,46_gelev_50 wfile=l0rall4.csv
+  echo " --- that was the fifth run of sutoolcsv ---"
+#
+# You can convert that file back to fixed-format using either of the 2 following specifications:
+# (the second specification reads the options from the C_SU records in the l0rall4.csv file)            
+#
+  sutoolcsv rfile=l0rall4.csv setid=r match=gaps forms=c_su_id,%.2f names=c_su_id,2_gaps_10,11_gx_25,26_gy_40,46_gelev_50 wfile=l0rall5.txt
+  echo " --- that was the sixth run of sutoolcsv ---"
+  sutoolcsv rfile=l0rall4.csv wfile=l0rall6.txt
+  echo " --- that was the seventh run of sutoolcsv ---"
+#
+  diff l0rall5.txt l0rall6.txt
+  echo " --- that was the diff between 5 and 6 ---"
+#
+# Of course, if you start with a fixed-format text file like l0rall5.txt there is no need to
+# convert it to csv, you can use it directly (here, and in SUGEOMCSV).
+#
+  sutoolcsv rfile=l0rall5.txt setid=r match=gaps forms=c_su_id,%.2f names=c_su_id,2_gaps_10,11_gx_25,26_gy_40,46_gelev_50 wfile=l0rall7.txt
+  echo " --- that was the eight run of sutoolcsv ---"
+#
+  diff l0rall5.txt l0rall7.txt
+  echo " --- that was the diff between 5 and 7 ---"
+#
+  echo "                                                                           "
+  echo "                                                                           "
+  echo "---------------------------------------------------------------------------"
+  echo "---  sutoolcsv processes fixed-format and csv text files.                  "
+  echo "---  Which means you can easily see the inputs and results.                "
+  echo "                                                                           "
+  echo "---  This example indicates how you can proceed with a simple 2d survey    "
+  echo "---  that has limited information (perhaps just observor notes).           "
+  echo "---------------------------------------------------------------------------"

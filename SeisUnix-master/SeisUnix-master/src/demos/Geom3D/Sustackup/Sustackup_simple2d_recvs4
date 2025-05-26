@@ -1,0 +1,35 @@
+#!/bin/sh
+# Sustackup_simple2d_recvs4 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of stacking receivers (using gaps key as receiver)         --"
+  echo "---  - compared to stacking via susort and sustack                        --"
+  echo "---  - note differences because sustackup stacks in double precision.     --"
+  echo "----------------------------------------------------------------------------"
+#
+ sustackup <fakexsrfnbis.su >fake41.su keyloc=gaps 
+#
+ suxwigb <fake41.su key=gaps title="sustackup by gaps key" &
+#
+  echo " Next, stacking to gaps using susort and sustack for comparison. --"
+#
+ susort <fakexsrfnbis.su >fake42.su gaps
+#
+ sustack <fake42.su >fake43.su key=gaps 
+#
+#sugethw <fake23.su key=cdp,nhs,offset,tracf
+#
+ suxwigb <fake43.su key=gaps title="after susort and sustack by gaps key" &
+#
+  echo "--- Maximums in stack by susort and sustack "
+#
+ sumax <fake43.su
+#
+ suop2 fake41.su fake43.su op=diff >fake44.su
+#
+ suxwigb <fake44.su key=gaps title="difference between sustack and sustackup (which stacks in double prec)" &
+#
+  echo "--- Maximums in difference display (not zero since sustackup stacks in double prec)"
+#
+ sumax <fake44.su

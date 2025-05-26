@@ -1,0 +1,15 @@
+#! /bin/sh
+# Prepare data for VelanBinBig interactive velocity picking.
+# Create: Andre Latour, May 1 2022.
+#set -x
+
+
+## Remove cdp 544 to demonstrate VelanBinBig behavior.
+tracein=bbsorted.su          # input seismic data. 
+velpanel=bbsortedno544.su    # output seismic data
+
+echo
+echo "            Removing cdp 544 from data."
+suwind < $tracein key=cdp min=-9999999 max=9999999 reject=544 count=9999 > $velpanel
+echo
+

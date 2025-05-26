@@ -1,0 +1,29 @@
+#!/bin/sh
+# Subinxxcsv_fakestack - for program SUBINXXCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "  Reduce grid. And use output grid with other programs to produce something "
+  echo "  easy to confirm (grid values in headers).  And 3 flat horizons why not.   "
+  echo "----------------------------------------------------------------------------"
+#
+  subinxxcsv rfile=kEFG.csv wfile=kEFGout1.csv check=1 igilow=-20 igihigh=-30 igclow=-2 igchigh=-3
+#
+# Input grid to subinqcsv and produce q-records.
+#
+  subinqcsv rfile=kEFGout1.csv qout=q1.csv cdp=1
+#
+# Create output traces containing q-record values in header, and some spikes.
+# Note match=cdp since q-files do not contain the C_SU_MATCH default record.
+# Also note that this q-file works without change because it has no tuples.
+#
+  sugeomcsv rfile=q1.csv >fake1.su match=cdp create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+# Filter traces to produce horizons.                                           
+#
+  subfilt <fake1.su >fake2.su fpasshi=20
+#
+  sugethw <fake2.su key=cdp,cdpt,igi,igc,gx,gy,sx,sy
+#
+  suximage <fake2.su
+#

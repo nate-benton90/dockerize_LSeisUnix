@@ -1,0 +1,12 @@
+#!/bin/sh
+# Sushiftcsv_test1 - for program SUSHIFTCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Input fake traces, apply only the source statics.                      "
+  echo "----------------------------------------------------------------------------"
+#
+  sushiftcsv <fake02.su >fake11.su rin=none
+#
+  suxwigb <fake11.su title=" applied only source statics " &
+#

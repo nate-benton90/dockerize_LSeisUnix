@@ -1,0 +1,12 @@
+#!/bin/sh
+# Subinxxcsv_example2 - for program SUBINXXCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Simple example that inputs a grid and exchanges its corners.           "
+  echo "----------------------------------------------------------------------------"
+#
+# check=1 prints some helpful details.
+#
+  subinxxcsv rfile=kEFG.csv wfile=kEFGout2.csv check=1 iflip=1
+#

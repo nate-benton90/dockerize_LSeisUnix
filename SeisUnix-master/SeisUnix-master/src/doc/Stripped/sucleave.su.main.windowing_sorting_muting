@@ -1,0 +1,64 @@
+ SUCLEAVE - Cleave traces from 1 input into multiple output files.     ",
+           (split to multiple output files, retaining input order).    ",
+
+ sucleave <stdin key=offset low=50 size=100 abs=1                      ",
+
+ key=offset  name of key used to seperate traces to output files.      ",
+
+    abs=1    Use absolute value of key.                                ",
+       =0    Do not use absolute value of key.                         ",
+
+  size=100   size of key ranges for output files. Must be > 0.         ",
+
+  low=size/2 Base value in lowest magnitude range for output files.    ",
+             The default is size/2. Must be <= size/2 and > 0.         ",
+             For each output file the centre of the range of traces    ",
+             output to it is low+size*N (where N is an integer).       ",
+              ( The lower boundary is included in the N range,         ", 
+               but the higher boundary belongs to the N+1 range ).     ", 
+
+ high=100000 base value in highest magnitude range for output files.   ",
+             (This value is adjusted to a multiple of low+size*N).     ",
+             If abs=1 the range limits are from  low  to high.         ",
+             If abs=0 the range limits are from -high to high.         ",
+
+  outbase=   This value is used as part of the output file names.      ",
+             By default outbase is cleave_key_ where key is key= name. ",
+             The nearest integer of the range base value (low+size*N)  ",
+             is always appended after outbase. For example:            ",
+               cleave_offset_50.su   cleave_offset_150.su              ",
+
+  print=0    Do not print.                                             ",
+       =1    Print filename, trace count, average key value for        ",
+             each created output file. Note that ranges with 0 traces  ",
+             will make no print.                                       ",
+
+  ATTENTION: No traces are deleted. All traces less than the minimum   ",
+             key range are written to one extra file, and all traces   ",
+             greater than the maximum key range are written to another ",
+             extra file.     WARNINGS are printed if this occurs.      ",
+             These extra files can be recognized because the number in ",
+             their names is outside the low,high ranges you specified. ",
+
+  NOTES                                                                ",
+   1. See simple tests (examples) in src/demos/Utilities/Sucleave      ",
+   2. Output files are not created until a trace is written to them.   ",
+      So, specifying excessive low= and high= values has little        ",
+      consequences except for some small memory allocation herein.     ",
+   3. Bad choice of size can create an output file for every trace.    ",
+
+ EXAMPLE USES:                                                         ",
+   1. You may want to deliberately partition your traces for different ",
+      processing. You can cleave your traces into offset ranges, while ",
+      retaining cdp order in those offset-ranged files.                ",
+      You can then use subraid to bring them back together.            ",
+   2. In streamer-cable-marine you may want to partition your shot     ",
+      gathers by cables (or port-starboard shot, cable combinations).  ",
+      This is sometimes called nominal subsurface line processing.     ",
+      You can then use subraid to bring them back together.            ",
+
+
+ Author:
+	Andre Latour.        
+	Looked at suop2.c code to get started (efopen,fgettr). 
+

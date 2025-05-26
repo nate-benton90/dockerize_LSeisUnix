@@ -1,0 +1,30 @@
+#!/bin/sh
+# Subinqcsv_example1_qinput - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This is a realistic example. The input time and velocity values are    "
+  echo "---  the same as input to Subinqcsv_example1_command, but have been copied  "
+  echo "---  to q-records for input here.                                           "
+  echo "---  The output q-files should be identical to Subinqcsv_example1_command   "
+  echo "----------------------------------------------------------------------------"
+#
+# Note that output times are 0 to 1000 in intervals of 100. 
+# If you output at intervals of 4 (a usual sampling interval for seismic traces),
+# you will get big records in the output q-file.
+#
+# Note that iecho=1 means only make output records at the input cdp numbers.
+#
+# Note that the input tnmo and vnmo have varying amounts of values at some cdps.
+# This is typical for velans (time-velocity pairs derived from semblance-scans).
+# There are unlikely values for at least one of the cdps (this is deliberate, 
+# it produces an obvious effect, see demos/Geom3D/Sunmocsv_realistic1 for details).
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin41.csv qout=qvalsout43.csv outind=0,1000,100 iecho=1 \
+#
+# Here, iecho is not specified, so you get output q-records at all cdps defined
+# in the 3d grid (subinqcsv has parameters which allow you to restrict the
+# cdp range to output, see the self-doc).
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin41.csv qout=qvalsout44.csv outind=0,1000,100 \
+#

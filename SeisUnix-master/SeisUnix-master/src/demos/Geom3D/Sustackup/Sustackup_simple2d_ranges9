@@ -1,0 +1,43 @@
+#!/bin/sh
+# Sustackup_simple2d_ranges9 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of range limits                                            --"
+  echo "---  - compared to ranging by suwind and stacking via susort and sustack  --"
+  echo "---    (in sustackup LESS THAN maxabs are included, thus 100 versus 99)   --"
+  echo "---    (also set keep=0 to not output when all traces out-of-range)       --"
+  echo "---  - note differences because sustackup stacks in double precision.     --"
+  echo "----------------------------------------------------------------------------"
+#
+ sustackup <fakexsrfnbis.su >fake91.su keyloc=cdp keyabs=offset minabs=50 maxabs=100 keep=0 
+#
+ suxwigb <fake91.su key=cdp title="sustackup by cdp key with offset range 50-100" &
+#
+  echo " Next, stacking to cdp using suwind and susort and sustack for comparison. --"
+#
+ suwind <fakexsrfnbis.su >fake92.su key=offset min=50 max=99 
+#
+ susort <fake92.su >fake93.su cdp
+#
+ sustack <fake93.su >fake94.su key=cdp 
+#
+ suxwigb <fake94.su key=cdp title="after susort and sustack by cdp key with offset range 50-99" &
+#
+  echo "--- Maximums in stack by susort and sustack "
+#
+ sumax <fake94.su
+#
+ suop2 fake91.su fake94.su op=diff >fake95.su
+#
+ suxwigb <fake95.su key=cdp title="difference between sustack and sustackup (which stacks in double prec)" &
+#
+  echo "--- Maximums in difference display (maybe not zero since sustackup stacks in double prec)"
+#
+ sumax <fake95.su
+#
+ sustackup <fakexsrfnbis.su >fake96.su keyloc=cdp keyabs=offset minabs=50 maxabs=100  
+#
+ suxwigb <fake96.su key=cdp title="sustackup by cdp key with offset range 50-100 (and default keep=1) " &
+#
+ sugethw <fake96.su key=cdp,nhs,offset,tracf,fldr

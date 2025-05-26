@@ -1,0 +1,41 @@
+#!/bin/sh
+# Susemgroup_test1 - for program SUSEMGROUP
+# Author: Andre Latour, Mar 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Test using a reasonable (fake) cdp stack situation.                  ---"
+  echo "---  - with 2 simple dipping horizons.                                   ---"
+  echo "---  - removed cdps 21,22,23,24                                          ---"
+  echo "---  - added noise                                                       ---"
+  echo "---  - display input file                                                ---"
+  echo "---  - run susemgroup with lockey=cdp groupkey=none (not their defaults) ---"
+  echo "---  - display all output files from susemgroup.                         ---"
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=cdps11.csv >tfake11a.su create=all spikes=4,0.00,100,2000,104,2400,108,1800,400,0 
+ subfilt <tfake11a.su >tfake12a.su fpasshi=60
+ suchw <tfake12a.su >tfake13a.su key1=gstat key2=tracf b=2
+ sustatic <tfake13a.su >tfake14a.su hdrs=1 sign=-1
+#
+ sugeomcsv rfile=cdps11.csv >tfake11b.su create=all spikes=4,0.00,100,1200,104,2000,108,1600,400,0 
+ subfilt <tfake11b.su >tfake12b.su fpasshi=40
+ suchw <tfake12b.su >tfake13b.su key1=gstat key2=tracf b=-2 a=300
+ sustatic <tfake13b.su >tfake14b.su hdrs=1 sign=-1
+#
+ suop2 tfake14a.su tfake14b.su op=sum >tfake14r.su
+ suaddnoise <tfake14r.su >tfake14n.su sn=5 seed=1 
+ suwind <tfake14n.su >tfake14.su key=cdp reject=21,22,23,24 
+ suxwigb <tfake14.su key=cdp title="input " &
+#
+ susemgroup <tfake14.su >tfake15.su lockey=cdp groupkey=none \
+            locmaxscan=3 scanstep=0.5 scanmax=12 \
+            outdip=tfake15d.su outpow=tfake15p.su outsem=tfake15s.su         
+#
+ suxwigb <tfake15.su key=cdp title="seismic output" &
+#
+ suxwigb <tfake15d.su key=cdp title="dip (ms per cdp)" &
+#
+ suxwigb <tfake15p.su key=cdp title="power along dip" &
+#
+ suxwigb <tfake15s.su key=cdp title="semblance values " &
+#

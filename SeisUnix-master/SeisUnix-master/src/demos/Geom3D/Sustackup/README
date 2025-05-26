@@ -1,0 +1,50 @@
+
+SUSTACKUP - Input Any Trace Order and Stack To Any Key Combination.      
+ 
+By default this program inputs any trace order and makes a cdp stack  
+using all input traces. But this program can also make other stacks.  
+Stacks can be made for any user-specified combination of key values.  
+All input traces with the same set of key values are stacked together.
+In particular, 2D and 3D shot or receiver stacks can be made.         
+Additionally, two range limits can be specified to exclude traces     
+from stacking. For instance, the offset range can be limited. Range   
+limiting can also be done by suwind, of course. But an important      
+difference here is that, by default, this program outputs a zero      
+amplitude trace with full header values even when the range limits    
+exclude all traces for that shot or receiver.                         
+
+------------------------------------------------------------------------------
+  Basically you should run the scripts in the following order since
+  previous output is used for subsequent input and various comparisons.
+  These scripts contain information about their purpose.                
+------------------------------------------------------------------------------
+
+sh ./Sustackup_test1
+
+sh ./Sustackup_create_simple2d
+
+---
+
+sh ./Sustackup_simple2d_shots2
+
+sh ./Sustackup_simple2d_shots3
+
+sh ./Sustackup_simple2d_recvs4
+
+sh ./Sustackup_simple2d_recvs5
+
+sh ./Sustackup_simple2d_cdps6
+
+sh ./Sustackup_simple2d_cdps7
+
+sh ./Sustackup_simple2d_cdpoff8
+
+sh ./Sustackup_simple2d_ranges9
+
+sh ./Sustackup_simple2d_ranges10
+
+sh ./Sustackup_simple2d_ranges11
+
+sh ./Sustackup_simple2d_ranges12
+
+---

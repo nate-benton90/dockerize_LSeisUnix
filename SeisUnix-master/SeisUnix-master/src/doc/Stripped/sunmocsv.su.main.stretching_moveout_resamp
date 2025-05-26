@@ -1,0 +1,149 @@
+ SUNMOCSV - NMO for an arbitrary velocity function of time and 3D or 2D CDP 
+
+  sunmocsv <stdin >stdout [optional parameters]			     
+
+ Optional Parameters:							     
+
+ qin=                  Velocity functions can be input via this file.       
+                       This file is optional, but if you do not input it,   
+                       you must use parameters cdp=, tnmo=, vnmo=.          
+                       See external document Q_FILE_STANDARDS.              
+
+                       The following 3 parameters cannot be specified if    
+                       you input velocity functions via the qin= file.      
+
+ cdp=		        CDPs for which vnmo & tnmo are specified.            
+ tnmo=                 NMO times corresponding to velocities in vnmo.       
+                       If any tnmo value is greater than 100 they are all   
+                       assumed to be milliseconds. Otherwise seconds.       
+ vnmo=                 NMO velocities corresponding to times in tnmo.	     
+                       If qin= is not specified, all 3 of these parameters  
+                       must be specified. There must be at least 1 number   
+                       in the cdp= list. There must be the same number of   
+                       vnmo= parameters as numbers in the cdp= list.        
+                       There must be the same number of tnmo= parameters    
+                       as numbers in the cdp= list, or, there can be just   
+                       one tnmo= parameter provided there are the same      
+                       number of velocities in all vnmo= lists.             
+
+ smute=1.5             samples with NMO stretch exceeding smute are zeroed  
+ lmute=25		length (in samples) of linear ramp for stretch mute  
+ sscale=1		=1 to divide output samples by NMO stretch factor    
+ invert=0		=1 to perform (approximate) inverse NMO		     
+ upward=0		=1 to scan upward to find first sample to kill	     
+ voutfile=		if set, interplolated velocity function v[cdp][t] is 
+			output to named file.			     	     
+
+ rfile=                If set, read a K-file containing 3D grid definition. ", 
+                       Assume 2D if no K-file and no grid definition is     ", 
+                       supplied via command line parameters. The required   ", 
+                       command line parameters are: grid_xa,grid_ya,        ", 
+                       grid_xb,grid_yb, grid_xc,grid_yc, grid_wb, grid_wc.  ", 
+                       (See program SUBINCSV for 3D grid details).          ", 
+                       If this is a 3D then the input CDPs for the velocity ", 
+                       functions and the seismic trace CDP key should be    ", 
+                       3D grid cell numbers as produced by SUBINCSV.        ", 
+                       A 3D also forces restrictions on the locations of the", 
+                       input velocity functions. Their CDP locations must   ", 
+                       form aligned rectangles (see Notes).                 ", 
+
+ check=0               Do not print grid checking and function locations.   
+                       =1 If grid definition input, run some grid functions 
+                          on the 4 grid corner points and print results.    
+                          Also print input velocity function location       
+                          information by using the grid definition and      
+                          the input cdp= values. The format and values are: 
+                            G,cdp,igi,igc,xgrid,ygrid,xworld,yworld.        
+                          (The format is intended to make it easy to see    
+                          and also to make it easy to load to spreadsheets).
+                          This information can be written to a file by      
+                          putting 2>yourfile on the command line.           
+
+ print=0               Do not print INPUT velocity functions.               
+                       =1 Print INPUT velocity functions. The cdp number    
+                          and its input velocity function are printed.      
+                          This print is not intended to be pretty. It just  
+                          allows easy checking that the q-file contains     
+                          the expected values (or just use a text editor).  
+                          It also allows programmers and others to confirm  
+                          that command line input via cdp=,tnmo=,vnmo=      
+                          is the same as identical input via the qin= file. 
+
+ Notes:								     
+
+ NMO interpolation error is less than 1% for frequencies less than 60% of   
+ the Nyquist frequency.						     
+
+ Exact inverse NMO is impossible, particularly for early times at large     
+ offsets and for frequencies near Nyquist with large interpolation errors.  
+
+ The "offset" header field must be set.				     
+ Use suazimuth to set offset header field when sx,sy,gx,gy are all	     
+ nonzero. 							   	     
+
+ The times specified in tnmo= parameters must be monotonically increasing.  
+ Velocities can also be input via the qin= file (see C_QFILE_STANDARDS).    
+
+ Velocities at each input cdp are interpolated to the sample times and then 
+ spatial interpolation is done, as explained next:                          
+
+ For 3D, the user needs to input velocity functions which form aligned      
+ rectangles. That is, how-ever-many grid inlines the user chooses to put    
+ velocity functions on, there must always be the same number of functions   
+ on each inline and those functions must be located at same grid crosslines.
+ For instance, if user inputs functions for inline 7 at crosslines 15,25,40 
+ then the user must input the functions at crosslines 15,25,40 for any other
+ inlines that the user wants to supply functions for. (If user is lucky     
+ enough that the grid has 100 inlines, then the input functions could be at 
+ CDPs 715,725,740 and 1115,1125,1140 and 2015,2025,2040 and 2515,2525,2540. 
+ Note that the CDP numbers specified on the cdp= parameter and also in the  
+ input seismic trace cdp key are translated to inline and crossline numbers 
+ using the input 3D grid definition - so those cdp numbers need to          
+ correspond to the input 3D grid definition.                                
+
+ For CDPs not listed in cdp= parameter or qin= file, bilinear interpolation 
+ of 1/velocity_squared is done if CDP is surrounded by 4 input functions,   
+ linear interpolation of 1/velocity_squared is done if the CDP is outside   
+ the sides of fully surrounded area, constant extrapolation if the CDP is   
+ outside the corners of fully surrounded area. If functions are only input  
+ along 1 inline (or 1 crossline) then the result is linear interpolation    
+ of 1/velocity_squared along that direction (and constant beyond ends).     
+
+ The format of the output interpolated velocity file is unformatted C floats
+ with vout[cdp][t], with time as the fast dimension and may be used as an   
+ input velocity file for further processing.				     
+
+
+ Credits:
+	SEP: Shuki Ronen, Chuck Sword
+	CWP: Shuki Ronen, Jack, Dave Hale, Bjoern Rommel
+      Modified: 08/08/98 - Carlos E. Theodoro - option for lateral offset
+      Modified: 07/11/02 - Sang-yong Suh -
+	  added "upward" option to handle decreasing velocity function.
+      CWP: Sept 2010: John Stockwell
+	  1. replaced Carlos Theodoro's fix 
+	  2. added  the instruction in the selfdoc to use suazimuth to set 
+	      offset so that it accounts for lateral offset. 
+        3. removed  Bjoren Rommel's anisotropy stuff. sunmo_a is the 
+           version with the anisotropy parameters left in.
+        4. note that scalel does not scale the offset field in
+           the segy standard.
+        Modified Sept 2021: Andre Latour   
+	  1. added 3D option (bilinear interpolation of velocity functions).
+           This is activated by input of a 3D grid definition.                   
+           See the SUBINCSV program for grid definition details.               
+        Modified Jan  2022: Andre Latour   
+	  1. Reworked to use lib routines to get velocity function values
+           either from command line parameters or from input q-files.      
+	  2. Reworked to use lib routines for bilinear interpolation. 
+        Modified Apr  2022: Andre Latour   
+	  1. changed so that if any tnmo value is greater than 100 all tnmo   
+	     values are assumed to be milliseconds. Otherwise seconds.
+ Technical Reference:
+	The Common Depth Point Stack
+	William A. Schneider
+	Proc. IEEE, v. 72, n. 10, p. 1238-1254
+	1984
+
+ Trace header fields accessed: ns, dt, delrt, offset, cdp, scalel
+

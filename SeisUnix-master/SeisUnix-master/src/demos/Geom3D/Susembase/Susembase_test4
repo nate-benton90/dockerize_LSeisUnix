@@ -1,0 +1,25 @@
+#!/bin/sh
+# Susembase_test4 - for program SUSEMBASE
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Test dadstack option.---------------------------------------------------"
+  echo "--- - actually takes lots of fiddling to get best results ------------------"
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=cdps21.csv >tfake41.su create=all spikes=4,0.00,100,2000,104,2400,108,1800,400,0 
+ subfilt <tfake41.su >tfake42.su fstoplo=3 fpasslo=5 fpasshi=60 
+ suchw <tfake42.su >tfake43.su key1=gstat key2=tracf key3=gstat b=4 c=1
+ sustatic <tfake43.su >tfake44.su hdrs=1 sign=-1
+#
+ suaddnoise <tfake44.su >tfake44n.su sn=20 seed=1 
+ suwind <tfake44n.su >tfake44.su key=cdp reject=21,22,23,24 
+ suxwigb <tfake44.su key=cdp title="input" &
+#
+ susembase <tfake44.su >tfake45.su sumopt=dadstack 
+#
+ suxwigb <tfake45.su key=cdp title="output with dadstack (note the horizon ends terminate sharper)" &
+#
+ susembase <tfake44.su >tfake46.su sumopt=stack 
+ suxwigb <tfake46.su key=cdp title="output with just stack" &
+#

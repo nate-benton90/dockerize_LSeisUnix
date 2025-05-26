@@ -1,0 +1,84 @@
+ LOGISTICFIT - least squares fit of a LOGISTIC function to input data 	
+
+  logisticfit <infile >outfile [optional parameters]			
+
+ Required Parameter:							
+ n=			the number of values of t and P(t)		
+ Optional Parameters:							
+ nstart=0		start of input data window			
+ nend=n		end of input data window			
+
+ outpar=/dev/tty 	output parameter file				
+
+ Notes:								
+ If the data are a population P(t) as a function of time t, then the 	
+ input consists of unformatted C-style floats in the form of a vector of
+ length 2n consisting of the vector of the values of 			
+ [t0,t1,t2,...tn-1)] followed by [P(t0),P(t1),P(t2),...,P(tn-1)].	
+
+ Notes about logistic curve fitting:					
+ The logistic function is a nontrivial solution to the Verhulst equation
+
+		 dP/dt = r P(1-P/K)					
+
+ which describes the growth of a population P(t), with growth rate r   
+ and carrying capacity K. This equation has analytic solution:		
+
+	       P(t)= K/(1 + (K-P0)/P0 exp(-r(t-t0))			
+
+ Here P0=P(t0). 							
+
+ The goal of this program is, that given population data that is assumed
+ to be governed by the logistic equation, to estimate K and r. These   
+ may then be used as input to the program 'verhulst'. In that program  
+ a1 corresponds to r and a2 corresponds to K here. 			
+
+ Caveat: this code will give results that get you close, but you may   
+ have to hand adjust r and K to suit your data. 			
+ Related program: verhulst 						
+
+
+   AUTHOR: 
+      John Stockwell, Adjunct Faculty, Colorado School of Mines,  April 2020
+
+ Technical reference:
+ https://www.maa.org/press/periodicals/loci/joma/logistic-growth-model-fitting-a-logistic-model-to-data-i
+ Algorithm:
+
+ Part I:
+ We note
+	dP/dt = r P(1-P/K)
+ implies
+      dP/dt
+    --------- = d/dt ln(P) =  -(r/K) P + r 
+       P 
+ Hence, plotting d/dt ln(P)  versus  P  will have a linear trend of slope -(r/K) and
+ intercept r. Thus, for y = mx + b    K=(-intercept/slope)
+
+ The logarithmic derivative is implemented in this code as (dP/dt)/P
+ 
+
+ Part II:
+ Second we note that the solution is the logistic (sigmoid function) curve given by
+
+     P(t) =		 K
+		 -------------------------- 
+	       1 + ([K-P0]/P0) exp[-r(t-t0)]
+
+ Here P0 is the value of P(t) at t0
+
+ P(t)( 1 + ([K-P0]/P0) exp[-r(t-t0)] ) = K
+       
+	     ([K-P0]/P0) exp[-r(t-t0)] = [K-P(t)]/P(t)   
+       
+	  -r(t-t0) = ln([K-P(t)]/P(t)) +  ln(P0/[K-P0]) = ln([K-P(t)]/P(t)) + C
+       
+ Given an estimate of K from the Part I, a line through a plot of 
+	   ln([K-P(t)]/P(t))  versus time t will have a slope of -r
+       
+	  r(t-t0) = ln(P(t)/[K-P(t)]) + C
+       
+ Here the ln() argument is flipped around to remove the minus sign.
+       
+
+

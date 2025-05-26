@@ -1,0 +1,10 @@
+C_SU_MATCH,tracf
+C_SU_SETID,Q
+C_SU_FORMS
+C_SU_ID,%.12g,%.12g,%.12g,%.12g
+C_SU_NAMES
+C_SU_ID,tracf,fldr,gaps,selev
+Q,1,10,101,-10
+Q,2,10,102,-20
+Q,6,11,104,20
+Q,10,14,104,-30

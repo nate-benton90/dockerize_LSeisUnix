@@ -1,0 +1,26 @@
+#!/bin/sh
+# Sucleave_test6 - for program SUCLEAVE
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Make null traces with offsets exactly on range boundaries.    ---"
+  echo "-- NOT absolute.                                                 ---"
+  echo " "
+#
+  sunull nt=100 ntr=20 >tnull61.su
+  sushw <tnull61.su >tnull62.su key=offset a=-800 b=100
+  sugethw <tnull62.su key=offset 
+#
+  sucleave <tnull62.su key=offset low=50 size=100 high=250 abs=0 print=1 
+#
+  echo " "
+  echo " Print offsets from two ranges (-150 and 150).                    "
+  echo " Note that output file -150 contain trace with offset -200.       "
+  echo " Note that output file  150 contain trace with offset  100.       "
+  echo " This is as it should be. The numerically lower boundary is       "
+  echo " included in the range, the numerically higher boundary is not.   "
+  echo " "
+  sugethw <cleave_offset_-150.su key=offset
+  echo " "
+  sugethw <cleave_offset_150.su key=offset
+#

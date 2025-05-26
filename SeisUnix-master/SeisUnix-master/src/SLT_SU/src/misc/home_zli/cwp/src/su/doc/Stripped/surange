@@ -1,0 +1,3 @@
+SURANGE - get max and min values for non-zero header entries
+surange <stdin
+Note: gives partial results if interrupted

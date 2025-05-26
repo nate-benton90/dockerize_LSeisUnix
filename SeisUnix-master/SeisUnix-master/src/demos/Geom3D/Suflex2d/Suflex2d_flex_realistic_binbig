@@ -1,0 +1,41 @@
+#!/bin/sh
+# Suflex2d_flex_realistic_binbig - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This script inputs the realistic traces and profile and uses the      "
+  echo "---  sunearcsv program to assign cdps to traces (same as other scripts).   "
+  echo "---                                                                        "
+  echo "---  But then it uses the subinbigcsv program to create super-cdps.        "
+  echo "---  (Only outputs the traces of cdps near some central cdps and           "
+  echo "---   renumbers those traces to the central cdp numbers).                  "
+  echo "---  Those super-cdp traces are then sorted by cdp and offset.             "
+  echo "---                                                                        "
+  echo "---  Those traces are input to suflex2d which is set-up to retain only the "
+  echo "---  trace closest to centre of each offset bin (within each super-cdp).   "
+  echo "---                                                                        "
+  echo "---  Note that binsize is 25 herein but 100 for flexing in other scripts.  "
+  echo "---  This is because for the particular geometry of this survey,           "
+  echo "---  each cdp only has one-quarter of the offsets. But since we have       "
+  echo "---  created super-cdps we have all the offsets available here.            "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+# Use sunearcsv to set cdp key to nearest cdp and igi values (inline distance of trace).
+#
+  sunearcsv qin=fakeqp.csv <fakexsrfn.su dimx=mgx dimy=mgy >fakexsrfnn.su keyp=cdp okeys=cdp
+#
+# Note that the igi,igc parameters in subinbigcsv are not the same as igi,igc values 
+# from sunearcsv. But without a 3D Grid input, subinbigcsv knows that igi parameters
+# refer to the cdp key and igc parameters cannot be used.
+#
+  subinbigcsv <fakexsrfnn.su >fakexsrfnnb.su igiout=100,1000,100 igiext=3  
+#
+  susort <fakexsrfnnb.su >fakexsrfnnbs.su cdp offset
+#
+  suflex2d <fakexsrfnnbs.su >fakexsrfnnbsf.su binsize=25 binalign=0 \
+            maxflex=0 binfold=1 binbest=3 maxfold=1000  
+#
+  sugethw <fakexsrfnnbsf.su key=cdp,offset
+#
+  suxwigb <fakexsrfnnbsf.su title='binbig cdps after choosing best trace in each offset bin' &

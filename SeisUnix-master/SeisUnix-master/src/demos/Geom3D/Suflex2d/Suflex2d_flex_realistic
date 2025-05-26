@@ -1,0 +1,62 @@
+#!/bin/sh
+# Suflex2d_flex_realistic - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This script uses sunearcsv to assign traces to their nearest cdp.     "
+  echo "---  Then it uses suwind to delete all traces of some shots near cdp 430.  "
+  echo "---                                                                        "
+  echo "---  Then it sorts traces to cdp and offset, nmo corrects, and stacks.     "
+  echo "---                                                                        "
+  echo "---  Then it flexes before stacking and makes another stack.               "
+  echo "---                                                                        "
+  echo "---  The before-flexing and after-flexing stacks are displayed.            "
+  echo "---  You should not expect to see much difference in the stacks since      "
+  echo "---  these traces all have the same fake horizons and nmo velocities.      "
+  echo "---                                                                        "
+  echo "---  The fold before-flexing and fold after-flexing are also plotted.      "
+  echo "---  This is the plot to concentrate on. Note how low fold near cdp 430    "
+  echo "---  caused by deleting the shots has been filled-in by the flexing.       "
+  echo "---                                                                        "
+  echo "---  The limit_offset script actually shows the flexing effect better.     "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+# Use sunearcsv to set cdp key to nearest cdp and igi values (inline distance of trace).
+#
+  sunearcsv qin=fakeqp.csv <fakexsrfn.su dimx=mgx dimy=mgy >fakexsrfnn.su keyp=cdp okeys=cdp
+#
+  suwind <fakexsrfnn.su >fakexsrfnnw.su key=fldr reject=70,72,74,76
+#
+  susort <fakexsrfnnw.su >fakexsrfnnws.su cdp offset
+#
+  sunmo <fakexsrfnnws.su >fakexsrfnnwsn.su tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+  sustack <fakexsrfnnwsn.su >fakexsrfnnwsns.su key=cdp verbose=1 2>fakebefore.txt
+#
+  suxwigb <fakexsrfnnwsns.su key=cdp title='cdp STACK before flex' &
+#
+  suflex2d <fakexsrfnnwsn.su >fakexsrfnnwsnf.su binsize=100 binalign=0 binfold=2 
+#
+  sustack <fakexsrfnnwsnf.su >fakexsrfnnwsnfs.su key=cdp verbose=1 2>fakeafter.txt
+#
+  suxwigb <fakexsrfnnwsnfs.su key=cdp title='cdp STACK after flex' &
+#
+# Use sed to remove first line, also replace val= and fold= with blanks.
+# Use a2b to convert to binary.                                          
+#
+  sed '1d' fakebefore.txt >fakebefore1.txt  
+  sed '1,$ s/val=/ /g' fakebefore1.txt >fakebefore2.txt
+  sed '1,$ s/fold=/ /g' fakebefore2.txt >fakebefore3.txt
+  a2b <fakebefore3.txt >fakebefore3.bin
+#
+  sed '1d' fakeafter.txt >fakeafter1.txt  
+  sed '1,$ s/val=/ /g' fakeafter1.txt >fakeafter2.txt
+  sed '1,$ s/fold=/ /g' fakeafter2.txt >fakeafter3.txt
+  a2b <fakeafter3.txt >fakeafter3.bin
+#
+  cat fakebefore3.bin fakeafter3.bin >fakecompare.bin
+#
+  xgraph <fakecompare.bin nplot=2 n=718,9999 linecolor=6,3 mark=3,8 marksize=1,1 linewidth=3 \
+          style=normal width=1000 height=300 x1beg=100 x1end=900 x2beg=0 x2end=40 \
+          title="cdp fold before flexing and after flexing (green)" &

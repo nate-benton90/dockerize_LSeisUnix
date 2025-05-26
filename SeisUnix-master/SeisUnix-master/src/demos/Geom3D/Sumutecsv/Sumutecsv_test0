@@ -1,0 +1,104 @@
+#!/bin/sh
+# Sumutecsv_test0 - for program SUMUTECSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test creates some traces (using sunull).                          "
+  echo "---  Then it sets every sample amplitude in those traces to 100.            "
+  echo "---  Then it sets the cdp number(s) (starts at 1, increments by 1)          "
+  echo "---  Then it sets the offset to 600 for all traces.                         "
+  echo "---  Then it applies a 3D mute to those traces and displays it.             "
+  echo "---  7 cases are made and displayed (note title on bottom of displays).     "
+  echo "---  These 7 cases give nice displays to help understand what is going on.  "
+  echo "---  Some of these cases also require special handling code in sumutecsv    "
+  echo "---  os it is desirable to have specific tests for them.                    "
+  echo "---    1 mute function only is specified.                                   "
+  echo "---    2 mute functions specified on just 1 inline (with extrapolation)     "
+  echo "---    3 mute functions specified on just 1 inline (with extrapolation)     "
+  echo "---    3 mute functions specified on just 1 inline (no extrapolation)       "
+  echo "---    2 mute functions specified on just 1 crossline (with extrapolation)  "
+  echo "---    3 mute functions specified on just 1 crossline (with extrapolation)  "
+  echo "---    3 mute functions specified on just 1 crossline (no extrapolation)    "
+  echo "---                                                                         "
+  echo "---  Notes: Only 5 inlines worth of cdps are created (1 trace per cdp).     "
+  echo "---         For ease of initial understanding of the displays,              "
+  echo "---         extrapolation is enabled in both directions (not the default).  "
+  echo "----------------------------------------------------------------------------"
+#
+# I know the 3d grid is 121 by 23 cells. Make 605 traces (5 inlines of 121).   
+# Make cdp numbers starting at 1, incrementing by 1. Set all offsets to 600.
+#
+  sunull nt=1500 ntr=605 dt=0.004 >tnull0.su
+  sumath <tnull0.su op=add a=100 >tnull0a.su
+  sushw <tnull0a.su >tnull0acdp.su key=cdp a=1 b=1
+  sushw <tnull0acdp.su >tnull0acdpoff.su key=offset a=600 b=0
+#
+# sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute1.su rfile=kEFG.csv mode=0 extrapi=1 extrapc=1 \
+  sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute1.su mode=0 \
+        cdp=131 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+#
+  suxwigb <tnull0acdpoffmute1.su key=cdp xcur=0.5 title='one mute function' & 
+#
+  sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute2.su rfile=kEFG.csv mode=0 extrapi=1 \
+        cdp=131,196 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=300,500,900,2000 \
+        tims=200,1960,2360,500 \
+#
+  suxwigb <tnull0acdpoffmute2.su key=cdp xcur=0.5 title="two mute functions on 1 inline (with extrapolation)" & 
+#
+  sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute3x.su rfile=kEFG.csv mode=0 extrapi=1 \
+        cdp=131,170,196 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=300,500,1000 \
+        tims=400,1410,1910 \
+        offs=300,500,900,2000 \
+        tims=200,1960,2360,500 \
+#
+  suxwigb <tnull0acdpoffmute3x.su key=cdp xcur=0.5 title="three mute functions on 1 inline (with extrapolation)" & 
+#
+  sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute3.su rfile=kEFG.csv mode=0 \
+        cdp=131,170,196 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=300,500,1000 \
+        tims=400,1410,1910 \
+        offs=300,500,900,2000 \
+        tims=200,1960,2360,500 \
+#
+  suxwigb <tnull0acdpoffmute3.su key=cdp xcur=0.5 title="three mute functions on 1 inline (NO extrapolation)" & 
+#
+  sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute4.su rfile=kEFG.csv mode=0 extrapc=1 \
+        cdp=131,373 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=100,300,500,1900,2000 \
+        tims=50,200,3730,5130,500 \
+#
+  suxwigb <tnull0acdpoffmute4.su key=cdp xcur=0.5 title="two mute functions on 1 crossline (with extrapolation)" & 
+#
+  sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute5x.su rfile=kEFG.csv mode=0 extrapc=1 \
+        cdp=131,373,494 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=100,300,500,1900,2000 \
+        tims=50,200,3730,5130,500 \
+        offs=100,300,500,1900,2000 \
+        tims=80,300,2730,4130,500 \
+#
+  suxwigb <tnull0acdpoffmute5x.su key=cdp xcur=0.5 title="three mute functions on 1 crossline (with extrapolation)"  & 
+#
+  sumutecsv <tnull0acdpoff.su >tnull0acdpoffmute5.su rfile=kEFG.csv mode=0 \
+        cdp=131,373,494 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=100,300,500,1900,2000 \
+        tims=50,200,3730,5130,500 \
+        offs=100,300,500,1900,2000 \
+        tims=80,300,2730,4130,500 \
+#
+  suxwigb <tnull0acdpoffmute5.su key=cdp xcur=0.5 title="three mute functions on 1 crossline (NO extrapolation)"  & 

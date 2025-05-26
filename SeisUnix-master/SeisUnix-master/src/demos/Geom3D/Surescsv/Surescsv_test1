@@ -1,0 +1,33 @@
+#!/bin/sh
+# Surescsv_test1 - for program SURESCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Use surescsv to derive statics.                                        "
+  echo "---  Use sushiftcsv to apply those statics.                                 "
+  echo "---  Make source,receiver,CDP stacks before and after.                      "
+  echo "---  Note: statics values can be seen in sstat.csv and rstat.csv flies.     "
+  echo "----------------------------------------------------------------------------"
+#
+  sustackup <fake06.su >fake11.su keyloc=fldr
+  suxwigb <fake11.su title="source stack before surescsv" &
+#
+  sustackup <fake06.su >fake12.su keyloc=gaps
+  suxwigb <fake12.su title="receiver stack before surescsv" &
+#
+  sustackup <fake06.su >fake13.su keyloc=cdp
+  suxwigb <fake13.su title="CDP stack before surescsv" &
+#
+  surescsv <fake06.su 
+#
+  sushiftcsv <fake06.su >fake15.su
+#
+  sustackup <fake15.su >fake16.su keyloc=fldr
+  suxwigb <fake16.su title="source stack AFTER surescsv" &
+#
+  sustackup <fake15.su >fake17.su keyloc=gaps
+  suxwigb <fake17.su title="receiver stack AFTER surescsv" &
+#
+  sustackup <fake15.su >fake18.su keyloc=cdp
+  suxwigb <fake18.su title="CDP stack AFTER surescsv" &
+#

@@ -1,0 +1,61 @@
+SUGEOMCSV inputs SU traces and updates the SU key values from either
+fixed-format or CSV files. This program is equally usefull and useable
+for either 3D or 2D geometry loading. And also for updating values 
+such as statics from fixed-format or csv files.
+
+But most examples herein concentrate on using it for loading initial
+3D land/ocean-bottom-cable geometry using a full set of SPS2 files.
+
+This program has high-level options which "know" the standard SPS2 
+and SPS1 formats (either as fixed-format files or after conversion
+to CSV files via SUTOOLCSV). But this program is generic and can
+update any SU key values from either fixed-format or CSV files.
+
+The ability to use CSV files for geometry leads in the direction of
+using SpreadSheets or SQL databases to by-pass the 240 byte header
+limitations of SU. Basically you just have to make sure the X, S, 
+and R records of SPS2 format have unique mapping values for their
+equivalent SpreadSheet/SQL tables produced from the CSV files output
+by SUTOOLCSV - and make sure SUGEOMCSV updates those unique mapping
+values to known SU trace keys. Which fits easily within 240 bytes. 
+The mapped SpreadSheet/SQL tables then essentially become external
+headers to contain information that cannot fit in 240 bytes and also
+allow processing of that information without reading the associated
+SU seismic file. But that is an extensive concept, and further in 
+the future.
+
+
+Included herein are examples of the 3 SPS2 fixed-format files.
+And examples of how to run SUGEOMCSV. 
+
+But I suggest you review, and run, the SUTOOLCSV examples/tests first.
+Then review and run the SUGEOMCSV tests in this order....
+
+
+ sh ./Sugeomcsv_create_realistic     (must be run before next test)
+
+ sh ./Sugeomcsv_input_realistic
+
+ sh ./Sugeomcsv_nicerecord
+
+ sh ./Sugeomcsv_missing
+
+ sh ./Sugeomcsv_unrepeat
+
+ sh ./Sugeomcsv_scalco_scalel
+
+ sh ./Sugeomcsv_create_ufile
+
+ sh ./Sugeomcsv_statics_and_delim
+
+ sh ./Sugeomcsv_create_simple2d  (must be run before next test)
+
+ sh ./Sugeomcsv_input_simple2d
+
+ sh ./Sugeomcsv_create_duplicates
+
+
+Note to programmers: If you actually change the code in sugeomcsv,
+remember to run (at least) Sugeomcsv_create_realistic and
+Sugeomcsv_create_simple2d to create traces BEFORE your changes.
+Then compare traces after your changes.

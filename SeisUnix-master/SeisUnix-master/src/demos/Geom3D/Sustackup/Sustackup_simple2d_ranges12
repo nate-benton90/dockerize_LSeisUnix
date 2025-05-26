@@ -1,0 +1,33 @@
+#!/bin/sh
+# Sustackup_simple2d_ranges12 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of reversed-range limits                                   --"
+  echo "---  - note that forward-range  11-25 does not include 25                 --"
+  echo "---  - note that reversed-range 25-11 does not include 11.                --"
+  echo "---    The idea is that forward ranges should not overlap when            --"
+  echo "---    we make seperate runs of sustackup.                                --"
+  echo "---    For instance 11-25 and 25-40 should NOT BOTH include 25.           --"
+  echo "---    Similarly 11-25 and a reversed 40-25 should not both include 25.   --"
+  echo "--- Note: The reversed-range option exists because keys might contain     --"
+  echo "---       azimuth (see the suazimuth program) or angle or similar values. --"
+  echo "---       If you want a range across 0 or 360 degrees you need to specify --"
+  echo "---       such as minabs=320 and maxabs=40 or minsign=340 and maxsign=40. --"
+  echo "---                                                                       --"
+  echo "---    This test does not use an azimuth value. It just shows the forward --"
+  echo "---    range 11-25 INCLUDES the same traces that reverse 25-11 EXCLUDES   --"
+  echo "---    (we do not want an overlap).                                       --"
+  echo "----------------------------------------------------------------------------"
+#
+ sustackup <fakexsrfnbis.su >fake121.su keyloc=cdp keyabs=cdp minabs=11 maxabs=25  
+#
+ suxwigb <fake121.su key=cdp title="sustackup by cdp key with cdp range 11-25" &
+#
+#sugethw <fake121.su key=cdp,nhs,offset,tracf,fldr
+#
+ sustackup <fakexsrfnbis.su >fake122.su keyloc=cdp keyabs=cdp minabs=25 maxabs=11  
+#
+ suxwigb <fake122.su key=cdp title="sustackup by cdp key with cdp range 25-11 (i.e. reversed)" &
+#
+#sugethw <fake122.su key=cdp,nhs,offset,tracf,fldr

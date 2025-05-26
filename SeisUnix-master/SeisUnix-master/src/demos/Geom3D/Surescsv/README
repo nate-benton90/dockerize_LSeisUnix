@@ -1,0 +1,56 @@
+
+SURESCSV - Surface Consistent Residual Statics Determination.   
+ 
+   Derives surface-consistent residual statics for sources and receivers.
+   There is one static value estimated for each identified source and    
+   one static value estimated for each identified receiver.              
+
+   Notes about tests:
+
+    1. sstat and gstat from l2slong.csv and l2rlong.csv contain shifts 
+       that are applied... so that surescsv has some statics to derive.
+       Note that sstat,gstat in trace headers are rounded to integer.
+    2. sugeomcsv creates the traces and sets scalco and scalel to -10
+       so the sx,sy,gx,gy and selev,gelev in headers are 10 times their
+       values in l2slong.csv and l2rlong.csv
+    3. half of fake input survey deliberatly has bad NMO velocity in test3,4,5.
+    4. suchw and sustatic are used in test4 and test5 to create a slanted
+       and undulating situation. This is VERY crude forward modelling that
+       is intended to be structural dip. Remember that surescsv is NOT intended
+       to remove dip. Thus the slant and undulations should NOT be removed 
+       by surescsv. Any long (spatial) wavelength statics should be removed
+       by elevation/refraction static programs or other statics techniques.
+       Surescsv is only intended to derive short (spatial) frequency statics.
+       The slant and undulations tests are intended to show that surescsv 
+       derives the correct high-frequency statics anyway.
+    5. Statics from surescsv are output in Q-files and are easiest to apply 
+       using sushiftcsv (which was written contemporaneously, Aug 2023).
+
+------------------------------------------------------------------------------
+  I advise running the scripts in the following order:
+------------------------------------------------------------------------------
+
+sh ./Surescsv_create_simple2dstat     Run first to create fake 2D seismic.
+
+sh ./Surescsv_test1
+
+sh ./Surescsv_test2
+
+sh ./Surescsv_test3
+
+sh ./Surescsv_test4
+
+sh ./Surescsv_test5
+
+---
+
+sh ./Surescsv_create_simple3dstat     Run first to create fake 3D seismic.
+
+sh ./Surescsv_test8
+
+sh ./Surescsv_test9
+
+
+
+
+

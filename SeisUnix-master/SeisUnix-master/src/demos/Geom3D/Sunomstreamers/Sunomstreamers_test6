@@ -1,0 +1,63 @@
+#!/bin/sh
+# SuSunomstreamers_test6 - for program SUNOMSTREAMERS
+# Author: Andre Latour, Dec  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This is a test of a reasonably normal towed-streamer situation, except: "
+  echo "---  - shots are further apart than normal (plots are easier to understand)."
+  echo "---  - only 7 streamers of 10 channels each (real layouts are much bigger). "
+  echo "--- This actual test is:                                                    "
+  echo "---  - create traces via sunomstreamers                                     "
+  echo "---  - use non-contiguous with SOME reversed channel numbering on streamers "
+  echo "---  - sort oddly (I use offset) to make sure sunomstreamers does not care  "
+  echo "---    about trace order                                                    "
+  echo "---  - then zero all keys but fldr,tracf (so as not to fool myself)         "
+  echo "---  - input the created traces into sunomstreamers with same setup except  "
+  echo "---    NOT the create option (so it will update keys instead).              "
+  echo "---  - compare the created values with the updated values (should be same)  "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+ sunomstreamers >fake60.su \
+ shotkey=fldr shotspacing=200 \
+ gunkey=fldr gunmod=2 gunid=0,1 guncross=-25,25 guninline=-40,-40 \
+ streamercross=-300,-200,-100,0,100,200,300 \
+ streamerinline=-100,-100,-100,-100,-100,-100,-100 \
+ channelstart=15,25,26,45,51,72,91 \
+ channelend=6,16,35,36,60,63,82 \
+ channelspacing=10,10,10,10,10,10,10 \
+ cdpspacing=5 offpi=2 linelocs=1 scalco=10 verbose=0 \
+ create=5 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ susort <fake60.su >fake60a.su offset
+#
+# Zero everything output by sunomstreamers except shot number (fldr) and channel numbers (tracf).
+#
+ suchw <fake60a.su >fake60b.su key1=sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps \
+                               key2=sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps \
+                               key3=sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps \
+                               b=0,0,0,0,0,0,0,0,0,0,0,0
+#
+ sunomstreamers <fake60b.su >fake61.su \
+ shotkey=fldr shotspacing=200 \
+ gunkey=fldr gunmod=2 gunid=0,1 guncross=-25,25 guninline=-40,-40 \
+ streamercross=-300,-200,-100,0,100,200,300 \
+ streamerinline=-100,-100,-100,-100,-100,-100,-100 \
+ channelstart=15,25,26,45,51,72,91 \
+ channelend=6,16,35,36,60,63,82 \
+ channelspacing=10,10,10,10,10,10,10 \
+ cdpspacing=5 offpi=2 linelocs=1 scalco=10 verbose=0 
+#
+ subfilt <fake61.su >fake61f.su fpasshi=20
+#
+ sunmo <fake61f.su >fake61fn.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+# The filter and inverse NMO give some nice "horizons", which you can see:
+#
+ suxwigb <fake61fn.su &
+#
+ echo "--- diff between created and updated key values follows (should be nothing)"
+ sugethw <fake60a.su key=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake60a.txt
+ sugethw <fake61.su key=fldr,tracf,sx,sy,gx,gy,scalco,counit,offset,cdp,grnofr,grnors,grnlof,gaps >fake61.txt
+ diff fake60a.txt fake61.txt
+ echo "--- after diff  "         

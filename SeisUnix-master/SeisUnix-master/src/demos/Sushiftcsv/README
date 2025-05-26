@@ -1,0 +1,29 @@
+
+SUSHIFTCSV - Apply Static Shifts From Nearest Q-file Records.   
+ 
+ The scripts in this directory are designed to tests the parameters.
+ For more realistic tests, see ../Surescsv which produces surface-consistent 
+ residual statics for fake traces of complete 2D and 3D seismic surveys.
+ 
+ 
+------------------------------------------------------------------------------
+  I advise running the scripts in the following order:
+------------------------------------------------------------------------------
+
+sh ./Sushiftcsv_create1         Must be run first to make fake seismic.
+
+sh ./Sushiftcsv_test1
+
+sh ./Sushiftcsv_test2
+
+sh ./Sushiftcsv_test3
+
+sh ./Sushiftcsv_test4
+
+sh ./Sushiftcsv_test5
+
+sh ./Sushiftcsv_test6
+
+sh ./Sushiftcsv_test7
+
+---

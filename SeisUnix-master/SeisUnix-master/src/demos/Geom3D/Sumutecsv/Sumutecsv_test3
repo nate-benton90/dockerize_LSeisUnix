@@ -1,0 +1,34 @@
+#!/bin/sh
+# Sumutecsv_test1 - for program SUMUTECSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test is similar to test1 except it has mute functions at          "
+  echo "---  the 4 corners of the 3D grid definition (to confirm that the           "
+  echo "---  maximum grid extents works correctly).                                 "
+  echo "---  Also this test uses time in SECONDS from parameter input.              "
+  echo "----------------------------------------------------------------------------"
+#
+# I know the 3d grid is 121 by 23 cells. So make 2783 traces.   
+# Set all offsets to 500.
+#
+  sunull nt=1500 ntr=2783 dt=0.004 >tnull3.su
+  sumath <tnull3.su op=add a=100 >tnull3a.su
+  sushw <tnull3a.su >tnull3acdp.su key=cdp a=1 b=1
+  sushw <tnull3acdp.su >tnull3acdpoff.su key=offset a=500 b=0
+#
+# Note in the mute functions that at offs=500 the tims is equal to 10 times cdp number.
+# At input offset=500, this produces a mute time of 10 times cdp number at all cdps.       
+#
+  sumutecsv <tnull3acdpoff.su >tnull3acdpoffmute.su rfile=kEFG.csv mode=0 \
+        cdp=1,121,2663,2783 \
+        offs=300,500,1000 \
+        tims=.200,1.001,1.501 \
+        offs=300,500,900,2000 \
+        tims=.200,1.121,1.521,.500 \
+        offs=100,300,500,1900,2000 \
+        tims=.050,0.200,3.663,5.063,0.500 \
+        offs=300,500,1000,2000 \
+        tims=.200,3.783,4.283,.500 \
+#
+  suxwigb <tnull3acdpoffmute.su key=cdp xcur=0.5 

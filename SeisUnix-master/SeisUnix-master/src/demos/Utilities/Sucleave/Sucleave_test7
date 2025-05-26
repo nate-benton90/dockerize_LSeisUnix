@@ -1,0 +1,22 @@
+#!/bin/sh
+# Sucleave_test7 - for program SUCLEAVE
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Make lots of traces per offset range. With offset gaps.       ---"
+  echo "-- NOT absolute.                                                 ---"
+  echo " "
+#
+  sunull nt=100 ntr=35 >tnull71.su
+  sushw <tnull71.su >tnull72.su key=offset a=-350 b=22
+  sugethw <tnull72.su key=offset 
+#
+  sucleave <tnull72.su key=offset low=20 size=60 high=250 abs=0 print=1 
+#
+  echo " "
+  echo " Print offsets from two files (-40 and 140).                      "
+  echo " "
+  sugethw <cleave_offset_-40.su key=offset
+  echo " "
+  sugethw <cleave_offset_140.su key=offset
+#

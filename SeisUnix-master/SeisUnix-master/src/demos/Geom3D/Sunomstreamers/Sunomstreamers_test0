@@ -1,0 +1,45 @@
+#!/bin/sh
+# Sunomstreamers_test0 - for program SUNOMSTREAMERS
+# Author: Andre Latour, Dec  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This is a test of a reasonably normal towed-streamer situation, except: "
+  echo "---  - shots are further apart than normal (plots are easier to understand)."
+  echo "---  - only 7 streamers of 10 channels each (real layouts are much bigger). "
+  echo "---  - using create= option to make output traces with no input traces.     "
+  echo "--- This actual test is the same setup of Sunomstreamers as test1:          "
+  echo "---  - except for scalco=1 instead of 10                                    "
+  echo "---  - but it xgraphs shot XYs and reciever XYs as well as mid XYs          "
+  echo "---                                                                         "
+  echo "--- Note: DO NOT EXPECT FULL ACCURACY IN THE XGRAPHs.                       "
+  echo "---       The mid XYs are put in sdel,gdel keys (which are integers).       "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+ sunomstreamers >fake01.su \
+ shotkey=fldr shotspacing=200 \
+ gunkey=fldr gunmod=2 gunid=0,1 guncross=-25,25 guninline=-40,-40 \
+ streamercross=-300,-200,-100,0,100,200,300 \
+ streamerinline=-100,-100,-100,-100,-100,-100,-100 \
+ channelstart=1,11,21,31,41,51,61 \
+ channelend=10,20,30,40,50,60,70 \
+ channelspacing=10,10,10,10,10,10,10 \
+ cdpspacing=5 offpi=2 linelocs=1 scalco=1 verbose=0 \
+ create=5 firstshot=1 spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+# Compute midpoint X,Y for xgraph.   
+#
+ suchw <fake01.su >fake02.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=2,2
+#
+ sugethw <fake02.su output=binary key=sdel,gdel >fake03.bin
+#
+ sugethw <fake02.su output=binary key=sx,sy >fake03a.bin
+#
+ sugethw <fake02.su output=binary key=gx,gy >fake03b.bin
+#
+ cat fake03.bin fake03a.bin fake03b.bin >fake04.bin
+#
+ xgraph <fake04.bin n=350,350,350 linecolor=3,2,4 mark=7,8,6 marksize=5,9,7 linewidth=0,0,0 \
+        style=normal width=1200 height=600 x1beg=99500 x1end=101500 x2beg=9500 x2end=10500 \
+        title="locations:  5 shots (red), their 7 streamers (blue), their midpoints (green)"  &
+#

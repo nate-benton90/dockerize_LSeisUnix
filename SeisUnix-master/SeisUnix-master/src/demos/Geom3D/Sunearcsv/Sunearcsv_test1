@@ -1,0 +1,59 @@
+#!/bin/sh
+# Sunearcsv_test1 - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Make a simple curving cdp profile using suprofcsv.                     "
+  echo "---  Create null traces with straight line XYs alongside that profile.      "
+  echo "---  Use Sunearcsv to assign traces to nearest cdps.                        "
+  echo "---  Use suchw to put midpoint XYs (sx+gx)/2 and (sy+gy)/2 into sdel,gdel   "
+  echo "---    (done strickly for xgraph, note that I do this AFTER Sunearcsv       "
+  echo "---     to make it obvious that the Sunearcsv options DO NOT USE sdel.gdel)."
+  echo "---  Use sugethw to print sx,sy,gx,gy,sdel,gdel,cdp,igi,igc                 "
+  echo "---  Use xgraph to show the cdp profile XYs and the straight line XYs.      "
+  echo "---  Manually check the printed cdp,igi,igc values against the xgraph.      "
+  echo "---  The cdp locations are crosses. Confirm their CDP number by counting    "
+  echo "---  down from top. Look at the trace inline,crossline distances (igi,igc). "
+  echo "---  The inline direction angle is from one cdp location to the next cdp,   "
+  echo "---  which is also the direction of positive inline distance. Positive      "
+  echo "---  crossline distance is to the left when looking from one cdp to next.   "
+  echo "---                                                                         "
+  echo "---  This test generates null traces and XYs with sx=gx and sy=gy.          "
+  echo "---  Which means sdel=sx=gx and gdel=gx=gy.                                 "
+  echo "---  So all traces would have offset=0 if offset was computed.              "
+  echo "---                                                                         "
+  echo "---  Note: The vertical is X axis (for these tests, I do not care).         "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=asis gx=0,1000,1000 gy=0,0,1500 \
+           chordi=100 nmaxa=3 nmaxs=3 chordf=100 \
+           qout=testout11.csv
+#
+ sunull nt=4 ntr=10 >tnull11.su
+ sushw <tnull11.su >tnull12.su key=sx,sy,gx,gy a=600,-50,600,-50 b=60,125,60,125
+#
+ sunearcsv qin=testout11.csv <tnull12.su dimx=mgx dimy=mgy >tnear11.su keyp=cdp okeys=cdp
+#
+ suchw <tnear11.su >tnear12.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=2,2 
+ sugethw <tnear12.su key=sx,sy,gx,gy,sdel,gdel,cdp,igi,igc
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 3 and 4
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use sugethw to output x,y values in binary.                                   
+# Use cat to combine the 2 sets of XYs into one file.                           
+#
+# Use xgraph to plot 2 sets of points with marks of Xs and triangles.
+#
+ sed '/C_SU/d' testout11.csv >testout12.csv
+ cut -d, -f3,4 <testout12.csv >testout13.csv
+ sed '1,$ s/,/ /g' testout13.csv >testout13.txt
+ a2b <testout13.txt >testout13.bin
+#
+ sugethw <tnear12.su output=binary key=sdel,gdel >testout14.bin
+ cat testout13.bin testout14.bin >testout15.bin
+#
+ xgraph <testout15.bin n=40,10 linecolor=2,3 mark=2,6 marksize=10,10 linewidth=0 \
+         width=1000 height=700 x1beg=-800 x1end=1400 x2beg=-100 x2end=2800

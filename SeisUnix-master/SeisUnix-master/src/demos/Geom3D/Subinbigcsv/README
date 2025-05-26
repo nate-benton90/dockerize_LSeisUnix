@@ -1,0 +1,74 @@
+
+SUBINBIGCSV - Make Some CDPs Larger and Delete All Traces Outside Them.
+
+Essentially, SUBINBIGCSV can act as a helper for Velocity Analysis (Velan) for 3D.
+And as a helper for Mute definition for 3D.                                         
+It makes super-cdps by incrementing by user-specified index intervals through the
+inline and crossline indexes of a 3D Grid and renumbering adjacent cdps to the 
+center cdp numbers. It also rejects all traces for cdps not adjacent to center cdps.
+
+This produces cdp locations which fullfill the enclosing-rectangle requirements  
+of SUNMOCSV, SUMUTECSV, and SUBINQCSV (for bilinear interpolation of functions).
+
+See demos/Geom3D/Sunmocsv for details about enclosing-rectangle requirements.
+
+
+The examples herein use the 3D grid definition which fits the 3D survey used in the
+demos/Geom3D/Sutoolcsv and demos/Geom3D/Sugeomcsv and demos/Geom3D/Subincsv examples.
+
+The Reject544 script deliberately deletes all traces for cdp 544 (after BigBin).
+So, the remaining cdps no longer form enclosing-rectangles (as required by SUNMOCSV).
+The VelanBinBig script reacts by producing a blank contour map for 544 which
+you should pick anyway. One pick is best. Then look at the stkvel.p1 output
+when you are finished. For an actual situation, you would then replace the
+velocity function for 544 in stkvel.p1 with some reasonable function.
+ 
+I suggest you run these tests in this order.
+
+sh ./Subinbigcsv_test1       (this is a simple to understand 2D test)
+
+sh ./Subinbigcsv_test2
+
+sh ./Subinbigcsv_test3
+
+
+Then, I suggest you review and run these scripts in this order.
+
+sh ./Create3D                (must be run first to create traces)
+
+sh ./BinBig                  (must be run second to make super-cdps)
+
+sh ./Reject544               (must be run before the next scripts)
+
+sh ./VelanBinBig             (this is INTERACTIVE velan picking) 
+
+sh ./NMOandDisplay           (after velocities are picked)
+
+
+sh ./VelanBinBigRandom       (this is also INTERACTIVE velan picking)
+
+-----
+
+In the place of BinBig above, you can run                                 
+
+sh ./BinBigList              
+
+This demonstrates that you can have different spacing between locations  
+while still getting enclosing-rectangles needed for bilinear interpolation.
+ 
+-----
+
+The following script performs interactive mute picking. Inputting the
+trace file from Reject544 causes it to produce a dark image which you
+should pick anyway. One pick is best. Then look at the mutes.p1 output
+when you are finished. For an actual situation, you would then replace 
+the mute function for 544 in mutes.p1 with some reasonable function.
+
+sh ./MutanBinBig             (this is INTERACTIVE mute picking) 
+
+
+Note: The interactive scripts herein are derived from 
+      demos/Velocity_Analysis/Traditional/Velan
+      which was authored by: Dave Hale, Jack K. Cohen, John Stockwell
+
+ 

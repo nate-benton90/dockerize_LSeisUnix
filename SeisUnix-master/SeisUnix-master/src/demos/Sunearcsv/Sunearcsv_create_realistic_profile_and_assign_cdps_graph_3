@@ -1,0 +1,77 @@
+#!/bin/sh
+# Sunearcsv_create_realistic_profile_and_assign_cdps_graph_3 - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This file uses sutoolcsv to convert a realistic 2d SPS2 R-file        "
+  echo "---  into a Q-file.                                                        "
+  echo "---  Then it inputs that Q-file into suprofcsv and outputs a cdp-profile   "
+  echo "---  using some reasonable parameter values for suprofcsv.                 "
+  echo "---  Note in particular that the input R-file interval is about 25 metres  "
+  echo "---  and the output cdp-profile interval is set to 12.5                    "
+  echo "---                                                                        "
+  echo "---  The sunearcsv program is then used to assign the traces to their      "
+  echo "---  nearest cdp location (updating the cdp,igi,igc keys in the headers).  "
+  echo "---                                                                        "
+  echo "---  xgraph then plots midpoint XYs of traces in 3 cdps and colors the     "
+  echo "---  midpoints of cdp=640 purple, cdp=641 green, and cdp=642 light blue    "
+  echo "---  (and also uses 3 different marks).                                    " 
+  echo "---  And it also plots the input R-locations (in blue) and the output      " 
+  echo "---  cdp-profile locations (in red). (Remember here that the cdp-profile   "
+  echo "---  locations are NOT division lines BETWEEN cdps, they are cdp CENTRES.) "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=realistic401.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=realistic401.csv \
+           chordi=12.5 nmaxa=30 nmaxs=30 chordf=12.5 \
+           qout=realistic411.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 12 and 13
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' realistic401.csv >realistic402.csv
+  cut -d, -f12,13 <realistic402.csv >realistic403.csv
+  sed '1,$ s/,/ /g' realistic403.csv >realistic403.txt
+  a2b <realistic403.txt >realistic403.bin
+#
+# Use sed to remove the first 5 lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 13 and 14
+#
+  sed '1,5d' realistic411.csv >realistic412.csv
+  cut -d, -f13,14 <realistic412.csv >realistic413.csv
+  sed '1,$ s/,/ /g' realistic413.csv >realistic413.txt
+  a2b <realistic413.txt >realistic413.bin
+#
+# Use suchw to compute trace midpoint XYs into sdel,gdel keys (for plotting).
+# Note the division by 20 since the trace XYs are scaled.
+#
+  suchw <fakexsrfn.su >fakexsrfn41.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=20,20 
+#
+# Use sunearcsv to set cdp key to nearest cdp.
+#
+ sunearcsv qin=realistic411.csv <fakexsrfn41.su dimx=mgx dimy=mgy >tnear411.su keyp=cdp okeys=cdp
+#
+# suwind <tnear411.su key=cdp min=640 max=640 >realistic_cdpa.su verbose=1 (tells cdp fold) 
+  suwind <tnear411.su key=cdp min=640 max=640 >realistic_cdpa.su  
+  suwind <tnear411.su key=cdp min=641 max=641 >realistic_cdpb.su 
+  suwind <tnear411.su key=cdp min=642 max=642 >realistic_cdpc.su 
+#
+  sugethw <realistic_cdpa.su output=binary key=sdel,gdel >fakexsrfn41a.bin
+  sugethw <realistic_cdpb.su output=binary key=sdel,gdel >fakexsrfn41b.bin
+  sugethw <realistic_cdpc.su output=binary key=sdel,gdel >fakexsrfn41c.bin
+#
+# Note: cat the trace XYs first so the other things will be on-top-of-them.
+#
+  cat fakexsrfn41a.bin fakexsrfn41b.bin fakexsrfn41c.bin realistic403.bin realistic413.bin >tcomparer4.bin
+#
+# The n value below for the last plot (plot 5) is 9999, which is not the actual value. 
+# (I set it to that just incase the suprofcsv parameters are changed above).
+#
+  xgraph <tcomparer4.bin nplot=5 n=16,18,17,399,9999 linecolor=6,3,5,4,2 mark=3,8,4,6,7 marksize=5,5,5,6,5 linewidth=0 \
+          width=800 height=800 x1beg=338500 x1end=340000 x2beg=5546500 x2end=5548000
+#

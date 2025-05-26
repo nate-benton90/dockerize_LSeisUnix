@@ -1,0 +1,53 @@
+#!/bin/sh
+# Sunearcsv_create_realistic_profile_and_graph_all - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This file uses sutoolcsv to convert a realistic 2d SPS2 R-file        "
+  echo "---  into a Q-file.                                                        "
+  echo "---  Then it inputs that Q-file into suprofcsv and outputs a cdp-profile   "
+  echo "---  using some reasonable parameter values for suprofcsv.                 "
+  echo "---  Note in particular that the input R-file interval is about 25 metres  "
+  echo "---  and the output cdp-profile interval is set to 12.5                    "
+  echo "---                                                                        "
+  echo "---  xgraph then plots the midpoint XYs of traces (in green) made by       "
+  echo "---  Sunearcsv_create_realistic_traces and the input R-locations (in blue) " 
+  echo "---  and the output cdp-profile locations (in red).                        "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=realistic101.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=realistic101.csv \
+           chordi=12.5 nmaxa=30 nmaxs=30 chordf=12.5 \
+           qout=realistic111.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 12 and 13
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' realistic101.csv >realistic102.csv
+  cut -d, -f12,13 <realistic102.csv >realistic103.csv
+  sed '1,$ s/,/ /g' realistic103.csv >realistic103.txt
+  a2b <realistic103.txt >realistic103.bin
+#
+# Use sed to remove the first 5 lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 13 and 14
+#
+  sed '1,5d' realistic111.csv >realistic112.csv
+  cut -d, -f13,14 <realistic112.csv >realistic113.csv
+  sed '1,$ s/,/ /g' realistic113.csv >realistic113.txt
+  a2b <realistic113.txt >realistic113.bin
+#
+  suchw <fakexsrfn.su >fakexsrfn11.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=20,20 
+  sugethw <fakexsrfn11.su output=binary key=sdel,gdel >fakexsrfn11.bin
+#
+# Note: cat the trace XYs first so the other things will be on-top-of-them.
+#
+  cat fakexsrfn11.bin realistic103.bin realistic113.bin >tcomparer1.bin
+#
+  xgraph <tcomparer1.bin nplot=3 n=10140,399,959 linecolor=3,4,2 mark=8,6,7 marksize=5,6,5 linewidth=0 \
+          width=1200 height=800 x1beg=334200 x1end=346500 x2beg=5538400 x2end=5551700
+

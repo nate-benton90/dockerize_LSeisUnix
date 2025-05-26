@@ -1,0 +1,28 @@
+#!/bin/sh
+# Sucleave_test4 - for program SUCLEAVE
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Make null traces with many offsets out-of-range. NOT absolute ---"
+  echo "-- Print option on.                                              ---"
+  echo " "
+#
+  sunull nt=100 ntr=20 >tnull41.su
+  sushw <tnull41.su >tnull42.su key=offset a=-750 b=100
+  sugethw <tnull42.su key=offset 
+#
+  sucleave <tnull42.su key=offset low=50 size=100 high=250 abs=0 print=1 
+#
+  echo " "
+  echo " Print offsets from the TWO extra out-of-range files (low, high)."
+  echo " Note that the low and high files get all traces that are too low"
+  echo " or too high. (For this setup, the print shows their average key "
+  echo " values are outside the range value in their file names, but this"
+  echo " is not always the case. You cannot relie on these extra files   "
+  echo " containing ONLY traces in the range implied by their names even "
+  echo " if the average is within range).                                "
+  echo " "
+  sugethw <cleave_offset_-350.su key=offset
+  echo " "
+  sugethw <cleave_offset_350.su key=offset
+#

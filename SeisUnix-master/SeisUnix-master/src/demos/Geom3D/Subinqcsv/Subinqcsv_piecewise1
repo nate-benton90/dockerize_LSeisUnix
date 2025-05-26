@@ -1,0 +1,18 @@
+#!/bin/sh
+# Subinqcsv_piecewise1 - for program SUBINQCSV
+# Author: Andre Latour, June 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Test of linear interpolation of coordinates using non-cdp keyloc.      "
+  echo "----------------------------------------------------------------------------"
+#
+  subinqcsv qout=qvalsout91.csv igiout=10,100,2 extrapi=1 keyloc=grnors \
+        grnors=20,40,90 \
+        sx=2000,4000,9000 \
+        sy=20000,40000,90000 \
+#
+# Same values, but input via a q-file.
+#
+  subinqcsv qout=qvalsout92.csv igiout=10,100,2 extrapi=1 keyloc=grnors \
+        inloc=1 qin=qvalsin81.csv \
+#

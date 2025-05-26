@@ -1,0 +1,33 @@
+#!/bin/sh
+# Surescsv_test8 - for program SURESCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Input the fake 3D survey.                                              "
+  echo "---  Use surescsv to derive statics.                                        "
+  echo "---  Use sushiftcsv to apply those statics.                                 "
+  echo "---  Make source,receiver,CDP stacks before and after.                      "
+  echo "----------------------------------------------------------------------------"
+#
+  sustackup <fake75.su >fake81.su keyloc=fldr
+  suxwigb <fake81.su key=fldr title="source stack before surescsv" &
+#
+  sustackup <fake75.su >fake82.su keyloc=grnors,gaps
+  suxwigb <fake82.su title="receiver stack before surescsv" &
+#
+  sustackup <fake75.su >fake83.su keyloc=igi,igc
+  suxwigb <fake83.su key=cdp title="CDP stack before surescsv" &
+#
+  surescsv <fake75.su rkeyloc=grnors,gaps ckeyloc=igi,igc longwave=-1 sout=sstat75.csv rout=rstat75.csv 
+#
+  sushiftcsv <fake75.su >fake84.su rkeyloc=grnors,gaps sin=sstat75.csv rin=rstat75.csv
+#
+  sustackup <fake84.su >fake85.su keyloc=fldr
+  suxwigb <fake85.su key=fldr title="source stack AFTER surescsv" &
+#
+  sustackup <fake84.su >fake86.su keyloc=grnors,gaps
+  suxwigb <fake86.su title="receiver stack AFTER surescsv" &
+#
+  sustackup <fake84.su >fake87.su keyloc=igi,igc
+  suxwigb <fake87.su key=cdp title="CDP stack AFTER surescsv" &
+#

@@ -1,0 +1,26 @@
+#!/bin/sh
+# Sushiftcsv_test7 - for program SUSHIFTCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Input fake traces, test other options.                                 "
+  echo "---  This script overrides the parameter defaults and applies statics from  "
+  echo "---  an odd file that uses tracf for location and selev for static values.  "
+  echo "---  Note that the 3 output images are the same since source, receiver, CDP "
+  echo "---  statics are handled the same inside sushiftcsv (except for defaults).  "
+  echo "---    This is the same as test6 except that 2 location keys are used       "
+  echo "---    for the skeyloc,rkeyloc,ckeyloc parameters. The images are the same. "
+  echo "----------------------------------------------------------------------------"
+#
+  sushiftcsv <fake02.su >fake71.su sin=tracf.csv skeyloc=fldr,gaps sstat=selev smult=3 slimit=0.1 rin=none  
+#
+  suxwigb <fake71.su title=" test other source options " &
+#
+  sushiftcsv <fake02.su >fake72.su rin=tracf.csv rkeyloc=fldr,gaps rstat=selev rmult=3 rlimit=0.1 sin=none  
+#
+  suxwigb <fake72.su title=" test other receiver options " &
+#
+  sushiftcsv <fake02.su >fake73.su cin=tracf.csv ckeyloc=fldr,gaps cstat=selev cmult=3 climit=0.1 sin=none rin=none 
+#
+  suxwigb <fake73.su title=" test other CDP options " &
+#

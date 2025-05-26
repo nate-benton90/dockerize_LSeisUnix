@@ -1,0 +1,41 @@
+#!/bin/sh
+# Sumutecsv_test2 - for program SUMUTECSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test is similar to test1 except it makes 2 traces per cdp.        "
+  echo "---  Those 2 traces have offsets of 500 and 800. That produces what         "
+  echo "---  looks like 2 straight lines in the seismic because the mute functions  "
+  echo "---  are the same as for test1 (read the details of test1).                 "
+  echo "---  The primary purpose of this test is to show that multiple offsets      "
+  echo "---  within a cdp are being handled correctly by the code.                  "
+  echo "---  Note: The tracl value on the display is 10 times the cdp number.       "
+  echo "----------------------------------------------------------------------------"
+#
+# I know the 3d grid is 121 by 23 cells. Make 1210 traces (5 inlines of 121).   
+# Make 2 traces per cdp with offset of 500 and 800. 
+#
+  sunull nt=1500 ntr=1210 dt=0.004 >tnull2.su
+  sumath <tnull2.su op=add a=100 >tnull2a.su
+  sushw <tnull2a.su >tnull2b.su key=tracl a=10 b=5
+  sushw <tnull2b.su >tnull2bcdp.su key=cdp a=1 b=0 c=1 j=2
+  sushw <tnull2bcdp.su >tnull2bcdpoff.su key=offset a=500 b=300 c=0 j=2
+#
+# sugethw <tnullbcdpoff.su key=tracl,cdp,offset >afile
+#
+# Similar to test1, try setting extrapi and/or extrapc to 0.
+# Also, change the 300 above to -100 so that offsets 300 and 200 are created.
+# Also, change the 300 above to 700 so that offsets 300 and 1200 are created.
+#
+  sumutecsv <tnull2bcdpoff.su >tnull2bcdpoffmute.su rfile=kEFG.csv mode=0 extrapi=1 extrapc=1 \
+        cdp=131,196,373,438 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=300,500,900,2000 \
+        tims=200,1960,2360,500 \
+        offs=100,300,500,1900,2000 \
+        tims=50,200,3730,5130,500 \
+        offs=300,500,1000,2000 \
+        tims=200,4380,4880,500 \
+#
+  suxwigb <tnull2bcdpoffmute.su key=tracl xcur=0.5 

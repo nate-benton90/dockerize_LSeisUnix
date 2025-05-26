@@ -1,0 +1,81 @@
+#!/bin/sh
+# Susembase_cdp3dinline - for program SUSEMBASE      
+# Author: Andre Latour, Feb  2023
+#
+  echo "---------------------------------------------------------------------"
+  echo " 1. Conveniently use sunomstreamer to create spiked-traces with   ---"
+  echo "    cdp numbers from 1 to 2783.                                   ---"
+  echo " 2. Apply a filter (to make the spikes look like horizons).       ---"
+  echo " 3. Use subincsv to get igi,igc grid indexes from cdp numbers     ---"
+  echo "    (The actual XYs of the grid do not matter here but I am using ---"
+  echo "     the same grid definition as in my other demos).              ---"
+  echo " 4. Use suchw and sustatic to shift the horizons.                 ---"
+  echo " 5. Use suaddnose.                                                ---"
+  echo " 6. Use suwind to delete some traces around the edges of the grid.---"
+  echo "    (Having traces all the way to the edges of the grid would     ---"
+  echo "    make it hard to understand what is going on).                 ---"
+  echo "    Also use suwind to delete cdps 1400,1401,1402                 ---"
+  echo "                                                                  ---"
+  echo " 7. Run susembase with lockey=igi groupkey=igc                    ---"
+  echo " 8. Use subincsv to get cdp number from igi igc indexes.          ---"
+  echo "    Note that susembase only sets the lockey correctly when it    ---"
+  echo "    creates traces. Which in this case is igi. To get correct     ---"
+  echo "    cdp numbers, you must use subincsv with bintype=-32           ---"
+  echo " 9. Run this script and notice that the noise is reduced and      ---"
+  echo "    cdps 1400,1401,1402 are re-created.                           ---"
+  echo "    But also notice that some cdps are created near the edges     ---"
+  echo "    of the grid.                                                  ---"
+  echo "10. When ready, run Susembase_cdp3dcrossline.                     ---"
+  echo "---------------------------------------------------------------------"
+#
+# Use subincsv bintype=-30 to produce grid index keys igi and igc, which makes              
+# it easier to static-shift horizons for test purposes.                           
+#
+ sunomstreamers >tfake81a.su shotkey=fldr shotspacing=200 gunkey=fldr \
+ gunmod=1 gunid=0 guncross=0 guninline=0 streamercross=0 streamerinline=0 \
+ channelkey=cdp channelstart=1 channelend=2783 channelspacing=10 \
+ cdpspacing=0 offpi=0 linelocs=0 scalco=1 \
+ create=1 firstshot=1 spikes=4,0.01,400,2000,404,-400,408,2200,1300,1600,1304,1600,2000,0
+#
+ subincsv <tfake81a.su >tfake81b.su bintype=-30 \
+          grid_xa=338800 grid_ya=5540700 grid_xb=340299 grid_yb=5538101 \
+          grid_xc=339753 grid_yc=5541250 grid_wb=25 grid_wc=50 
+#
+ subfilt <tfake81b.su >tfake81c.su fpasshi=60
+ suchw <tfake81c.su >tfake81d.su key1=gstat key2=igi key3=igc b=-1 a=200 e=1.3 c=1 f=1.5
+ sustatic <tfake81d.su >tfake81e.su hdrs=1 sign=-1
+#
+ sunomstreamers >tfake81f.su shotkey=fldr shotspacing=200 gunkey=fldr \
+ gunmod=1 gunid=0 guncross=0 guninline=0 streamercross=0 streamerinline=0 \
+ channelkey=cdp channelstart=1 channelend=2783 channelspacing=10 \
+ cdpspacing=0 offpi=0 linelocs=0 scalco=1 \
+ create=1 firstshot=1 spikes=4,0.01,500,-2000,504,-2000,2000,0
+#
+ subincsv <tfake81f.su >tfake81g.su bintype=-30 \
+          grid_xa=338800 grid_ya=5540700 grid_xb=340299 grid_yb=5538101 \
+          grid_xc=339753 grid_yc=5541250 grid_wb=25 grid_wc=50 
+#
+ subfilt <tfake81g.su >tfake81h.su fpasshi=60
+ suchw <tfake81h.su >tfake81i.su key1=gstat key2=igi b=1 a=-200 e=1.45
+ sustatic <tfake81i.su >tfake81j.su hdrs=1 sign=-1
+#
+ suop2 tfake81e.su tfake81j.su op=sum >tfake81.su
+ suaddnoise <tfake81.su >tfake82.su sn=5 seed=1 
+#
+ suwind <tfake82.su >tfake83.su key=igi reject=1,2,3,4,5,6,7,,8,9,115,116,117,118,119,120,121
+ suwind <tfake83.su >tfake84.su key=igc reject=1,2,3,4,21,22,23
+ suwind <tfake84.su >tfake85.su key=cdp reject=1400,1401,1402
+ suxwigb <tfake85.su key=cdp title="before inline susembase" &
+#
+# Note: you can interpolate (outputinc=0.5 or whatever), 
+#       it requires AT LEAST resetting the grid cell sizes afterwards. 
+#       But it may also require more grid redefinition than just that.
+#
+ susembase <tfake85.su >tfake86.su lockey=igi groupkey=igc 
+#
+ subincsv <tfake86.su >tfake87.su bintype=-32 \
+          grid_xa=338800 grid_ya=5540700 grid_xb=340299 grid_yb=5538101 \
+          grid_xc=339753 grid_yc=5541250 grid_wb=25 grid_wc=50 
+#
+ suxwigb <tfake87.su key=cdp title="AFTER inline susembase" &
+#

@@ -1,0 +1,73 @@
+#!/bin/sh
+# Sunearcsv_create_realistic_profile_and_graph_with_color_offsets - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This file uses sutoolcsv to convert a realistic 2d SPS2 R-file        "
+  echo "---  into a Q-file.                                                        "
+  echo "---  Then it inputs that Q-file into suprofcsv and outputs a cdp-profile   "
+  echo "---  using some reasonable parameter values for suprofcsv.                 "
+  echo "---  Note in particular that the input R-file interval is about 25 metres  "
+  echo "---  and the output cdp-profile interval is set to 12.5                    "
+  echo "---                                                                        "
+  echo "---  xgraph then plots the midpoint XYs of traces made by                  "
+  echo "---  Sunearcsv_create_realistic_traces and colors source-receiver offsets  " 
+  echo "---  less than 270 purple, offsets 270 to 540 green, and >540 light blue   " 
+  echo "---  (and also uses 3 different marks).                                    " 
+  echo "---  And it also plots the input R-locations (in blue) and the output      " 
+  echo "---  cdp-profile locations (in red).                                       "
+  echo "---                                                                        "
+  echo "---  Note that, if you change suprofcsv parameters nmaxa and mnamxs to 15, "
+  echo "---  the profile moves closer to the survey line, and also closer to where "
+  echo "---  the near-offset traces are located.                                   "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=realistic201.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=realistic201.csv \
+           chordi=12.5 nmaxa=30 nmaxs=30 chordf=12.5 \
+           qout=realistic211.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 12 and 13
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' realistic201.csv >realistic202.csv
+  cut -d, -f12,13 <realistic202.csv >realistic203.csv
+  sed '1,$ s/,/ /g' realistic203.csv >realistic203.txt
+  a2b <realistic203.txt >realistic203.bin
+#
+# Use sed to remove the first 5 lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 13 and 14
+#
+  sed '1,5d' realistic211.csv >realistic212.csv
+  cut -d, -f13,14 <realistic212.csv >realistic213.csv
+  sed '1,$ s/,/ /g' realistic213.csv >realistic213.txt
+  a2b <realistic213.txt >realistic213.bin
+#
+# Use suchw to compute trace midpoint XYs into sdel,gdel keys (for plotting).
+# Note the division by 20 since the trace XYs are scaled.
+#
+  suchw <fakexsrfn.su >fakexsrfn21.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=20,20 
+#
+# Use sucleave to (conveniently) separate the traces into offset ranges.
+#
+  sucleave <fakexsrfn21.su key=offset size=270 print=1 outbase=realistic_offset
+#
+  sugethw <realistic_offset135.su output=binary key=sdel,gdel >fakexsrfn21a.bin
+  sugethw <realistic_offset405.su output=binary key=sdel,gdel >fakexsrfn21b.bin
+  sugethw <realistic_offset675.su output=binary key=sdel,gdel >fakexsrfn21c.bin
+#
+# Note: cat the trace XYs first so the other things will be on-top-of-them.
+#
+  cat fakexsrfn21a.bin fakexsrfn21b.bin fakexsrfn21c.bin realistic203.bin realistic213.bin >tcomparer2.bin
+#
+# The n value below for the last plot (plot 5) is 9999, which is not the actual value. 
+# (I set it to that just incase the suprofcsv parameters are changed above).
+#
+  xgraph <tcomparer2.bin nplot=5 n=3430,3799,2911,399,9999 linecolor=6,3,5,4,2 mark=3,8,4,6,7 marksize=5,5,5,6,5 linewidth=0 \
+          width=1200 height=800 x1beg=334200 x1end=346500 x2beg=5538400 x2end=5551700
+

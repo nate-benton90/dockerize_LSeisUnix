@@ -1,0 +1,140 @@
+ SUFLEX2D - Duplicate Some Traces Into CDPs From Neighbouring CDPs.         
+
+ suflex2d     <in.su >out.su  (other parameters)                            
+
+ This program assigns input traces of a cdp to offset bins (offset ranges). 
+ If an output cdp does not have a user-specified number of traces in an     
+ offset bin, this program searches the neighbouring cdps and duplicates and 
+ outputs traces from the same offset bin. The neighbouring traces that are  
+ closer to the output cdp centre have higher duplication priority. To know  
+ which traces are closer to cdp centre, this program uses igi key values.   
+ The igi key values should be the inline distance between trace midpoint    
+ coordinates and cdp profile coordinates, as computed by program sunearcsv. 
+
+ Traces duplicated from neighbouring cdps have their cdp key value changed  
+ to the output cdp they are duplicated into. (Also their igi key is changed 
+ as described in the igiadd parameter). Note that being duplicated and      
+ output does not mean that a trace is deleted from a neighbouring cdp.      
+ A trace may be deleted if option keepmore is 0, but that is unrelated to   
+ the duplication.                                                           
+
+ Input traces must be ordered by cdp and absolute value of offset. This is  
+ checked and an error-halt will occur at the first input trace where this   
+ is not the case. (See Note On Output for a slight exception to this).      
+
+ Parameter overview:                                                        
+
+ maxflex=1    Maximum Relative cdp to include in flexing. Must be equal to  
+              zero or greater. This program uses the input traces of cdps   
+              from minflex to maxflex (inclusive) around each output cdp.   
+
+ minflex= -maxflex  Minimum Relative cdp to include in flexing. Must be     
+                    equal to zero or smaller. The default is the magnitude  
+                    of maxflex with a negative sign.                        
+
+ maxfold=100  Maximum number of traces per input cdp gather.                
+              Note that the output cdp gathers usually have more traces     
+              than input cdps (and sometimes more traces than this value).  
+
+ binsize=25   Offset Bin Size.                                              
+              Note: The offsets are absolute valued before use herein.      
+              Note: Even though the offset key contains integers,           
+                    this parameter allows floating point numbers.           
+              Note: Offset bins contain their lower boundary but their      
+                    higher boundary belongs to the next higher bin.         
+
+ binalign=binsize/2   Offset Bin Alignment. Default is half of binsize.     
+                      Specify the offset value at the centre of any bin     
+                      that you find convenient. For instance, usually, the  
+                      nominal minimum shot-to-receiver distance produces    
+                      a good alignment of the bin centres.                  
+              Note: Even though the offset key contains integers,           
+                    this parameter allows floating point numbers.           
+              Note: This parameter does not restrict the offset range, the  
+                    offset bins extend from 0 to infinity and all traces    
+                    are put into some offset bin. Empty bins are ignored.   
+              Note: Having an offset distance closer to the bin centre does 
+                    not give higher priority to a trace. Traces in the same 
+                    bin have priority only based on cdp and igi key values. 
+
+ binfold=2    Desired Number of Traces Per Offset Bin. Typical split-spread 
+              surveys have two traces with the same offset in each cdp.     
+
+ binbest=0    Use IGI key values to determine which traces are better to    
+              duplicate to fullfill binfold requirements. Typically, igi    
+              values come from the sunearcsv program and contain the        
+              signed inline distance (positive values means traces are      
+              closer to next cdp, negative means closer to previous cdp).   
+        =1    Use IGC key values but absolute value them. Typically, igc    
+              values come from the sunearcsv program and contain the        
+              signed crossline distance. But this option absolute values    
+              them before use herein. So it does not matter which side of   
+              profile traces are located, only how far away they are in     
+              the crossline direction (smaller absolute values are better). 
+        =2    Use IGC key values but do not absolute value them.            
+              Smaller values (including negatives) are better. Normally     
+              you would not use this option for igc values directly from    
+              sunuearcsv since it means prefering one crossline direction.  
+        =-2   Same as option 2, but reverse the sign of IGC values first.   
+              This makes larger values better.                              
+        =3    Use OFFSET key values. Values closer to the centre of the     
+              offset bin of the trace are better (see binalign parameter).  
+              Typically you might use this option with the subinbigcsv      
+              program (and set binfold=1) to select traces from a super-cdp 
+              to get a nice offset distribution for analysis/display/tests. 
+        Note: Remember that trace priority only applies when comparing      
+              symmetric cdps around the output cdp. Input traces for each   
+              cdp always have more priority than input traces of any        
+              neighbouring cdps. And a close neighbouring cdp always has    
+              more priority than a far neighbouring cdp. Only SYMMETRIC     
+              neighbouring cdps have their igi or igc values compared.      
+        Note: If igi or igc values are all zero (or any constant), traces   
+              will still be duplicated from the closest neighbouring cdp to 
+              fullfill binfold requirements. So you can still use suflex2d  
+              even if you have not used sunearcsv to set igi,igc.           
+        Note: No option here uses igi or igc as true distances, only to     
+              determine the relative priority for duplicating traces.       
+              You can therefore set one of these keys yourself to some      
+              priority that you have computed.                              
+
+ keepmore=0   Do not keep more than binfold traces per bin. Traces in target
+              cdp always have priority over traces of neighbouring cdps.    
+              But sometimes the target cdp already has more input traces in 
+              an offset bin than binfold. Option 0 here means that excess   
+              traces with the worst binbest priority values are not output. 
+         =1   Output those traces anyway.                                   
+
+ igiadd=100   Add this to the igi key values for output traces that are     
+              duplicated into a cdp from neighbouring cdps. Multiply this   
+              value by the difference in cdp numbers between current cdp    
+              and whichever neighbouring cdp the trace originated from.     
+              Usually you should use a value here that easily allows you to 
+              tell which output traces originated from neighbouring cdps.   
+              But in some cases setting this to the distance between cdps   
+              is a good choice (especially if you are attempting to cascade 
+              the flexing - see next note).                                 
+              Note that this value is added to the igi key values even if   
+              the binbest option is 1 or 2.                                 
+
+ Note On Output:                                                            
+       Traces duplicated from neighbouring CDPs have their cdp key value    
+       changed to the cdp they are duplicated into. (Also their igi key is  
+       changed as described in the igiadd parameter). But duplicated traces 
+       are not output in true offset order, just in their bin order. This   
+       means the output must be re-sorted by offset distance if you need    
+       to have true offset order.                                           
+       And, this program has a slight exception to requirement that input   
+       be ordered by cdp and absolute value of offset. The traces only must 
+       be ordered by cdp and absolute value of offset bins. Within bins the 
+       offsets can be out-of-order. Thus output from this program can be    
+       re-input without sorting (if binsize and binalign remain the same).  
+           (Re-input allows cascading of the flexing, but requires          
+            extensive understanding of the situation).                      
+ ------------------------------------------------------------------------   ", 
+
+
+ Credits:                                                                 
+ Author: Andre Latour, Nov 2022                                            
+                                                                          
+ Trace keys involved: cdp,offset,igi                                      
+                                                                          

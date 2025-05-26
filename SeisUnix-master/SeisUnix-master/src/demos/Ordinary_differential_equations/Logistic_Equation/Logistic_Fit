@@ -1,0 +1,21 @@
+#! /bin/sh
+
+STEPMAX=2000
+
+# make data
+verhulst y0=1 a1=1.0 a2=2000 h=0.01 stepmax=$STEPMAX toutfile=times.bin mode=x > population.bin
+
+xgraph < population.bin n=$STEPMAX d1=0.01 style=normal \
+	width=1000 height=1000 label1="time" &
+
+echo
+echo "True values:"
+echo "carrying capacity (K) a2=2000"
+echo "growth constant (r) a1=1.0"
+
+echo
+cat times.bin population.bin > data.bin
+echo "Extracted values"
+logisticfit n=$STEPMAX < data.bin
+
+exit 0

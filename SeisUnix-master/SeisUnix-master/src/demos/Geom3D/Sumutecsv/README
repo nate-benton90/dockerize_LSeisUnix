@@ -1,0 +1,63 @@
+SUMUTECSV performs trace muting (zeroing of amplitudes) according to             
+mute functions that you define. If a 3D grid is input from a K-file 
+(or via command line parameters), bilinear interpolation of those mute
+functions to trace cdps is done. The basic way this happens is that 
+the 3D grid is used to translate the cdp= parameter numbers to 3D grid
+inline and crossline locations.                         
+
+The fact that bilinear interpolation is done forces restrictions on 
+where input mute functions can be located. If you choose to input mute   
+functions along a particular inline then you must put mute functions 
+at the same crosslines at any other inlines that you choose to put  
+mute functions on. 
+
+To see an example of the mute function location restrictions, view  
+vellocs.png file (SUNMOCSV has the same restrictions on locations). 
+Note that you can have changing gaps between functions in the inline 
+direction and changing gaps between functions in crossline direction. 
+But you cannot put mute functions at isolated random locations. 
+
+Again, looking at vellocs.png note that function locations for 
+cdps 136,620,716,232 surround a large area. Within this large area, 
+bilinear interpolation is done using the surrounding 4 functions of 
+smaller areas. If extrapolation options are NOT enabled, linear 
+interpolation occurs outside the edges of the large area, just 
+using the edge function values (for instance, all cdps above 
+the 620,656,666,696,716 line on the image get the same mute functions 
+as if they were located exactly on the 620,656,666,696,716 line). 
+And (if extrapolation options are NOT enabled), all cdps that are 
+outside the corners of the large area get the same mute function as 
+the corner itself.
+
+The examples here use the 3D grid definition which fits the 3D survey
+used in the demos/Geom3D/Sutoolcsv, Sugeomcsv, and Subincsv examples.
+
+The tests below contain details of how they are setup, and what 
+they are intended to do and show.
+
+I suggest you review and run the SUMUTECSV tests in this order....
+
+ sh ./Sumutecsv_test0    
+
+ sh ./Sumutecsv_test1    
+
+ sh ./Sumutecsv_test2    
+
+ sh ./Sumutecsv_test3    
+
+ sh ./Sumutecsv_test4    
+
+ sh ./Sumutecsv_realistic1 
+
+
+The following tests are similar to tests without the q on the end, except
+that the mute values are input in a q-file instead of via the command line.
+They also check that the result has 0 difference with their non-q version 
+and therefore should be run after the tests above.
+
+ sh ./Sumutecsv_test0q    
+
+ sh ./Sumutecsv_test2q    
+
+ sh ./Sumutecsv_test4q    
+

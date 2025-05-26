@@ -1,0 +1,22 @@
+#!/bin/sh
+# Sufarldcsv_create1 - for program SUFARLDCSV
+# Author: Andre Latour, Nov 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Use sugeomcsv to create spiked traces with simple header key valuses.  "
+  echo "---  See demos/Geom3D/Sugeomcsv for how this is done.                       "
+  echo "---  Apply filter to spikes and display them.                               "
+  echo "---  The traces all have just 1 shot line,station and 1 rcvr line,station   "
+  echo "---  but multiple cdps. This allows testing that the q-file output by       "
+  echo "---  sufaldcsv is use-able by the sushiftcsv program (which is the program  "
+  echo "---  that actually needs to be able to apply the floating datum statics).   "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=SRC.csv >testouttraces1.su create=all spikes=4,0.00,500,1000,600,0
+#
+  sugethw <testouttraces1.su key=tracf,grnofr,grnlof,grnors,gaps,cdp
+#
+  subfilt <testouttraces1.su >testouttraces2.su fpasshi=20
+#
+  suxwigb <testouttraces2.su title="fake flat traces with some usefull header values" &
+#

@@ -1,0 +1,80 @@
+#!/bin/sh
+# Subinqcsv_fixed_command - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo " These are examples where there are the same number of velocities     "
+  echo " at each input cdp and they all have the same time values.            "
+  echo " This is the same situation as for the C_SU_NDIMS record in q-files.  "
+  echo "----------------------------------------------------------------------"
+#
+# There are 4 input times in the one tims= list.
+# There are 4 input velocities for each cdp. 
+#
+# The outind= parameter creates 6 tims values to be output in the  
+# C_SU_NDIMS record as well as 6 output vnmo values in each q-record.                             
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout51.csv outind=0,2000,400 iecho=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        tims=0,190,850,1800 \
+        vnmo=1021,2000,4000,5000 \
+        vnmo=1041,3500,4000,5000 \
+        vnmo=1081,3500,4000,5000 \
+        vnmo=1101,5500,6000,8000 \
+        vnmo=2473,3333,5555,6666 \
+        vnmo=2493,3500,4000,5000 \
+        vnmo=2533,3500,4000,5000 \
+        vnmo=2553,3500,4000,5000 \
+        vnmo=3683,3700,4000,5000 \
+        vnmo=3703,3800,4000,5000 \
+        vnmo=3743,3800,4000,5500 \
+        vnmo=3763,5000,6000,8000 \
+#
+# Same setup, but with iecho=0, so this will spatially interpolate.
+# Also add 2 non-tuple values for output (named numa and vuma). Note their 
+# values are cdp + 1000, making it easy to tell that the interpolation
+# and extrapolation is working.
+# But vuma will be inverse-squared-VALUE weighted so it will not match numa,
+# but it should match the first output vnmo value.                          
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout52.csv outind=0,2000,400 extrapi=1 extrapc=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        numa=1021,1041,1081,1101,2473,2493,2533,2553,3683,3703,3743,3763 \
+        vuma=1021,1041,1081,1101,2473,2493,2533,2553,3683,3703,3743,3763 \
+        tims=0,190,850,1800 \
+        vnmo=1021,2000,4000,5000 \
+        vnmo=1041,3500,4000,5000 \
+        vnmo=1081,3500,4000,5000 \
+        vnmo=1101,5500,6000,8000 \
+        vnmo=2473,3333,5555,6666 \
+        vnmo=2493,3500,4000,5000 \
+        vnmo=2533,3500,4000,5000 \
+        vnmo=2553,3500,4000,5000 \
+        vnmo=3683,3700,4000,5000 \
+        vnmo=3703,3800,4000,5000 \
+        vnmo=3743,3800,4000,5500 \
+        vnmo=3763,5000,6000,8000 \
+#
+# Same setup, but remove some locations so that input locations do not
+# cover the entire grid extent.
+# Note that negative vnmo values appear in the output. This shows why it 
+# is not generally a good idea to enable extrapolation for velocities or other
+# values that are using inverse-square-VALUE-weighting.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout53.csv outind=0,2000,400 extrapi=1 extrapc=1 \
+        cdp=1473,1493,1533,1553,2683,2703,2743,2763 \
+        numa=2473,2493,2533,2553,3683,3703,3743,3763 \
+        vuma=2473,2493,2533,2553,3683,3703,3743,3763 \
+        tims=0,190,850,1800 \
+        vnmo=2473,3333,5555,6666 \
+        vnmo=2493,3500,4000,5000 \
+        vnmo=2533,3500,4000,5000 \
+        vnmo=2553,3500,4000,5000 \
+        vnmo=3683,3700,4000,5000 \
+        vnmo=3703,3800,4000,5000 \
+        vnmo=3743,3800,4000,5500 \
+        vnmo=3763,5000,6000,8000 \
+#
+# Note that output identical q-records can be produced using outlist as follows:    
+# subinqcsv rfile=kEFG.csv qout=qvalsout51.csv outlist=0,190,850,1800 iecho=1 \
+#

@@ -1,0 +1,31 @@
+#!/bin/sh
+# Subraid_test1 - for program SUBRAID
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Make null traces and generate cdp and offset numbers in them     --"
+  echo "-- and then sort by cdp,offset.                                     --"
+  echo "-- Then generate another dataset with different cdps and offsets    --"
+  echo "-- and also sort it cdp,offset.                                     --"
+  echo "-- Then use SUBRAID to combine those 2 cdp,offset ordered           --"
+  echo "-- input files into 1 cdp,offset ordered output file.               --"
+  echo "-- (Also set and print selev so you can tell which input the trace  --"
+  echo "--  came from, although you can also tell by offset in this test    --"
+  echo "--  since offset values are unique between the 2 inputs).           --"
+  echo " "
+#
+  sunull nt=3 ntr=40 >tnull01.su
+  sushw <tnull01.su >tnull02.su key=cdp,offset,selev a=1,-299,1 b=3,200,0 j=5,4,1000
+  susort <tnull02.su >tnull03.su cdp offset
+  sugethw <tnull03.su key=cdp,offset,selev
+#
+  sunull nt=3 ntr=30 >tnull04.su
+  sushw <tnull04.su >tnull05.su key=cdp,offset,selev a=2,-297,2 b=2,200,0 j=5,4,1000
+  susort <tnull05.su >tnull06.su cdp offset
+  sugethw <tnull06.su key=cdp,offset,selev
+#
+  subraid key=cdp,offset in1=tnull03.su in2=tnull06.su >tnull07.su 
+  echo " "
+  echo " Header print from output of subraid follows="
+  echo " "
+  sugethw <tnull07.su key=cdp,offset,selev

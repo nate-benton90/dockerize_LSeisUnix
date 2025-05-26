@@ -1,0 +1,54 @@
+#!/bin/sh
+# Sustackup_create_simple2d - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "---  For initial geometry, 3 runs of sugeomcsv are usually required.        "
+  echo "                                                                            "
+  echo "---  The idea of this example is to show novice users how to create some    "
+  echo "---  realistic traces for 2d. The sequence herein is:                       "
+  echo "---   - use l0xall.csv and create traces with spikes                        "
+  echo "---   - update X,Ys and other values from l0sall.csv and l0rall.csv files.  "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - apply inverse NMO                                                   "
+  echo "                                                                            "
+  echo "      See Sutoolcsv/Sutoolcsp_simple2d for how to make simple 2d geometry   "
+  echo "      files such as l0xall.csv, l0sall.csv, and l0rall.csv                  "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=l0xa.csv setid=x match=fldr,tracf names=c_su_id,match1,grnlof,matche1_cf,matche1_ct,matche1_ci,gaps_rf,gaps_rt >fakex.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l0sa.csv setid=s match=grnlof names=c_su_id,grnlof,sx,sy,selev,sstat <fakex.su >fakexs.su
+#
+  sugeomcsv rfile=l0ra.csv setid=r match=gaps names=c_su_id,gaps,gx,gy,gelev,gstat <fakexs.su >fakexsr.su
+#
+  subfilt <fakexsr.su >fakexsrf.su fpasshi=20
+#
+  sunmo <fakexsrf.su >fakexsrfn.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+# The filter and inverse NMO give some nice "horizons", which you can see:
+#
+# suximage <fakexsrfn.su &
+  suxwigb <fakexsrfn.su title="with inverse nmo applied" &
+#
+# Need cdp numbers in order to linearly interp the velocities in sunmo.
+#
+  subincsv <fakexsrfn.su >fakexsrfnb.su bintype=20 point_crz=-200 point_cru=2 point_csz=-200 point_csu=2  
+#
+# Note: Deliberately parameterize wrong velocities at cdp 110            
+#
+  sunmo <fakexsrfnb.su >fakexsrfnbi.su  cdp=1,55,110       \
+       tnmo=0,0.190,0.450,0.800 \
+       vnmo=1800,3500,4000,5000 \
+       tnmo=0,0.190,0.450,0.800 \
+       vnmo=1800,3500,4000,5000 \
+       tnmo=0,0.190,0.450,0.800 \
+       vnmo=1100,2100,3100,3300 
+#
+  suxwigb <fakexsrfnbi.su title="bad nmo, with NO statics applied" &
+#
+  sustatic <fakexsrfnbi.su >fakexsrfnbis.su hdrs=1 sign=-1
+#
+  suxwigb <fakexsrfnbis.su title="bad nmo, with all statics applied" &
+#

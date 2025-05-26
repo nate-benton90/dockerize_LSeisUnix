@@ -1,0 +1,6 @@
+SUADDNOISE - add noise to traces					
+SUGROLL - Ground roll supression using Karhunen-Loeve transform	
+SUHARLAN - signal-noise separation by the invertible linear		
+SUJITTER - Add random time shifts to seismic traces			
+SUSEMBASE - Semblance Based Structure-Oriented Interpolate and Smooth.     
+SUSEMGROUP - Semblance Based Structure-Oriented Smooth In Trace Groups.    

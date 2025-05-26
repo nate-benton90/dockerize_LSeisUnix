@@ -1,0 +1,18 @@
+#!/bin/sh
+# Sushiftcsv_create1 - for program SUSHIFTCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Use sugeomcsv to create spiked traces with simple header key valuses.  "
+  echo "---  See demos/Geom3D/Sugeomcsv for how this is done.                       "
+  echo "---  Apply filter to spikes and display them.                               "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=SRC.csv >fake01.su create=all spikes=4,0.00,200,1000,500,0
+#
+  sugethw <fake01.su key=tracf,fldr,gaps,cdp 
+#
+  subfilt <fake01.su >fake02.su fpasshi=20
+#
+  suxwigb <fake02.su title="flat" &
+#

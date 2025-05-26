@@ -1,0 +1,45 @@
+#!/bin/sh
+# Subinqcsv_notuples_command - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo " These are examples where there are no tuple values, just single      "
+  echo " values at each cdp. The names of these values are numa, numb, vuma.  "
+  echo " There is a limited list of these names recognized by subinqcsv when  "
+  echo " using command line parameter input (but not when using q-file input)."
+  echo " Since vuma starts with a v, it uses inverse-squared-value-weighting, "
+  echo " the results of which can be seen when compared to numa which has the "
+  echo " same input values but is not using inverse-squared-value-weighting.  "
+  echo "----------------------------------------------------------------------"
+#
+# Notice that input numa are cdp + 100. This arrangement makes the ouptut 
+# easier to confirm. Since bilinear interpolation and extrapolation is 
+# occuring based on the cdp locations, then all interpolated output of numa
+# should also be cdp + 100. 
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout0.csv extrapi=1 extrapc=1 iecho=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        numa=121,141,181,201,1573,1593,1633,1653,2783,2803,2843,2863 \
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout1.csv extrapi=1 extrapc=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        numa=121,141,181,201,1573,1593,1633,1653,2783,2803,2843,2863 \
+#
+# As a further test, remove the last 4 input cdps. For bilinear interpolation
+# to still function, remaining input cdps must still form aligned rectangles.      
+# See README and vellocs.png if you do not understand what this means.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout2.csv extrapi=1 extrapc=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553 \
+        numa=121,141,181,201,1573,1593,1633,1653 \
+        numb=221,241,281,301,1673,1693,1733,1753 \
+#
+# Since vuma is using inverse-squared-VALUE-weighting, its output will
+# not match numb output except at the exact input cdp numbers.                
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout3.csv extrapi=1 extrapc=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553 \
+        numa=121,141,181,201,1573,1593,1633,1653 \
+        numb=221,241,281,301,1673,1693,1733,1753 \
+        vuma=221,241,281,301,1673,1693,1733,1753 \
+#

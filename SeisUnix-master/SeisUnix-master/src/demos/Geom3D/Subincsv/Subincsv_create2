@@ -1,0 +1,46 @@
+#!/bin/sh
+# Sugeomcsp_create_realistic_for_bin 
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some realistic traces            "
+  echo "---  for use in Subincsv tests. The sequence herein is:                     "
+  echo "---   - use SPS2 X-file and create traces with spike seismic amplitudes     "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---  BUT do not bother to inverse-NMO the traces.                           "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Create traces from the values in SPS2 X-file (plus spikes)
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fakex.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su
+# rm -f fakex.su 
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su
+# rm -f fakexs.su 
+#
+  subfilt <fakexsr.su >fakexsrf.su fpasshi=20
+# rm -f fakexsr.su 
+#
+# Note that there is no reason to run inverse-NMO and then forward-NMO since all we
+# are doing in the Subincsv tests is binning, sorting, and stacking.
+#
+# sunmo <fakexsrf.su >fakexsrfn.su invert=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+# rm -f fakexsrf.su 
+#
+# suximage <fakexsrf.su
+#
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some realistic traces            "
+  echo "---  for use in Subincsv tests. The sequence herein is:                     "
+  echo "---   - use SPS2 X-file and create traces with spike seismic amplitudes     "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---  BUT do not bother to inverse-NMO the traces.                           "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"

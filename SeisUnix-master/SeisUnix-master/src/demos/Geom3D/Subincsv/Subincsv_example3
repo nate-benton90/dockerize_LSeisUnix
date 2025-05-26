@@ -1,0 +1,66 @@
+#!/bin/sh
+# Subincsp_example3 - for program SUBINCSV
+# Author: Andre Latour, Aug 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  in this example, subincsv reads a 3d grid definition and updates cdp   "
+  echo "---  key with the 3d cell number, and also igi,igc with 3d grid indexes.    "
+  echo "---  After that, the traces are sorted (to cdp) and stacked.                "
+  echo "---  Note the empty spots in the suxwigb image. This, of course, is because "
+  echo "---  many cdps (cells) near the edges of the grid contain no traces.        "
+  echo "---  Note that subincsv is used poststack with bintype=-30. This (re)sets   "
+  echo "---  igi,igc and sx,sy,gx,gy to the cell centre values of the cdp number    "
+  echo "---  (where sx,sy are raw coordinates and gx,gy are grid coordinates).      "
+  echo "---  Since sustack is stacking on cdp, the cdp value is the most            "
+  echo "---  trustworthy value after sustack.                                       "
+  echo "---  Advice: You might think that making the grid as small as possible      "
+  echo "---          is a good idea. But usually it is better to have 10 or more    "
+  echo "---          empty cdps near the edges. This is especially true when        "
+  echo "---          using 2d programs to process 3d surveys (it is not good for a  "
+  echo "---          2d migration aperture to wrap to the other side of the grid).  "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Note that the input traces are NOT inverse-NMOed because we would just have 
+# to run forward-NMO here.                                                       
+#
+# sunmo <fakexsrf.su >fakexsrfn.su tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+subincsv <fakexsrf.su >faketfb.su rfile=kEFG.csv 
+#
+susort <faketfb.su >faketfbs.su cdp offset
+#
+sustack <faketfbs.su >faketfbss.su key=cdp verbose=1
+#
+sugethw <faketfbss.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+suxwigb <faketfbss.su key=cdp
+#
+# 
+#
+ subincsv <faketfbss.su >fakepoststack.su rfile=kEFG.csv bintype=-30 
+#
+ sugethw <fakepoststack.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+#
+#
+#
+# The 7 other grid definitions of example2 can also be used.
+# But you should delete some traces before doing this since 
+# the input trace distribution is so consistant that it will 
+# be hard to tell how the survey is getting re-orientated.          
+#
+#subincsv <fakexsrf.su >faketfb.su rfile=kEGF.csv 
+#
+#subincsv <fakexsrf.su >faketfb.su rfile=kFEH.csv
+#
+#subincsv <fakexsrf.su >faketfb.su rfile=kFHE.csv
+#
+#subincsv <fakexsrf.su >faketfb.su rfile=kGEH.csv
+#
+#subincsv <fakexsrf.su >faketfb.su rfile=kGHE.csv
+#
+#subincsv <fakexsrf.su >faketfb.su rfile=kHFG.csv
+#
+#subincsv <fakexsrf.su >faketfb.su rfile=kHGF.csv
+#

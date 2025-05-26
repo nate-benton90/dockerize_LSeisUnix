@@ -1,0 +1,55 @@
+#!/bin/sh
+# Subraid_test5 - for program SUBRAID
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- This test is the same as test3 except just using cdp (not offset) --"
+  echo "-- Also deliberately changing order of concatenation to highlight    --"
+  echo "-- the effect (read notes herein).                                   --"
+  echo " "
+#
+  sunull nt=3 ntr=40 >tnull71.su
+  sushw <tnull71.su >tnull72.su key=cdp,offset,selev a=1,-299,1 b=3,200,0 j=5,4,1000
+  suhtmath <tnull72.su >tnull73.su key=cdp op=add 
+  suhtmath <tnull73.su >tnull74.su key=offset op=add scale=100 
+  susort <tnull74.su >tnull75.su cdp
+#
+  sunull nt=3 ntr=30 >tnull76.su
+  sushw <tnull76.su >tnull77.su key=cdp,offset,selev a=2,-297,2 b=2,200,0 j=5,4,1000
+  suhtmath <tnull77.su >tnull78.su key=cdp op=add 
+  suhtmath <tnull78.su >tnull79.su key=offset op=add scale=100 
+  susort <tnull79.su >tnull80.su cdp -offset
+#
+  sunull nt=3 ntr=40 >tnull81.su
+  sushw <tnull81.su >tnull82.su key=cdp,offset,selev a=4,-295,1 b=5,100,0 j=5,4,1000
+  suhtmath <tnull82.su >tnull83.su key=cdp op=add 
+  suhtmath <tnull83.su >tnull84.su key=offset op=add scale=100 
+  susort <tnull84.su >tnull85.su cdp 
+#
+  subraid key=cdp in11=tnull75.su in52=tnull80.su in83=tnull85.su >tnull86.su 
+  suascii <tnull86.su >info86.txt
+#
+# Now combine the 3 files by concatenate and full resort. 
+# By luck they should be the same because the middle file with the -offset
+# sort is the middle of the concatenation here and both susort and subraid
+# leave the traces from the 3 files in same sequence in their combined cdps. 
+#
+  cat tnull75.su tnull80.su tnull85.su >tnull87.su
+  susort <tnull87.su >tnull88.su cdp
+  suascii <tnull88.su >info88.txt
+  echo " "
+  echo "  diff -q info86.txt info88.txt follows. By luck, should be blank."
+  echo " "
+  diff -q info86.txt info88.txt
+#
+# But now alter the concatenation order and repeat. The susort is now
+# leaving the offsets in a different order in the cdps.
+#
+  cat tnull80.su tnull75.su tnull85.su >tnull89.su
+  susort <tnull89.su >tnull90.su cdp
+  suascii <tnull90.su >info90.txt
+  echo " "
+  echo "  diff -q info86.txt info90.txt follows. Should be different."
+  echo " "
+  diff -q info86.txt info90.txt
+

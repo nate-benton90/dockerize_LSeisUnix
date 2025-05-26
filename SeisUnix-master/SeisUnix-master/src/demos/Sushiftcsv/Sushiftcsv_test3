@@ -1,0 +1,12 @@
+#!/bin/sh
+# Sushiftcsv_test3 - for program SUSHIFTCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Input fake traces, apply only the CDP statics (remember default = -2)) "
+  echo "----------------------------------------------------------------------------"
+#
+  sushiftcsv <fake02.su >fake31.su sin=none rin=none cin=cstat.csv
+#
+  suxwigb <fake31.su title=" applied only CDP statics (remember, default -2)" &
+#

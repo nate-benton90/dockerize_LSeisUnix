@@ -1,0 +1,130 @@
+ SUSEMGROUP - Semblance Based Structure-Oriented Smooth In Trace Groups.    
+
+ This program performs semblance scanning to derive (apparent) dips in the  
+ direction of offsets within cdps (or other key values). It then uses those 
+ dips to align trace sample values and performs a normalized sum (which     
+ reduces noise). Since the dip compensation produces locally-flat horizons  
+ during summing, the result is less smearing of those horizons.             
+      This program does not interpolate. No traces will be created.         
+      This program can process 2D and 3D stacked data. Since interpolation  
+      is often desirable for stacked data, see program susembase for that.  
+
+ susemgroup   <in.su >out.su  (other parameters)                            
+
+ Parameter overview:                                                        
+
+ lockey=offset Trace key that indicates location within groupkey group.     
+               (Traces within groups do not have to be sorted by this key). 
+         Note: Other parameters default to values corresponding to this     
+               lockey being offset. For 2D stacked data, you should SPECIFY 
+               lockkey=cdp and groupkey=none and approximately scanstep=0.5 
+               and scanmax=12 and locmaxscan=3. For 3D stacked data, you    
+               should SPECIFY lockkey=igi or igc and groupkey=igc or igi and
+               approximately scanstep=0.5 and scanmax=12 and locmaxscan=3.  
+
+ groupkey=cdp  Trace key that indicates a group of traces. Traces with the  ",  
+               same groupkey value are processed as a group. Any CHANGE of  ",  
+               this groupkey value indicates a new group. For cdps this     ",  
+               grouping is typically achieved by sorting. But, for instance,",  
+               a 3D shot gather typically contains traces in receiver line  ",  
+               groups, with NEW groups being defined herein for subsequent  ",  
+               shots even though the receiver line numbers REPEAT.          ",  
+         =none There is only 1 group and all lockey values are in the group.",  
+               Typically this option is for stacked input. For instance,    ",  
+               to input a 2D stack specify lockey=cdp (and groupkey=none).  ",  
+               For a 3D stack then lockey,groupkey are igi,igc then igc,igi ",  
+               (or vice-versa, depending on which direction you sort first).",  
+               For large stacked data, also increase the maxfold value.     
+         Note: If you need to use susort, remember that the sort keys are   ",  
+               listed in reverse order of lockey and groupkey here.         ",  
+
+ maxfold=999  This is maximum number of traces in a group. For instance,    
+              if groupkey=cdp this is maximum number of traces in any cdp.  
+
+ locmaxscan=75 Maximum Relative lockey to include in scanning for dips.     
+               Must be greater than or equal to 0. This program scans traces
+               from -locmaxscan to locmaxscan (inclusive) at each location. 
+           =0  Do not scan for dips. You must specify parameter locmaxsum   
+               and you cannot specify scanstep, scanmax, scanmin, dipext.   
+               Note: The default value corresponds to a lockey=offset,      
+                     so the 75 typically means 75 metres or 75 feet.        
+
+ scanstep=0.05      Time Step to Scan (milliseconds per 1 lockey unit).     
+ scanmax =1.1       Maximum Time to Scan (milliseconds per 1 lockey unit).  
+ scanmin =-scanmax  Minimum Time to Scan (milliseconds per 1 lockey unit).  
+              Note: These defaults correspond to a lockey=offset, so these  
+                    values are typically milliseconds per metre or foot.    
+
+ dipext=12. Dip Extender (milliseconds).                                    
+            At each location the semblance scanning produces an estimate    
+            of the dip at each sample time. This parameter performs a       
+            weighted-average of those estimated dips symmetrically from     
+            -dipext to +dipext. The weights used are the sum of the         
+            squared amplitudes of seismic values along the estimated dip    
+            in the locmaxscan range of input traces. In cruder terms: the   
+            power along the dip value chozen by the semblance scanning.     
+            Effectively, this causes the dip values from large horizons     
+            to be trusted more and extended up and down nearby times.       
+
+ dipuse=1  Estimate and use dips at input locations. (Same options as the   
+           susembase program, but since input and output locations are same 
+           herein, the actual decision is how you want to use the dips).    
+       =0  Estimate and use dips at output locations.                       
+
+ locmaxsum=locmaxscan  Maximum Relative lockey to include in normalized sum.
+                       Must be greater than 0. This program sums the input  
+                       traces from -locmaxsum to locmaxsum (inclusive) at   
+                       each location (and divides by the total number).     
+                 Note: Remember that the sample values of these traces are  
+                       corrected by their estimated dips before summing, so 
+                       the result is less smeared than uncorrected values.  
+
+ outdip=   Do not output this file.                                         
+       =(file name) Output the dip values chosen by the semblance scanning  
+           into trace samples in this file. The trace header values are     
+           copied from the seismic traces.                                  
+     Note: These dips are after dipext processing. But even with dipext=0   
+           they will not have scanstep granularity because the scanned      
+           maximum semblance dip undergoes a 3-point interpolation to get   
+           a better approximation of the dip at the true peak in semblance. 
+     Note: It is technically more correct to call the dips made and used    
+           by this program APPARANT dips. The dip values are put into the   
+           trace samples and are in milliseconds per 1 location unit.       
+
+ outpow=   Do not output this file.                                         
+       =(file name) Output the average power along the dip direction chosen 
+           by the semblance scanning. (Same header values as for outdip).   
+
+ outsem=   Do not output this file.                                         
+       =(file name) Output the semblance value computed and chosen by the   
+           semblance scanning. (Same header values as for outdip).          
+
+ indip=    Name of trace file which contains (apparant) dip values.         
+           Dip scanning is disabled if you use this parameter. Thus you     
+           cannot specify parameters scanstep, scanmax, scanmin, dipext,    
+           and locmaxscan - and you must specify parameter locmaxsum.       
+           This file is usually initially made by specifying outdip above.  
+     Note: The intention here is to allow you to output dips from one run   
+           of this program and use them in a second run of this program.    
+           The first run can input smoothed, denoised seismic to get dips,  
+           and the second run can input the un-smoothed, noisy seismic and  
+           use the dips from the first run. As well, you can also actually  
+           smooth and denoise the DIP VALUES in this file before input here.
+
+ Note: This program enforces non-hierarchical parameter error checking.     
+       This means if you disable a main option, all parameters related      
+       to it must be removed from the command line. That is, for novice     
+       users this program is sufficiently complex that it refuses to guess  
+       which parameter was specified in error.                              
+
+ ------------------------------------------------------------------------   ", 
+
+
+ Credits:                                                                 
+ Author: Andre Latour, Feb 2023                                            
+ 1. This program derived from susembase, so retaining the rolling names   
+    even though this program is not employing rolling storage technique.  
+ 2. As of Feb 2023, scanit functions in susembase and herein are identical.*/
+                                                                          
+ Trace keys usually involved: offset,cdp                                  
+                                                                          

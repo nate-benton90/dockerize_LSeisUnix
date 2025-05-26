@@ -1,0 +1,48 @@
+#!/bin/sh
+# Sustackup_test1 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of stacking by cdp.                                        --"
+  echo "---  - Note that the created traces are not in cdp order.                 --"
+  echo "---    (but the display of the input is done using horizontal key of cdp) --"
+  echo "---  - The created traces get static shifted to put their single spike    --"
+  echo "---    at the same time as the offset value contained in cdps01.csv       --"
+  echo "---    which makes it easy to see they have been summed into correct cdps.--"
+  echo "---  - Note that fold is in output nhs key.                                --"
+  echo "---  - Note that the output header for each cdp is actually copied from    --"
+  echo "---    the input trace with smallest offset for that cdp. You can check    --"
+  echo "---    that by looking at the offset and tracf values from output stack.   --"
+  echo "---                                                                        --"
+  echo "---    If you do not believe the stacking, remove the subfilt.             --"
+  echo "---                                                                        --"
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=cdps01.csv >fake01.su create=all spikes=4,0.00,100,1000,1200,0 
+#
+ subfilt <fake01.su >fake02.su fpasshi=40
+#
+ suchw <fake02.su >fake03.su key1=gstat key2=offset a=-100 b=1 
+ sustatic <fake03.su >fake04.su hdrs=1 sign=-1
+#
+ suxwigb <fake04.su key=cdp title="input (remember display has multiple traces per cdp)" &
+#
+ sugethw <fake04.su key=cdp,nhs,offset,tracf
+#
+#sustackup <fake04.su >fake02.su keyloc=cdp maxstack=7
+ sustackup <fake04.su >fake05.su 
+#
+ sugethw <fake05.su key=cdp,nhs,offset,tracf
+#
+ suxwigb <fake05.su key=cdp title="output of sustackup by cdp" &
+#
+  echo " Next, stacking to cdp using susort and sustack for comparison. --"
+#
+ susort <fake04.su >fake06.su cdp 
+#
+ sustack <fake06.su >fake07.su 
+#
+ sugethw <fake07.su key=cdp,nhs,offset,tracf
+#
+ suxwigb <fake07.su key=cdp title="output after susort and sustack by cdp" &
+#

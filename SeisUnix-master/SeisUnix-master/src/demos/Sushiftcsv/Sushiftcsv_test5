@@ -1,0 +1,12 @@
+#!/bin/sh
+# Sushiftcsv_test5 - for program SUSHIFTCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Input fake traces, apply source,receiver,CDP statics                   "
+  echo "----------------------------------------------------------------------------"
+#
+  sushiftcsv <fake02.su >fake51.su cin=cstat.csv 
+#
+  suxwigb <fake51.su title=" applied source,receiver, -2*CDP statics " &
+#

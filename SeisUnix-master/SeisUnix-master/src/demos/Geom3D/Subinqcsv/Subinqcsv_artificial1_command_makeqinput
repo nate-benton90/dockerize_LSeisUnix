@@ -1,0 +1,128 @@
+#!/bin/sh
+# Subinqcsv_artificial_command_makeqinput - for program SUBINQCSV.
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo "-  This is not really a test. It exists to output a q-file which      "
+  echo "-  has convenient values for testing INPUT of q-files to subinqcsv.   "
+  echo "-  The output q-file is standard and can be input as-is to subinqcsv. "
+  echo "-  But that is not the purpose. Usually, you should delete C_SU_NDIMS "
+  echo "-  record from output file and make other modifications (read herein)."
+  echo "----------------------------------------------------------------------"
+#
+# Subinqcsv will translate cdp= parameter values to their inline and crossline
+# locations using 3d grid defined in kEFG.csv (see locations in vellocs.png).                               
+# Subinqcsv can interpolate and output values for all 2783 input trace cdps. 
+# The interpolation will be bilinear, linear, or constant depending on where 
+# the output cdp is located relative to the input locations.             
+#
+# To check that interpolation is bilinear, linear, or constant as appropriate, 
+# note that first  vnmo= value of each input function is 10000 + cdp number, 
+#           second vnmo= value of each input function is 20000 + igi number,
+#           third  vnmo= value of each input function is 30000 + igc number,
+#           fourth vnmo= value of each input function is 40000.                
+# Since all input locations have vnmo= that match their cdp,igi,igc
+# plus 10000,20000,30000 their INTERPOLATED output values should match. 
+# Actually, the output vnmo values will not match exactly because they are          
+# inverse-square-VALUE-weighted by default because their names start with v    
+# (the addition of 10000,20000,30000 reduces effect of 1/vel-squared).                  
+#
+# And, for each location, there is a dpth=, which is similar to vnmo= except     
+# that the values have an additional 5000 added to them.                         
+# Since dpth= is not inverse-square-value-weighted by default, its output
+# values should match exactly cdp,igi,igc + 15000,25000,35000.       
+#
+# And also note that, right after cdp= there are vuma= and numa= values which 
+# match the cdp numbers except that 1000 and 3000 are added. Again, since vuma=
+# starts with a v, by default it uses inverse-square-value-weighting.           
+#
+# Along with everything else, in the output q-file notice the C_SU_NDIMS record.
+# It has the name tnmo, some commas, then the outind values are duplicated.
+# THESE ARE Q-FILE STANDARDS. If you look at the records after inputting them
+# to a Spreadsheet, you will see why these standards exist. The commas ensure     
+# that the first column containing vnmo gets the correct outind value at top.
+# And each column to the right also gets its corresponding outind value.
+# In other words, these q-file standards exist so that you can easily SEE which 
+# output time value corresponds to each vnmo and dpth column.                     
+#
+# This setup allows varying numbers of tuples per location, but here there are
+# always 4 per location with identical tupa and tnmo values. This is just done
+# conveniently herein, the actual tests for varying tuples occurs elsewhere.
+#
+# Since iecho=1, output file only has q-records at the 15 input cdp= locations. 
+# Therefore, you do not need a 3d grid input. This choice reduces the number  
+# of values on the q-records by not outputting the standard 3d related values.                 
+# This output is also more likely to be what the user will start from initially                
+# when specifying q-files manually via a Spreadsheet.                                         
+#
+# The output here is progenitor of qvalsin21VARY.csv and qvalsin21VARYodd.csv
+#          *** Make sure to delete the output C_SU_NDIMS record ***
+#
+  subinqcsv qout=qvalsout19.csv formtv=%.3f extrapi=1 \
+            outind=0.000,0.012,0.004 iecho=1 \
+        cdp=136,172,182,212,232,257,293,303,333,353,620,656,666,696,716  \
+        vuma=1136,1172,1182,1212,1232,1257,1293,1303,1333,1353,1620,1656,1666,1696,1716  \
+        numa=3136,3172,3182,3212,3232,3257,3293,3303,3333,3353,3620,3656,3666,3696,3716  \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10136,20015,30002,40000 \
+        dpth=15136,25015,35002,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10172,20051,30002,40000 \
+        dpth=15172,25051,35002,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10182,20061,30002,40000 \
+        dpth=15182,25061,35002,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10212,20091,30002,40000 \
+        dpth=15212,25091,35002,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10232,20111,30002,40000 \
+        dpth=15232,25111,35002,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10257,20015,30003,40000 \
+        dpth=15257,25015,35003,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10293,20051,30003,40000 \
+        dpth=15293,25051,35003,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10303,20061,30003,40000 \
+        dpth=15303,25061,35003,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10333,20091,30003,40000 \
+        dpth=15333,25091,35003,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10353,20111,30003,40000 \
+        dpth=15353,25111,35003,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10620,20015,30006,40000 \
+        dpth=15620,25015,35006,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10656,20051,30006,40000 \
+        dpth=15656,25051,35006,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10666,20061,30006,40000 \
+        dpth=15666,25061,35006,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10696,20091,30006,40000 \
+        dpth=15696,25091,35006,45000 \
+        tupa=0.000,0.004,0.008,0.012 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=10716,20111,30006,40000 \
+        dpth=15716,25111,35006,45000 \
+#
+# subinqcsv rfile=kEFG.csv qout=qvalsout19.csv formtv=%.3f extrapi=1 extrapc=1 \
+#           outind=0.000,0.012,0.004 iecho=1 \

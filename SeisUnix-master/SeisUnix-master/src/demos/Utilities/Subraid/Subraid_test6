@@ -1,0 +1,24 @@
+#!/bin/sh
+# Subraid_test6 - for program SUBRAID
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- Same as test1, just use different key names (fldr,tracf)         --"
+  echo "-- and different numbers.                                           --"
+  echo " "
+#
+  sunull nt=3 ntr=40 >tnull91.su
+  sushw <tnull91.su >tnull92.su key=fldr,tracf,selev a=-10,101,1 b=3,200,0 j=5,4,1000
+  susort <tnull92.su >tnull93.su fldr tracf
+  sugethw <tnull93.su key=fldr,tracf,selev
+#
+  sunull nt=3 ntr=30 >tnull94.su
+  sushw <tnull94.su >tnull95.su key=fldr,tracf,selev a=-9,103,2 b=2,200,0 j=5,4,1000
+  susort <tnull95.su >tnull96.su fldr tracf
+  sugethw <tnull96.su key=fldr,tracf,selev
+#
+  subraid key=fldr,tracf in1=tnull93.su in2=tnull96.su >tnull97.su 
+  echo " "
+  echo " Header print from output of subraid follows="
+  echo " "
+  sugethw <tnull97.su key=fldr,tracf,selev

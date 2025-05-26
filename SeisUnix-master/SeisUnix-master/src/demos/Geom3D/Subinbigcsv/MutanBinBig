@@ -1,0 +1,250 @@
+#! /bin/sh
+# Mute definition using binbig cdps (as output by BinBig script).
+# This script is based on demos/Velocity_Analysis/Traditional/Velan
+# authored by: Dave Hale, Jack K. Cohen, John Stockwell
+#
+# Modified: Andre Latour, May 1 2022.
+#           Only the par file for sumutecsv is created. 
+#           Note that BinBig can also be used for 2D and this script    
+#           will also function for that case.                           
+# NOTE: Comment lines preceeding user input start with  ##
+#set -x
+
+
+#mutepanel=bbsorted.su    # input traces from BinBig (subinbigcsv and susort)                  
+mutepanel=bbsortedno544.su  # input traces after Reject544                 
+qlocations=qlocations.csv # cdp locations from BinBig (subinbigcsv)
+seqbeg=5                 # skip this many header records in qlocations
+
+# The sumutecsv has many parameters and options.                      
+# But I have only put these here.                                    
+# There options ARE passed through the parameter file made here.
+mode=0       # 0=mute above    1=mute below       
+ntaper=0     # number of samples to taper mute
+extrapt=0    # 0 means DO NOT extrapolate at ends in offset direction. 
+             #   (Mute times beyond ends are held constant). 
+             # 1 means extrapolate at both offset ends.
+             # 2 means extrapolate only at lower offset end.
+             # 3 means extrapolate only at higher offset end.
+
+maxoff=2000             # maximum offset to plot     
+fold=9999        	# maximum traces that will be accepted per cdp     
+mpicks=mutes.p1	        # output file of cdp=, offs=, and tims= values
+mpickstail=mutestail.p1	# convenient file with some values
+
+perc=97		# clip above perc percential in amplitude
+xcur=3		# allow xcur trace xcursion
+
+### Get header info
+
+nout=`sugethw ns <$mutepanel | sed 1q | sed 's/.*ns=//'`
+dt=`sugethw dt <$mutepanel | sed 1q | sed 's/.*dt=//'`
+dxout=`bc -l <<END
+	$dt / 1000000
+END`
+
+## Create null traces to use if there are no traces in the desired cdp.
+## Add 10 amplitude so there is something to mute. Set offsets.
+sunull nt=$nout ntr=100 dt=$dxout >panel.miss1
+sumath <panel.miss1 op=add a=10 >panel.miss2
+sushw <panel.miss2 >panel.missing key=offset a=0 b=100
+
+
+echo  "Skip Introduction? (y/n) " | tr -d "\012" >/dev/tty
+read response
+case $response in
+n*) # continue mute definition
+
+
+### give instructions
+echo
+echo
+echo "            Instructions for Mute Picking."
+echo
+echo "  A wiggle trace plot of the cdp panel will appear. Click on it. "
+echo
+echo "  Pick by placing cursor on plot and typing 's'. Type 'q' after last pick."
+echo "  This is 'blind' picking. There is no indication a point has been picked."
+echo
+echo "  You must pick in increasing offset distance. "
+echo
+echo "  You may get some DARK trace plots. PICK THEM ANYWAY."
+echo "  This is deliberate when there are no traces for a cdp location."
+echo "  The bilinear interpolation of sumutecsv requires mute functions"
+echo "  that form enclosing rectangles. If you make just one pick you can"
+echo "  recognize these locations later and replace them with reasonable"
+echo "  mute functions made from nearby locations."
+echo
+echo "  After picking, you will see a muted version of the input traces." 
+echo
+echo "  You will be prompted in the terminal window to hit return. "
+echo "  Then you will be asked if your picks are ok. This gives you "
+echo "  a chance to re-pick the mute if you do not like it."
+
+pause
+
+;;
+*y) #continue
+
+echo
+echo "Beginning the mute definition"
+echo
+
+;;
+esac
+
+
+>$mpicks
+>$mpickstail
+echo  "mode=$mode" | tr -d "\012" >>$mpicks
+echo  " ntaper=$ntaper" | tr -d "\012" >>$mpicks
+echo  " extrapt=$extrapt" >>$mpicks
+
+seqnow=$seqbeg
+seqend=`wc -l < $qlocations`
+
+while [ $seqnow -lt $seqend ]
+do
+        cdp=`sed <"$qlocations" 1,"$seqnow"d | sed 1q | cut -d, -f2`
+        igi=`sed <"$qlocations" 1,"$seqnow"d | sed 1q | cut -d, -f4`
+        igc=`sed <"$qlocations" 1,"$seqnow"d | sed 1q | cut -d, -f5`
+
+	ok=false
+	reusepanel=false
+	
+	# see if panel.$cdp exists
+	if [ -f panel.$cdp ]
+	then
+		echo  "panel.$cdp exists. Reuse? (y/n) " | tr -d "\012" >/dev/tty
+		read response
+		case $response in
+		n*) # continue velocity analysis
+			reusepanel=false
+		;;
+		y*) # no need to get velocity panel
+			reusepanel=true
+		;;
+		esac
+	fi
+
+	# see if par.$cdp exists
+	if [ -f par.$cdp ]
+	then
+		echo
+		echo " file par.$cdp already exists"
+		echo " indicating that cdp $cdp has been picked"
+		echo
+
+		echo  "Redo mute definition on cdp $cdp? (y/n) " | tr -d "\012" >/dev/tty
+		read response
+		case $response in
+		n*) # continue velocity analysis with next cdp
+			ok=true
+		;;
+		y*) # continue with same value of cdp
+			ok=false
+		;;
+		esac
+	fi
+
+
+	# begin velocity analysis
+	while [ $ok = false ]
+	do
+		echo "Mute definition for cdp $cdp. Hints: click plot, move mouse and type s for picks, q to quit."
+
+		if [ $reusepanel = false ]
+		then
+ 			suwind < $mutepanel key=cdp min=$cdp max=$cdp count=$fold > panel.$cdp 
+			reusepanel=true
+		fi
+
+		if [ ! -s panel.$cdp ]
+		then
+                   cp panel.missing panel.$cdp
+		   echo "No traces for cdp $cdp.  Make at least 1 pick anyway (and then reset function in $mpicks)."
+		fi
+
+		suxwigb < panel.$cdp title="gather for cdp=$cdp  igi=$igi igc=$igc" \
+				key=offset xbox=50 mpicks=mpicks.$cdp \
+				perc=$perc xcur=$xcur wbox=900 \
+                                grid1=dash x1beg=0 grid2=dash x2beg=0 x2end=$maxoff
+
+# Note: no sort of mpicks here. 
+#       The user must pick in increasing order of offsets or sumutecsv error-exits.
+#       One reason for this is that mpicks contains time,offset but offset is 
+#       actually the independent dimension here. So sort <mpicks.$cdp -n is wrong
+#       and would actually cause error-halt in sumutecsv (sometimes).
+
+                >temp
+		mkparfile <mpicks.$cdp string1=tims string2=offs >temp
+
+#       The 2 seds below exchange lines 1 and 2 so that it is offs, then tims.
+#       This is not necessary HERE, but it should help prevent confusion elsewhere.
+                sed <temp 1d >par.$cdp
+                sed <temp 2d >>par.$cdp
+
+		# view a mute of the panel
+		echo "Hit return after mute panel comes up"
+                sumutecsv < panel.$cdp mode=$mode ntaper=$ntaper extrapt=$extrapt \
+                            cdp=1 par=par.$cdp |
+                suxwigb key=offset title="Mute of cdp=$cdp  igi=$igi igc=$igc" xbox=50 xcur=$xcur \
+                        grid1=dash x1beg=0 grid2=dash x2beg=0 x2end=$maxoff \
+			perc=$perc xcur=$xcur wbox=900 &
+
+		pause  
+
+
+		# check to see if the picks are ok
+		echo  "Picks OK? (y/n) "  | tr -d "\012" >/dev/tty
+		read response
+		case $response in
+		n*) ok=false ;;
+		*) ok=true 
+			# clean up the screen
+			zap xwigb
+		;;
+		esac
+
+	done </dev/tty
+
+# Combine the individual picks into a composite sunmocsv par file
+
+ 	if [ $seqnow = $seqbeg ]
+        then
+                echo  "cdp=$cdp" | tr -d "\012" >>$mpicks
+        else
+	        echo  ",$cdp"  | tr -d "\012" >>$mpicks
+        fi
+
+        seqnow=`bc -l <<END
+                $seqnow + 1
+END`
+
+	cat par.$cdp >>$mpickstail
+
+	echo
+	echo
+	echo  "Continue with mute definition? (y/n) "  | tr -d "\012" >/dev/tty
+	read response
+	case $response in
+	n*)	# if quitting set cdp to a value large enough to
+		# break out of loop 
+		seqnow=`expr $seqend + 1`
+	;;
+	y*)
+
+	;;
+	esac
+
+done
+
+echo >>$mpicks
+cat $mpickstail >>$mpicks 
+
+set +x
+
+# final echo
+echo "sumutecsv par file: $mpicks is ready"
+
+exit 0

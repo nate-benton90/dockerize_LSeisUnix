@@ -1,0 +1,38 @@
+#!/bin/sh
+# SuSunomstreamers_test3 - for program SUNOMSTREAMERS
+# Author: Andre Latour, Dec  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This is a test of a reasonably normal towed-streamer situation, except: "
+  echo "---  - shots are further apart than normal (plots are easier to understand)."
+  echo "---  - only 7 streamers of 10 channels each (real layouts are much bigger). "
+  echo "---  - using create= option to make output traces with no input traces.     "
+  echo "--- This actual test is:                                                    "
+  echo "---  - just like test2 except switch gunids for shots (port,starboard)      "
+  echo "---    Compare locations to xgraph from test1 or test2.                     "
+  echo "---    Note that the mid XYs of the traces for each shot have shifted       "
+  echo "---    in the crossline direction since the other gun array is firing       "
+  echo "---    compared to the test1 and test2 setups.                              "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+# Note that I left the remaining parameters where they are in test1.
+#
+ sunomstreamers >fake31.su \
+              shotspacing=200 \
+                      gunid=1,0 guncross=-25,25 guninline=-40 \
+ streamercross=-300,-200,-100,0,100,200,300 \
+ streamerinline=-100 \
+ channelstart=1 \
+ channelend=10 \
+ channelspacing=10 \
+                                                     \
+ create=5             spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ suchw <fake31.su >fake32.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=20,20
+#
+ sugethw <fake32.su output=binary key=sdel,gdel >fake32.bin
+#
+ xgraph <fake32.bin n=280,70 linecolor=3,4 mark=7,8 marksize=5,5 linewidth=0,0 \
+        style=normal width=1200 height=600 x1beg=99500 x1end=101500 x2beg=9500 x2end=10500 &
+#

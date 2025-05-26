@@ -1,0 +1,80 @@
+#!/bin/sh
+# Subinqcsv_just_3dgridXYs - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- This example outputs q-files with JUST the standard 3d grid values.     "
+  echo "--- The main concept here is that you can output the 3d cell centre XYs     "
+  echo "--- in the q-file and then import that q-file into a Spreadsheet program.   "
+  echo "--- Then you can add other values into that Spreadsheet using whatever      "
+  echo "--- computations, interpolations, and manipulations you see fit.            "
+  echo "----------------------------------------------------------------------------"
+#
+# With iecho=1 you only get q-records at the cdps that you list.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout71.csv iecho=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+#
+# Test option that uses cdpt values for location, rather than cdp.
+# This output should be identical to qvalsout71.csv above since the  
+# cdpt values are the values at the cdps above.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout72.csv inloc=2 iecho=1 \
+        cdpt=461,921,1841,2301,473,933,1853,2313,483,943,1863,2323 \
+#
+# Test option that uses igi,igc values for location, rather than cdp.
+# This output should be identical to qvalsout71.csv above since these
+# igi,igc values are the values at the cdps above.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout73.csv inloc=3 iecho=1 \
+        igi=21,41,81,101,21,41,81,101,21,41,81,101 \
+        igc=1,1,1,1,13,13,13,13,23,23,23,23 \
+#
+# Test option that uses gx,gy values for location, rather than cdp.
+# This output should be identical to qvalsout71.csv above since these
+# gx,gy values are the values at the cdps above.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout74.csv inloc=4 iecho=1 \
+        gx=500,1000,2000,2500,500,1000,2000,2500,500,1000,2000,2500 \
+        gy=0,0,0,0,600,600,600,600,1100,1100,1100,1100 \
+#
+# Test option that uses sx,sy values for location, rather than cdp.
+# This output should be identical to qvalsout71.csv above since these
+# sx,sy values are the values at the cdps above.
+#
+# Note that the input sx,sy values do not have to be exactly the 
+# cell centre XYs since same cdp number and other values are generated anyway.
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout75.csv inloc=5 iecho=1 \
+        sx=339050,339300,339800,340049,339570,339819,340319,340569,340002,340252,340752,341002 \
+        sy=5540266,5539833,5538967.63,5538534.54,5540566.74,5540133,5539267,5538834,5540816,5540383,5539517,5539084 \
+#
+# If you want the entire set of cdps of the grid, set iecho=0 (or remove it).
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout76.csv \
+        cdp=1 \
+#
+# If you want the entire set of cdps of the grid, and a constant value output
+# to the q-records, then:                                                     
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout77.csv \
+        cdp=1 \
+        numa=1500 \
+#
+# The remaining tests use input q-files and same options as first 5 tests above.
+# Results should be same as qvalsout71.csv
+#
+# Note that input files qvalsin72.csv and qvalsin73.csv have had some values
+# removed to make sure the code is searching for the names, not just using the 
+# sequential comma-locations in the q-file.
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin71.csv qout=qvalsout81.csv iecho=1 \
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin72.csv qout=qvalsout82.csv inloc=2 iecho=1 \
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin72.csv qout=qvalsout83.csv inloc=3 iecho=1 \
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin73.csv qout=qvalsout84.csv inloc=4 iecho=1 \
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin73.csv qout=qvalsout85.csv inloc=5 iecho=1 \
+#

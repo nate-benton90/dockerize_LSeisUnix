@@ -1,0 +1,55 @@
+#!/bin/sh
+# Sunearcsv_create_realistic_profile_and_plot_igc - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This file uses sutoolcsv to convert a realistic 2d SPS2 R-file        "
+  echo "---  into a Q-file.                                                        "
+  echo "---  Then it inputs that Q-file into suprofcsv and outputs a cdp-profile   "
+  echo "---  using some reasonable parameter values for suprofcsv.                 "
+  echo "---  Note in particular that the input R-file interval is about 25 metres  "
+  echo "---  and the output cdp-profile interval is set to 12.5                    "
+  echo "---                                                                        "
+  echo "---  xgraph then plots cdp numbers versus igc key values from sunearcsv.   "
+  echo "---  The igc values are the cross-line distances away from the cdp centres "
+  echo "---  in metres.                                                            "
+  echo "---                                                                        "
+  echo "---  Remember that the cdp numbers are actually 12.5 metres apart,         "
+  echo "---  whereas the igc values are actual metres.                             "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=realistic601.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=realistic601.csv \
+           chordi=12.5 nmaxa=30 nmaxs=30 chordf=12.5 \
+           qout=realistic611.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 12 and 13
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' realistic601.csv >realistic602.csv
+  cut -d, -f12,13 <realistic602.csv >realistic603.csv
+  sed '1,$ s/,/ /g' realistic603.csv >realistic603.txt
+  a2b <realistic603.txt >realistic603.bin
+#
+# Use sed to remove the first 5 lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 13 and 14
+#
+  sed '1,5d' realistic611.csv >realistic612.csv
+  cut -d, -f13,14 <realistic612.csv >realistic613.csv
+  sed '1,$ s/,/ /g' realistic613.csv >realistic613.txt
+  a2b <realistic613.txt >realistic613.bin
+#
+# Use sunearcsv to set cdp key to nearest cdp and igi values (inline distance of trace).
+#
+  sunearcsv qin=realistic611.csv <fakexsrfn.su dimx=mgx dimy=mgy >tnear611.su keyp=cdp okeys=cdp
+#
+  sugethw <tnear611.su output=binary key=igc,cdp >fakexsrfn61.bin
+#
+  xgraph <fakexsrfn61.bin nplot=1 n=10140 linecolor=3 mark=7 marksize=3 linewidth=0 \
+          width=1200 height=800 x1beg=-500 x1end=500 x2beg=0 x2end=1000
+#

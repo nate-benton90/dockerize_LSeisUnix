@@ -1,0 +1,85 @@
+
+The subinqcsv program and its new library routines are part of a general idea
+to make it easier for SU programs to use Spreadsheets for dealing with 
+large amounts of input data values. 
+
+The sugeomcsv and sutoolcsv programs are already part of this intention.
+The intention is to refactor sunmocsv and sumutecsv to use the library routines
+developed for subinqcsv. Just like subinqcsv, they will still allow input via
+parameters, but they will also allow q-files as input.
+
+----
+
+Subinqcsv performs interpolation according to functions that you input.
+If a 3D grid is input from a K-file, bilinear interpolation of those 
+functions to grid cdps is done. The basic way this happens is that 
+the 3D grid is used to translate the cdp numbers to 3D grid inline and
+crossline locations.                         
+
+The fact that bilinear interpolation is done forces restrictions on where
+input functions can be located. If you choose to input functions along a 
+particular inline then you must put functions at the same crosslines at 
+any other inlines that you choose to put functions on. 
+
+To see an example of the location restrictions, view vellocs.png file.
+Note that you can have changing gaps between functions in the inline 
+direction and changing gaps between functions in the crossline direction. 
+But you cannot have input functions at isolated random locations. 
+
+Again, looking at vellocs.png note that function locations for 
+cdps 136,620,716,232 surround a large area. Within this large area, 
+bilinear interpolation is done using the surrounding 4 functions of 
+smaller areas. If extrapolation options are NOT enabled, linear 
+interpolation occurs outside the edges of the large area, just 
+using the edge function values (for instance, all cdps above 
+the 620,656,666,696,716 line on the image get the same functions 
+as if they were located exactly on the 620,656,666,696,716 line). 
+And (if extrapolation options are NOT enabled), all cdps that are 
+outside the corners of the large area get the same function as 
+the corner itself.
+
+The examples here use the 3D grid definition which fits the 3D survey
+used in the demos/Geom3D/Sutoolcsv, Sugeomcsv, and Subincsv examples.
+
+The tests below contain details of how they are setup, and what 
+they are intended to do and show.
+
+I suggest you review and run the Subinqcsv tests in the order below.
+
+The first 2 tests below are called examples because they involve a
+basic situation that you encounter: time-velocity pairs at cdps
+as produced by semblance-scans for velocity analysis (velans).
+
+ sh ./Subinqcsv_example1_command
+
+ sh ./Subinqcsv_example1_qinput
+
+
+Then review and run:
+
+ sh ./Subinqcsv_easy_3d_velan_locations
+
+ sh ./Subinqcsv_just_3dgridXYs
+
+ sh ./Subinqcsv_piecewise1     
+
+ sh ./Subinqcsv_notuples_command
+
+ sh ./Subinqcsv_notuples_qinput_2d
+
+ sh ./Subinqcsv_tuples_command
+
+ sh ./Subinqcsv_tuples_qinput
+
+The remaining tests have more complicated input data and situations.
+For instance, beyond time-velocity pairs, triplets of values are input. 
+They also have values which are intended to make it easier to check    
+that Subinqcsv is performing correctly.                                   
+
+ sh ./Subinqcsv_fixed_command
+
+ sh ./Subinqcsv_fixed_qinput
+
+ sh ./Subinqcsv_artificial1_command
+
+ sh ./Subinqcsv_artificial1_command_makeqinput

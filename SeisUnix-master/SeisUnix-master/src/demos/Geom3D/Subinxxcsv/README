@@ -1,0 +1,42 @@
+
+The subinxxcsv program changes the size of grids by adding or subtracting
+a number of cells from any grid edge. 
+It also allows exchanging certain grid corners and cell widths.      
+  
+--------------
+
+I suggest running the example/tests in this order:
+
+ sh ./Subinxxcsv_example1
+
+ sh ./Subinxxcsv_example2
+
+ sh ./Subinxxcsv_fakestack
+
+
+--------------
+
+Comments: 
+
+In the trivial use-cases, it may be that you have just over-estimated or 
+under-estimated the extent of grid that you need to cover your survey.
+
+But in the not-so-trivial use-cases, you may be trying to use 2d programs to
+process 3d surveys. An example of this idea is to employ 2d migration in the
+inline grid direction followed by 2d migration in the crossline grid direction
+(of course 2d by 2d migration is not usually as good as 3d migration). 
+Without knowing the full behavior of any 2d migration program, there are still
+several ways that you might use this program:
+
+  1. Make extra dead cells to pad both the inline and crossline directions. 
+     (You want to prevent 2d migration operators from reaching backwards or
+      forwards and using live data from cdps which are on different inlines 
+      or crosslines). 
+
+  2. You may wish to flip the grid so that inline now becomes crossline. 
+     This may be necessary to get transposed cdp numbers which you can use in 
+     the second cdp sort and second 2d migration. 
+
+Of course, for 2d by 2d migrations, just getting reasonable cdp numbers in the
+input traces is not sufficient. You also have to worry about velocity fields,
+which are a more difficult problem.                  

@@ -1,0 +1,42 @@
+#!/bin/sh
+# Surescsv_create_simple3dstat 
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some realistic traces            "
+  echo "---  of a 3D survey for use surescsv tests. The sequence herein is:         "
+  echo "---   - use SPS2 X-file and create traces with spike seismic amplitudes     "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - apply statics from S-file and R-file so that surescsv has           "
+  echo "---   - something to find.                                                  "
+  echo "---  BUT do not bother to inverse-NMO the traces (since you would just      "
+  echo "---  have to forward-NMO them anyway before surescsv).                      "
+  echo "                                                                            "
+  echo "     NOTE: The SPS2 files used herein to create the fake 3D survey traces   "
+  echo "           have some statics in them, which are applied so that surescsv    "
+  echo "           has something to derive. The geometry and 3D grid definition     "
+  echo "           are the same as for other tests (for Subincsv and so on).        "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Create traces from the values in SPS2 X-file (plus spikes)
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fake70.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fake70.su >fake71.su
+# rm -f fakex.su 
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fake71.su >fake72.su
+# rm -f fakexs.su 
+#
+  subfilt <fake72.su >fake73.su fpasshi=20
+# rm -f fakexsr.su 
+#
+  subincsv <fake73.su >fake74.su rfile=kEFG.csv check=1
+# sugethw <fake74.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+  sustatic <fake74.su >fake75.su hdrs=1
+#
+  suxwigb <fake75.su title="flat with shifts" &
+#

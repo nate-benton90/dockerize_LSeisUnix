@@ -1,0 +1,65 @@
+
+SUPROFCSV - Input Q-file or parameters, make profile, output other Q-file.
+
+The suprofcsv program is part of a set of 3 programs which were primarily
+written for surveys which are usually refered to as "crooked lines". 
+These 3 programs also can be used for straight, bent, or coil surveys.
+The 3 programs are:
+
+  suprofcsv - create cdp locations (coordinates) at intervals along a profile
+  sunearcsv - assign traces the cdp number of the nearest cdp of a profile
+  suflex2d  - duplicate traces of nearby cdps for offset bin fold requirements
+              (Using the suflex2d program is not required for crooked lines,
+               but it uses values that are output by sunearcsv).
+ 
+These 3 programs are under development. Should be available end of 2022.
+ 
+ 
+The first script herein starts from a realistic SPS2 R-file which shows the
+kind of profile you want to get from suprofcsv for typical crooked surveys.
+The remaining scripts are tests of the individual options.                           
+
+---
+
+I suggest you run these scripts in the following order.
+
+sh ./Suprofcsv_realistic1   
+
+---
+
+sh ./Suprofcsv_test0      
+
+sh ./Suprofcsv_test1      
+
+sh ./Suprofcsv_test2      
+
+sh ./Suprofcsv_test3      
+
+sh ./Suprofcsv_test4      
+
+sh ./Suprofcsv_compare01234
+
+---
+
+sh ./Suprofcsv_test5      
+
+sh ./Suprofcsv_compare45
+
+---
+
+sh ./Suprofcsv_test6      
+
+sh ./Suprofcsv_compare56
+
+---
+
+sh ./Suprofcsv_test7      
+
+sh ./Suprofcsv_compare57
+
+---
+
+sh ./Suprofcsv_test2a      
+
+sh ./Suprofcsv_compare0122a
+

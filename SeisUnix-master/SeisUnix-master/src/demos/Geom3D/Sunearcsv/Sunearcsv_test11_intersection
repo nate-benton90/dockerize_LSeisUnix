@@ -1,0 +1,48 @@
+#!/bin/sh
+# Sunearcsv_test11_intersection - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Same as test10 except for enabling the third dimension in order to     "
+  echo "---  restrict the station number range for the search.                      "
+  echo "---  Note that the trace near the intersection is now given cdp=8.          "
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=asis gx=1000,2000,2000,1220,1220 gy=1000,1000,2000,2000,800 \
+           gaps=101,201,301,371,541 \
+           chordi=100 nmaxa=3 nmaxs=3 chordf=100 \
+           qout=testout111.csv
+#
+ sunull nt=4 ntr=10 >tnull111.su
+ sushw <tnull111.su >tnull112.su key=sx,sy,gx,gy,grnlof,gaps a=650,1000,650,1000,65,65 b=100,0,100,0,10,10
+#
+ sunearcsv qin=testout111.csv <tnull112.su dimx=mgx dimy=mgy >tnear111.su keyp=cdp okeys=cdp \
+           dimr=mgaps typer=-2 minr=-30 maxr=30
+#
+# Use suchw to compute the midpoint XYs and put them into sdel,gdel. 
+# And also the midpoint station number and put it into swdep.        
+# Note that this is done AFTER sunearcsv just so you are sure that sunearcsv is not using them itself.
+# (We just want to be able to print/plot them).
+#
+ suchw <tnear111.su >tnear112.su key1=sdel,gdel,swdep key2=sx,sy,grnlof key3=gx,gy,gaps b=1,1,1 c=1,1,1 d=2,2,2 
+ sugethw <tnear112.su key=sx,sy,gx,gy,sdel,gdel,swdep,cdp,igi,igc
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 4 and 5
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use sugethw to output x,y values in binary.                                   
+# Use cat to combine the 2 sets of XYs into one file.                           
+#
+# Use xgraph to plot 2 sets of points with marks of Xs and triangles.
+#
+ sed '/C_SU/d' testout111.csv >testout112.csv
+ cut -d, -f4,5 <testout112.csv >testout113.csv
+ sed '1,$ s/,/ /g' testout113.csv >testout113.txt
+ a2b <testout113.txt >testout113.bin
+#
+ sugethw <tnear112.su output=binary key=sdel,gdel >testout114.bin
+ cat testout113.bin testout114.bin >testout115.bin
+#
+ xgraph <testout115.bin n=51,10 linecolor=2,3 mark=2,6 marksize=10,10 linewidth=0 \
+         width=1000 height=900 x1beg=0 x1end=2400 x2beg=-400 x2end=2200

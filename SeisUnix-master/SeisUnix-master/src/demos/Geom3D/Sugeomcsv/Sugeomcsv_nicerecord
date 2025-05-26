@@ -1,0 +1,52 @@
+#!/bin/sh
+# Sugeomcsp_nicerecord - for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This tests the nicerecord= option and the maxrecords= option.          "
+  echo "---  (The nicerecord= option skips bad records at top of some text files).  "
+  echo "----------------------------------------------------------------------------"
+#
+# Create some records (without spikes= they have just one 4 ms sample):
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fakex.su create=100
+#
+  echo " --- that was first run of sugeomcsv ---"
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su
+#
+  echo " --- that was second run of sugeomcsv ---"
+#
+#
+# Try to use a file with some bad stuff at the top:
+#
+  sugeomcsv rfile=l2rallNASTY.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su
+#
+  echo " --- that was third run of sugeomcsv ---"
+#
+#----
+#
+# Use nicerecord=7 to skip over that bad stuff:
+#
+  sugeomcsv rfile=l2rallNASTY.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su nicerecord=7
+#
+  echo " --- that was fourth run of sugeomcsv ---"
+#
+#----
+#
+# Also test maxrecords= too small:
+#
+  sugeomcsv rfile=l2rallNASTY.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su nicerecord=7 maxrecords=500
+#
+  echo " --- that was fifth run of sugeomcsv ---"
+#
+# And test maxrecords= big enough:
+#
+  sugeomcsv rfile=l2rallNASTY.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su nicerecord=7 maxrecords=600
+#
+  echo " --- that was sixth run of sugeomcsv ---"
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This tests the nicerecord= option and the maxrecords= option.          "
+  echo "---  (The nicerecord= option skips bad records at top of some text files).  "
+  echo "----------------------------------------------------------------------------"

@@ -1,0 +1,40 @@
+
+SUNOMSTREAMERS - Nominal Geometry and 2D CDPS for Towed-Streamer Marine.       
+ 
+ This program allows you to define a towed-streamer marine layout with   
+ multiple airgun arrays (or other sources) amd multiple towed-streamers.
+ This basically consists of inline and crossline offset positions as well 
+ as airgun and streamer identifiers and streamer channel ranges and spacing.
+ From this definition, output traces are (optionally) updated with offset, 
+ sx,sy,gx,gy,cdp, and airgun and streamer sequence (grnofr and grnors keys).
+ These values are nominal geometry and nominal inline cdps since they are  
+ computed only from the layout definition and not any INPUT coordinates.  
+
+------------------------------------------------------------------------------
+  I advise running the scripts in the following order.
+------------------------------------------------------------------------------
+
+Test0 makes an overall display of 5 shots, their 7 streamers, and midpoints.
+Also read the comments in the scripts for an idea of what the tests are doing.
+
+sh ./Sunomstreamers_test0
+
+sh ./Sunomstreamers_test1   Must run this before some of the remaining tests.
+
+sh ./Sunomstreamers_test2
+
+sh ./Sunomstreamers_test3
+
+sh ./Sunomstreamers_test4
+
+sh ./Sunomstreamers_test5
+
+sh ./Sunomstreamers_test6
+
+sh ./Sunomstreamers_test7
+
+sh ./Sunomstreamers_test8
+
+sh ./Sunomstreamers_test9
+
+---

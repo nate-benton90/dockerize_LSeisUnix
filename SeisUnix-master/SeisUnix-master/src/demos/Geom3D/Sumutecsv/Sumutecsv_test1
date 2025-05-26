@@ -1,0 +1,54 @@
+#!/bin/sh
+# Sumutecsv_test1 - for program SUMUTECSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test creates some traces (using sunull).                          "
+  echo "---  Then it sets every sample amplitude in those traces to 100.            "
+  echo "---  Then it sets the cdp number(s).                                        "
+  echo "---  Then it sets the offset(s).                                            "
+  echo "---  Then it applies a 3D mute to those traces and displays it.             "
+  echo "---  The mute offset,time are set to make it easy to confirm results.       "
+  echo "----------------------------------------------------------------------------"
+#
+# I know the 3d grid is 121 by 23 cells. Make 605 traces (5 inlines of 121).   
+# Make cdp numbers starting at 1, incrementing by 1. 
+# Set all offsets to 500.
+#
+  sunull nt=1500 ntr=605 dt=0.004 >tnull1.su
+  sumath <tnull1.su op=add a=100 >tnull1a.su
+  sushw <tnull1a.su >tnull1acdp.su key=cdp a=1 b=1
+  sushw <tnull1acdp.su >tnull1acdpoff.su key=offset a=500 b=0
+#
+# Note in the mute functions that at offs=500 the tims is equal to 10 times cdp number.
+# Now, enable full extrapolation options in both inline and crossline directions.               
+# At input offset=500, this produces a mute time of 10 times cdp number at all cdps.       
+# Now, reset both extrapi and extrapc to 0 and run this test again. Note that the
+# mute pattern has 5 distinct shapes in it (this corresponds to the 5 input inlines).   
+# Note that input mute functions have only been supplied along inline 2 and inline 4.        
+# Because there is no extrapolation, inline 1 has the same mute times as inline 2 and
+# inline 5 has the same mute times as inline 4. But note that inline 3 has mute times
+# that are half-way between inlines 2 and 4 (as they should be since all locations 
+# enclosed between the mute functions of inlines 2 and 4 are bilinearly interpolated).
+#
+# Now, reset the offset from 500 to 800 and run this test again with extrapi=1 extrapc=1
+# You get a straight line again, but it is 300 ms deeper than for offset 500.                    
+# Note that offset 800 is not specified within the mute functions below. But if you look
+# carefully you will see that the offs,tims just after offset 500 are arranged so that
+# they all produce 300 ms more for offset 800 than for offset 500 (that is, cdp*10 + 300).  
+# This offset 800 test shows that the interpolation between offs,tims values is working.
+#
+  sumutecsv <tnull1acdpoff.su >tnull1acdpoffmute.su rfile=kEFG.csv mode=0 extrapi=1 extrapc=1 \
+        cdp=131,196,373,438 \
+        offs=300,500,1000 \
+        tims=200,1310,1810 \
+        offs=300,500,900,2000 \
+        tims=200,1960,2360,500 \
+        offs=100,300,500,1900,2000 \
+        tims=50,200,3730,5130,500 \
+        offs=300,500,1000,2000 \
+        tims=200,4380,4880,500 \
+#
+  sugethw <tnull1acdpoffmute.su key=cdp,muts,mute
+#
+  suxwigb <tnull1acdpoffmute.su key=cdp xcur=0.5 

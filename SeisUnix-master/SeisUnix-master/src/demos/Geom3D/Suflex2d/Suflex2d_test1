@@ -1,0 +1,56 @@
+#!/bin/sh
+# Suflex2d_test1 - for program SUFLEX2D
+# Author: Andre Latour, Nov  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test generates some traces in cdp,offset order.                   "
+  echo "---  Rather than the typical 2 traces per offset bin, this test only has 1. "
+  echo "---  Some cdps are missing, some offsets are missing within some cdps.      "
+  echo "---  The traces have spikes and are then filtered and inverse-nmoed.        "
+  echo "---  That dataset is displayed.                                             "
+  echo "---  The suflex2d program is run with reasonable setup options.             "
+  echo "---  The output of suflex2d is displayed.                                   "
+  echo "---  Note how the cdp gathers now have more consistant fold and offset.     "
+  echo "---  In particular:                                                         "
+  echo "---  a) cdps 1,6,8,10,13,14,16 have traces after suflex2d. Since they were  "
+  echo "---     empty, their traces are ALL just duplicates from neighbouring cdps. "
+  echo "---     Note that filling-in completely empty cdps is not the primary       "
+  echo "---     purpose of suflex2d, but it is a logical consequence of duplicating "
+  echo "---     traces to fullfil offset bin fold desires.                          "
+  echo "---  b) If you zoom-in you can see that cdp 4 only has 3 traces on input,   "
+  echo "---     but 4 traces after suflex2d. A trace was duplicated from either     " 
+  echo "---     cdp 3 or cdp 5, whichever had better igi key value (inline position)"
+  echo "---     in THE SAME OFFSET BIN as the trace missing from cdp 4 on input.    " 
+  echo "---  c) Remember that igi key values are zero at the cdp centre location of "
+  echo "---     THEIR cdp number and positive in the direction of increasing cdps.  "
+  echo "---     This means an igi of 5 in the next cdp number is further away from  "
+  echo "---     the target cdp than an igi of -5. (Vice-versa for cdp numbers less  "
+  echo "---     than the target cdp).                                               "
+  echo "---  d) Note that offset values in createcps01.csv allow you to recognize   "
+  echo "---     which cdp got duplicated into cdp 4. You can see it came from cdp 3 "
+  echo "---     because it has offset 103. Looking at the igi value of that trace,  "
+  echo "---     it is 9, which puts it closer than igi of 3 in cdp 5 (offset 105).  "
+  echo "---  e) Looking at the print for cdp 6, you can see that it got some traces "
+  echo "---     duplicated from cdp 5 and some duplicated from cdp 7.               "
+  echo "---  f) Looking at the displays and printout for cdp 10 you can see that it "
+  echo "---     only got duplicates of the input traces from cdp 11 because cdp 10  "
+  echo "---     cannot use traces from cdp 12 (it is outside the default maxflex=1)."
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=createcdps01.csv setid=m match=cdp,tracl names=c_su_id,cdp,tracl,ep,offset,igi >fakecdps01.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+ subfilt <fakecdps01.su >fakecdpsf01.su fpasshi=20
+#
+#sunmo <fakecdpsf01.su >fakecdpsfn01.su invert=1 cdp=1 tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+ sunmo <fakecdpsf01.su >fakecdpsfn01.su invert=1 cdp=1 tnmo=0,0.190,0.450,0.800 vnmo=800,1500,2000,3000
+#
+ suxwigb <fakecdpsfn01.su key=cdp x2beg=0 x2end=19 title="before suflex2d" & 
+#
+ suflex2d <fakecdpsfn01.su >fakecdpsfnf01.su binsize=50 binalign=25 binfold=1
+#
+ suxwigb <fakecdpsfnf01.su key=cdp x2beg=0 x2end=19 title="after suflex2d" &  
+#
+ sugethw <fakecdpsfnf01.su key=cdp,offset,igi
+#
+#susort <fakecdpsfnf01.su >fakecdpsfnfs01.su cdp offset
+#suximage <fakecdpsfnfs01.su  

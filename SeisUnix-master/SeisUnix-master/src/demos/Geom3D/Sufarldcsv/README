@@ -1,0 +1,59 @@
+
+SUFARLDCSV - Floating Approximate Robust Local Datum From Q-files. 
+ 
+ 
+  The sufarldcsv program runs the same algorithms for 2D or 3D.
+  It is intended to produce a smooth floating datum at 2D cdps or 3D cdps.
+  The primary user-adjustment should be the avrad parameter which controls 
+  the radial distance within which to average shot and receiver statics
+  around each cdp AND also enables an edge-compensation algorithm.                           
+  Once avrad has produced averaged shot,receiver values at each cdp, the 
+  navrg and nsmth parameters allow further averaging,smoothing of those values
+  along the inline cdps (and crossline if 3D).
+ 
+
+------------------------------------------------------------------------------
+  I advise running the scripts in the following order:
+------------------------------------------------------------------------------
+
+The following scripts produce maps of shots, receivers, 3D cdp XY locations.    
+The first script uses the csv files containing all shots and all receivers.             
+The second script uses csv files that have missing shots and missing receivers.             
+(the l2rallr2.csv receiver file is not mapped since it only has big change                
+ at 2 receiver statics,elevations VALUES and therefor MAPs same as l2rall.csv).                    
+
+sh ./Sufarldcsv_3d_mapa
+
+sh ./Sufarldcsv_3d_mapb
+
+---
+
+sh ./Sufarldcsv_create1             Need to run this before the tests below.     
+
+---
+
+------------------------------------------------------------------------------
+In general you should vary the sufarldcsv parameters within the following 
+scripts and see what happens in the plots.                                        
+------------------------------------------------------------------------------
+
+The following scripts use the input q-files containing all shots and receivers.
+They plot and apply the averaged,smoothed statics output by sufarldcsv 
+( test5 is for shots, test6 is for receivers, test7 is for (shot+receiver)/2 ).
+
+sh ./Sufarldcsv_3d_test5        
+
+sh ./Sufarldcsv_3d_test6
+
+sh ./Sufarldcsv_3d_test7
+
+------------------------------------------------------------------------------
+  Now some 2D tests (yes, I recommend running the previous 3D tests first).
+------------------------------------------------------------------------------
+
+sh ./Sufarldcsv_2d_test8        
+
+sh ./Sufarldcsv_2d_test9        
+
+sh ./Sufarldcsv_2d_test0        
+

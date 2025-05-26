@@ -1,0 +1,42 @@
+#!/bin/sh
+# Sunearcsv_create_realistic_profile_and_assign_cdps_stack - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "---------------------------------------------------------------------------"
+  echo "---  This file uses sutoolcsv to convert a realistic 2d SPS2 R-file        "
+  echo "---  into a Q-file.                                                        "
+  echo "---  Then it inputs that Q-file into suprofcsv and outputs a cdp-profile   "
+  echo "---  using some reasonable parameter values for suprofcsv.                 "
+  echo "---  Note in particular that the input R-file interval is about 25 metres  "
+  echo "---  and the output cdp-profile interval is set to 12.5                    "
+  echo "---                                                                        "
+  echo "---  The sunearcsv program is then used to assign the traces to their      "
+  echo "---  nearest cdp location (updating the cdp,igi,igc keys in the headers).  "
+  echo "---                                                                        "
+  echo "---  Processing then continues normally.                                   "
+  echo "---   - first sort by cdp (and offset)                                     "
+  echo "---   - then apply forward nmo                                             "
+  echo "---   - then stack and display                                             "
+  echo "---                                                                        "
+  echo "---------------------------------------------------------------------------"
+#
+ sutoolcsv rfile=l2rcrook.txt setid=r outid=q match=sps2 forms=sps2 names=sps2all wfile=realistic901.csv
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps qin=realistic901.csv \
+           chordi=12.5 nmaxa=30 nmaxs=30 chordf=12.5 \
+           qout=realistic911.csv
+#
+# Use sunearcsv to set cdp key to nearest cdp.
+#
+  sunearcsv qin=realistic911.csv <fakexsrfn.su dimx=mgx dimy=mgy >tnear911.su keyp=cdp okeys=cdp
+#
+  susort <tnear911.su >tnear912.su cdp offset
+#
+# Note this is forward nmo (during creation of realistic traces, this same function was INVERSE nmo-ed). 
+#
+  sunmo <tnear912.su >tnear913.su tnmo=0,0.190,0.450,0.800 vnmo=1800,3500,4000,5000
+#
+  sustack <tnear913.su >tnear914.su key=cdp verbose=1
+#
+  suxwigb <tnear914.su key=cdp
+#

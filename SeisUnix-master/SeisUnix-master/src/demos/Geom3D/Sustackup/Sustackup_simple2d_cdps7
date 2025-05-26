@@ -1,0 +1,30 @@
+#!/bin/sh
+# Sustackup_simple2d_cdps7 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of stacking cdps                                           --"
+  echo "---  - but sort to different order before sustackup                       --"
+  echo "---  - compare to previous sustackup from original order                  --"
+  echo "---    Since sustackup stacks into double precision buffers,              --"
+  echo "---    the order of input traces should not have much affect on results   --"
+  echo "---    (unlike sustack, which stacks into float (single precision).       --"
+  echo "----------------------------------------------------------------------------"
+#
+ susort <fakexsrfnbis.su >fake71.su offset
+#
+ sustackup <fake71.su >fake72.su keyloc=cdp  
+#
+ suxwigb <fake72.su key=cdp title="sustackup by gaps key from offset ordered traces" &
+#
+  echo "--- Maximums in stack by sustackup "
+#
+ sumax <fake72.su
+#
+ suop2 fake61.su fake72.su op=diff >fake73.su
+#
+ suxwigb <fake73.su key=cdp title="difference between sustackups (original order and offset sorted)" &
+#
+  echo "--- Maximums in difference display (original order and offset sorted)"
+#
+ sumax <fake73.su

@@ -1,0 +1,50 @@
+#!/bin/sh
+# Sustackup_simple2d_ranges11 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of 2 range limits                                          --"
+  echo "---  - Like ranges10 test except input offset is set negative.            --"
+  echo "---  - compared to ranging by suwind and stacking via susort and sustack  --"
+  echo "---    (in sustackup LESS THAN maxabs are included, thus 100 versus 99)   --"
+  echo "---    (in sustackup LESS THAN maxsign are included, thus 17 versus 16)   --"
+  echo "---    (also set keep=0 to not output stack trace if all out-of-ranges)   --"
+  echo "---  - note differences because sustackup stacks in double precision.     --"
+  echo "----------------------------------------------------------------------------"
+#
+ suchw <fakexsrfnbis.su >fake110.su key1=offset key2=offset b=-1
+#
+ sustackup <fake110.su >fake111.su keyloc=cdp keyabs=offset minabs=50 maxabs=200 keep=0 \
+            keysign=gaps minsign=121 maxsign=137
+#
+ suxwigb <fake111.su key=cdp title="sustackup by cdp with offset range 50-200 and gaps 121-137" &
+#
+  echo " Next, stacking to cdp using suwind and susort and sustack for comparison. --"
+#
+ suwind <fake110.su >fake112w.su key=offset abs=1 min=50 max=199 
+ suwind <fake112w.su >fake112.su key=gaps min=121 max=136
+#
+ susort <fake112.su >fake113.su cdp
+#
+ sustack <fake113.su >fake114.su key=cdp 
+#
+ suxwigb <fake114.su key=cdp title="after susort and sustack by cdp key with offset 50-199 and gaps 121-136" &
+#
+  echo "--- Maximums in stack by susort and sustack "
+#
+ sumax <fake114.su
+#
+ suop2 fake111.su fake114.su op=diff >fake115.su
+#
+ suxwigb <fake115.su key=cdp title="difference between sustack and sustackup (which stacks in double prec)" &
+#
+  echo "--- Maximums in difference display (maybe not zero since sustackup stacks in double prec)"
+#
+ sumax <fake115.su
+#
+ sustackup <fakexsrfnbis.su >fake116.su keyloc=cdp keyabs=offset minabs=50 maxabs=200 \
+            keysign=gaps minsign=121 maxsign=137
+#
+ suxwigb <fake116.su key=cdp title="sustackup by cdp key with offset 50-200 and gaps 121-137 (and default keep=1)" &
+#
+ sugethw <fake116.su key=cdp,nhs,offset,tracf,fldr

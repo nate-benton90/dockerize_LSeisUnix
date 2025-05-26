@@ -1,0 +1,61 @@
+#!/bin/sh
+# Sufarldcsv_3d_mapa - for program SUFARLDCSV
+# Author: Andre Latour, Nov 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo " xgraph the shots, receiver, cdps by their coordinates.                     "
+  echo " Note that sufarldcsv is used with no input shot or receiver files.         "
+  echo " Done just to get the 3D cdp coordinates for mapping, which also happens    "
+  echo " to be a test for sin=none and rin=none.                                    "
+  echo "                                                                            "
+  echo " For xgraph, you need the number of shots, receivers, cdps. THIS script     "
+  echo " has the correct sizes for l2sall.csv, l2rall.csv and this grid.            "
+  echo "                                                                            "
+  echo " Note:                                                                      "
+  echo "       l2rall.csv is all receivers with normal statics,elevations.          "
+  echo "       l2rallr2.csv has 2 recrs with big diffs (line 100, points 102,150)   "
+  echo "       l2rallr2l3.csv has 2 big diffs, and missing receivers on some lines  "
+  echo "    *  l2sall.csv is all shots with normal statics,elevations.              "
+  echo "    *  l2salll3.csv has missing shots near those missing receivers          "
+  echo "       You can interchange those file names here without making other       "
+  echo "       alterations in this script because the xgraph is of cdps (cells).    "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Input shot file, receiver file, cdp file.                               
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 2 and 5
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' l2sall.csv >testmapa1.csv
+#
+  cut -d, -f9,10 <testmapa1.csv >testmapa2.csv
+  sed '1,$ s/,/ /g' testmapa2.csv >testmapa2.txt
+  a2b <testmapa2.txt >testmapa2.bin
+#
+  sed '/C_SU/d' l2rall.csv >testmapa3.csv
+#
+  cut -d, -f8,9 <testmapa3.csv >testmapa4.csv
+  sed '1,$ s/,/ /g' testmapa4.csv >testmapa4.txt
+  a2b <testmapa4.txt >testmapa4.bin
+#
+# Note, sufarldcsv used just to produce cdp coordinates for mapping.
+#
+  subinxxcsv rfile=kEFG.csv wfile=testgrida5.csv igilow=10 igchigh=8
+  sufarldcsv sin=none rin=none rfile=testgrida5.csv dout=testmapa6.csv
+
+  sed '/C_SU/d' testmapa6.csv >testmapa7.csv
+#
+  cut -d, -f6,7 <testmapa7.csv >testmapa8.csv
+  sed '1,$ s/,/ /g' testmapa8.csv >testmapa8.txt
+  a2b <testmapa8.txt >testmapa8.bin
+#
+  cat testmapa2.bin testmapa4.bin testmapa8.bin >testmapa9.bin
+#
+  xgraph <testmapa9.bin nplot=3 n=140,550,4371 linecolor=2,4,3 mark=1,6,7 marksize=12,7,3 linewidth=0 \
+          style=normal width=1200 height=1200 x1beg=337900 x1end=342100 x2beg=5537550 x2end=5541750 \
+          title="  shot, receiver, cdp coordinate locations (red,blue,green) " & 
+

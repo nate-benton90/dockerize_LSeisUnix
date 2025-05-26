@@ -1,0 +1,31 @@
+#!/bin/sh
+# Susembase_test6 - for program SUSEMBASE
+# Author: Andre Latour, Feb 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Test using a reasonable (fake) cdp stack situation.                  ---"
+  echo "---  - with 2 simple dipping horizons.                                   ---"
+  echo "---  - removed cdps 21,22,23,24                                          ---"
+  echo "---  - added noise                                                       ---"
+  echo "---  - display input file                                                ---"
+  echo "---  - bypass=1 (only outputs at input locations, but still smoothed).   ---"
+  echo "----------------------------------------------------------------------------"
+#
+ sugeomcsv rfile=cdps11.csv >tfake61a.su create=all spikes=4,0.00,100,2000,104,2400,108,1800,400,0 
+ subfilt <tfake61a.su >tfake62a.su fpasshi=60
+ suchw <tfake62a.su >tfake63a.su key1=gstat key2=tracf b=2
+ sustatic <tfake63a.su >tfake64a.su hdrs=1 sign=-1
+#
+ sugeomcsv rfile=cdps11.csv >tfake61b.su create=all spikes=4,0.00,100,1200,104,2000,108,1600,400,0 
+ subfilt <tfake61b.su >tfake62b.su fpasshi=40
+ suchw <tfake62b.su >tfake63b.su key1=gstat key2=tracf b=-2 a=300
+ sustatic <tfake63b.su >tfake64b.su hdrs=1 sign=-1
+#
+ suop2 tfake64a.su tfake64b.su op=sum >tfake64r.su
+ suaddnoise <tfake64r.su >tfake64n.su sn=5 seed=1 
+ suwind <tfake64n.su >tfake64.su key=cdp reject=21,22,23,24
+ suxwigb <tfake64.su key=cdp title="input " &
+#
+ susembase <tfake64.su >tfake65.su outputinc=1 bypass=-1
+ suxwigb <tfake65.su key=cdp title="output (bypass=1 only outputs at inputs, BUT still smoothed) " &
+#

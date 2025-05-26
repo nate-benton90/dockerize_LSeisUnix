@@ -1,0 +1,40 @@
+#!/bin/sh
+# Surescsv_test9 - for program SURESCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Create a slant across 3D survey.                                       "
+  echo "---  Use surescsv to derive statics.                                        "
+  echo "---  Use sushiftcsv to apply those statics.                                 "
+  echo "---  Make source,receiver,CDP stacks before and after.                      "
+  echo "----------------------------------------------------------------------------"
+#
+# Set sstat,gstat to produce a slant.            
+# Remember to set tstat=0 as well since the previous sustatic set it, and next sustatic would use it.
+#
+  suchw <fake75.su >fake75a.su key1=sstat,gstat,tstat key2=sx,gx,cdp key3=sstat,gstat,gaps a=-3388,-3388,0 b=0.001,0.001,0 c=0,0,0
+#
+  sustatic <fake75a.su >fake90.su hdrs=1
+#
+  sustackup <fake90.su >fake91.su keyloc=fldr
+  suxwigb <fake91.su key=fldr title="source stack before surescsv" &
+#
+  sustackup <fake90.su >fake92.su keyloc=grnors,gaps
+  suxwigb <fake92.su title="receiver stack before surescsv" &
+#
+  sustackup <fake90.su >fake93.su keyloc=igi,igc
+  suxwigb <fake93.su key=cdp title="CDP stack before surescsv" &
+#
+  surescsv <fake90.su rkeyloc=grnors,gaps ckeyloc=igi,igc sout=sstat90.csv rout=rstat90.csv 
+#
+  sushiftcsv <fake90.su >fake94.su rkeyloc=grnors,gaps sin=sstat90.csv rin=rstat90.csv
+#
+  sustackup <fake94.su >fake95.su keyloc=fldr
+  suxwigb <fake95.su key=fldr title="source stack AFTER surescsv" &
+#
+  sustackup <fake94.su >fake96.su keyloc=grnors,gaps
+  suxwigb <fake96.su title="receiver stack AFTER surescsv" &
+#
+  sustackup <fake94.su >fake97.su keyloc=igi,igc
+  suxwigb <fake97.su key=cdp title="CDP stack AFTER surescsv" &
+#

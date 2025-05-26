@@ -1,0 +1,63 @@
+#!/bin/sh
+# Subinqcsv_notuples_command - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------"
+  echo " These are examples where there are tuple values on q-records.        "
+  echo " These examples are similar to time,velocity pairs obtained from      "
+  echo " semblance-scans (velans) except that additional values exist in the  "
+  echo " input q-records.                                                     "
+  echo "----------------------------------------------------------------------"
+#
+# Note that there are a varying number of pairs (tuples) at the cdps.  
+# Since vnmo starts with a v, the default behavior is to use           
+# inverse-squared-VALUE-weighting (not inverse-squared-DISTANCE).      
+# The iecho option is 1 here, which just outputs at the input locations.  
+# But outind= still causes the independent dimension (tnmo for this example)     
+# to output dpth and vnmo at 0,0.004,0.008,0.012,0.016,0.02 for each input q-record.                   
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin21VARY.csv qout=qvalsout21.csv outind=0,0.020,0.004 iecho=1 \
+#
+# Enable extrapt (and starting outind to less than 0 so you can see lower end extrapolation).
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin21VARY.csv qout=qvalsout22.csv outind=-.004,0.020,0.004 \
+     iecho=1 extrapt=1 \
+#
+# Same setup, but with iecho=0, so this will spatially interpolate. 
+# If the extrapolation options are used, it is easier to see that the interpolation is 
+# working properly for the names that do not start with v. But, for vuma, the default                  
+# inverse-square-VALUE-weighting and extrapolation results in negative values when 
+# extrapolating a long way. 
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin21VARY.csv qout=qvalsout23.csv outind=0,0.020,0.004 \
+     extrapi=1 extrapc=1 \
+#
+# Do not inverse-square-value-weight any values.             
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin21VARY.csv qout=qvalsout24.csv outind=0,0.020,0.004 \
+     extrapi=1 extrapc=1 invp2=none \
+#
+# So, for velocity type values it is better to not extrapolate, which is why  
+# extrapi= and extrapc= default to OFF. Note that even with both options OFF, locations 
+# along the sides of the full aligned-rectangle area still get linear interpolation in
+# one direction. Only the far 4 corners of the aligned-rectangle area produce constant
+# values in their outer quadrants.                                               
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin21VARY.csv qout=qvalsout25.csv outind=0,0.020,0.004 \
+     iecho=0 \
+#
+# This uses a q-file where there are varying numbers of tuples and other oddities.
+# Note that only C_SU_NAMES (and its following record) are required in the header. 
+# This is allowed by subinqcsv since it only recognizes q-records as input.    
+#
+# Note also that the 3 names within these tuples are only repeated twice even though there
+# are more actual tuples in the q-records. 
+# The duplication of at least one additional set of tuple names is a q-file STANDARD which
+# exists so that programs know when single values end on q-records, and tupled values begin.
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin21VARYodd.csv qout=qvalsout26.csv outind=0,0.020,0.004 iecho=1 \
+#
+# Eliminate numa from single values, and dpth from tuples.
+#
+  subinqcsv rfile=kEFG.csv qin=qvalsin21VARYodd.csv qout=qvalsout27.csv outind=0,0.020,0.004 iecho=1 ename=numa,dpth \
+

@@ -1,0 +1,73 @@
+#!/bin/sh
+# Surescsv_test4 - for program SURESCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Create a slant across survey.                                          "
+  echo "---  Deliberately use bad NMO velocities on second half of survey.          "
+  echo "---  Use surescsv to derive statics.                                        "
+  echo "---  Use sushiftcsv to apply those statics.                                 "
+  echo "---  Make source,receiver,CDP stacks before and after.                      "
+  echo "---  *** The actual affect of the bad NMO on the STATICS is quite subtle.   "
+  echo "---      Note also that shot 40 and 120 have non-centred layouts.           "
+  echo "---      The useoff and longwave parameters are most likely to be involved. "
+  echo "----------------------------------------------------------------------------"
+#
+# Set sstat,gstat to produce a slant.            
+# Remember to set tstat=0 as well since the previous sustatic set it, and next sustatic would use it.
+#
+  suchw <fake06.su >fake41.su key1=sstat,gstat,tstat key2=grnlof,gaps,cdp key3=sstat,gstat,gaps a=-100,-100,0 b=0.1,0.1,0 c=0,0,0
+#
+  sustatic <fake41.su >fake42.su hdrs=1
+#
+  sunmo <fake42.su >fake43.su invert=1 \
+        cdp=1,370,371,740 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 
+#
+  sunmo <fake43.su >fake44.su          \
+        cdp=1,370,371,740 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        tnmo=0,0.190,0.450,0.800 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1800,2500,4000,5000 \
+        vnmo=1500,2000,3000,4000 \
+        vnmo=1500,2000,3000,4000 
+#
+  suxwigb <fake44.su title="traces before surescsv" &
+#
+  sustackup <fake44.su >fake45.su keyloc=fldr
+  suxwigb <fake45.su title="source stack before surescsv" &
+#
+  sustackup <fake44.su >fake46.su keyloc=gaps
+  suxwigb <fake46.su title="receiver stack before surescsv" &
+#
+  sustackup <fake44.su >fake47.su keyloc=cdp
+  suxwigb <fake47.su title="CDP stack before surescsv" &
+#
+# Here are some helpful hints for parameters to test.....
+#
+# surescsv <fake32.su maxsources=169 maxreceivers=397 maxcdps=733 maxtraces=10140
+# surescsv <fake32.su cdivider=4.0 maxshift=40 numiter=5 useoff=1.5av iuseoff=0 longwave=av  srderive=0
+# See the top of the sstat32.csv file for the actual defaulted values of useoff and longwave.                       
+  surescsv <fake44.su sout=sstat44.csv rout=rstat44.csv longwave=-1                               
+#
+  sushiftcsv <fake44.su >fake45.su sin=sstat44.csv rin=rstat44.csv
+#
+  sustackup <fake45.su >fake46.su keyloc=fldr
+  suxwigb <fake46.su title="source stack AFTER surescsv" &
+#
+  sustackup <fake45.su >fake47.su keyloc=gaps
+  suxwigb <fake47.su title="receiver stack AFTER surescsv" &
+#
+  sustackup <fake45.su >fake48.su keyloc=cdp
+  suxwigb <fake48.su title="CDP stack AFTER surescsv" &
+#

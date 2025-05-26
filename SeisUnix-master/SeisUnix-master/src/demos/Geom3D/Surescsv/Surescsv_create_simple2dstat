@@ -1,0 +1,34 @@
+#!/bin/sh
+# Surescsv_create_simple2dstat - for program SURESCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Use sugeomcsv to create traces with simple 2D geometry.                "
+  echo "---  See demos/Geom3D/Sugeomcsv for how this is done.                       "
+  echo "---  Simple 2D CDP numbers are also set using subincsv.                     "
+  echo "                                                                            "
+  echo "---  Some sources and receivers have non-zero static values which           "
+  echo "---  are applied in order to test surescsv functioning.                     "
+  echo "                                                                            "
+  echo "---  Sources 40 and 120 have non-symmetrical layouts (shot not in centre).  "
+  echo "                                                                            "
+  echo "---  Note that the created traces effectively have full NMO correction.     "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=l2xlong.csv >fake01.su create=all spikes=4,0.01,200,1000,208,1200,500,-2000,800,1600,1000,0
+#
+  sugeomcsv rfile=l2slong.csv <fake01.su >fake02.su
+#
+  sugeomcsv rfile=l2rlong.csv <fake02.su >fake03.su
+#
+  subfilt <fake03.su >fake04.su fpasshi=20
+#
+# Need cdp numbers
+#
+  subincsv <fake04.su >fake05.su bintype=20 point_crz=-200 point_cru=2 point_csz=-200 point_csu=2  
+#
+  sustatic <fake05.su >fake06.su hdrs=1
+#
+  suxwigb <fake06.su title="flat with statics applied" &
+#

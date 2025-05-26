@@ -1,0 +1,12 @@
+#!/bin/sh
+# Suprofcsv_compare - for program SUPROFCSV
+# Author: Andre Latour, Sept 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Compare from test 4 and test 5.                                        "
+  echo "----------------------------------------------------------------------------"
+#
+  cat testout43.bin testout53.bin >tcompare45.bin
+  xgraph <tcompare45.bin nplot=2 n=349,416 linecolor=4,2 mark=6,7 marksize=10,10 linewidth=0 \
+          width=800 height=800 x1beg=-100 x1end=1600 x2beg=-100 x2end=1600
+#

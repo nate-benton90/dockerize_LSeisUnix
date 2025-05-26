@@ -1,0 +1,30 @@
+#!/bin/sh
+# Sustackup_simple2d_recvs5 - for program SUSTACKUP
+# Author: Andre Latour, April 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "--- Basic test of stacking receivers (using gaps key as receiver)         --"
+  echo "---  - but sort to different order before sustackup                       --"
+  echo "---  - compare to previous sustackup from original order                  --"
+  echo "---    Since sustackup stacks into double precision buffers,              --"
+  echo "---    the order of input traces should not have much affect on results   --"
+  echo "---    (unlike sustack, which stacks into float (single precision).       --"
+  echo "----------------------------------------------------------------------------"
+#
+ susort <fakexsrfnbis.su >fake51.su offset
+#
+ sustackup <fake51.su >fake52.su keyloc=gaps 
+#
+ suxwigb <fake52.su key=gaps title="sustackup by gaps key from offset ordered traces" &
+#
+  echo "--- Maximums in stack by sustackup "
+#
+ sumax <fake52.su
+#
+ suop2 fake41.su fake52.su op=diff >fake53.su
+#
+ suxwigb <fake53.su key=gaps title="difference between sustackups (original order and offset sorted)" &
+#
+  echo "--- Maximums in difference display (original order and offset sorted)"
+#
+ sumax <fake53.su

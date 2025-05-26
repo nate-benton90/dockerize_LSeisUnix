@@ -1,0 +1,12 @@
+#!/bin/sh
+# Sushiftcsv_test2 - for program SUSHIFTCSV
+# Author: Andre Latour, Aug 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Input fake traces, apply only the receiver statics                     "
+  echo "----------------------------------------------------------------------------"
+#
+  sushiftcsv <fake02.su >fake21.su sin=none 
+#
+  suxwigb <fake21.su title=" applied only receiver statics " &
+#

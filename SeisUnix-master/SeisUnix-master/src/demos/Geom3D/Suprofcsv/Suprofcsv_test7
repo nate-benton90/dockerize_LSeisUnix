@@ -1,0 +1,27 @@
+#!/bin/sh
+# Suprofcsv_test7 - for program SUPROFCSV
+# Author: Andre Latour, Sept 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Same as test 6, but using test 5 OUTPUT Q-file as INPUT for shifting.  "
+  echo "---  (This is a test, to see WHY to do this, see demos/Geom3D/Sunearcsv).   "
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=asis qin=testout51.csv \
+           chordi=0 nmaxa=0 nmaxs=0 chordf=0 \
+           shiftrec=100,270,400 shiftdist=0,5,-3 \
+           qout=testout71.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 4 and 5 (NOTE 4 5)
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' testout71.csv >testout72.csv
+  cut -d, -f4,5 <testout72.csv >testout73.csv
+  sed '1,$ s/,/ /g' testout73.csv >testout73.txt
+  a2b <testout73.txt >testout73.bin
+  xgraph <testout73.bin n=999 linecolor=5 mark=5 marksize=5 linewidth=0 \
+          width=800 height=800 x1beg=-100 x1end=1600 x2beg=-100 x2end=1600
+#

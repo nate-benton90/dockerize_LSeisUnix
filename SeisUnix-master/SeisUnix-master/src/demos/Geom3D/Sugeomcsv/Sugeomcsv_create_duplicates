@@ -1,0 +1,21 @@
+#!/bin/sh
+# Sugeomcsp_create_duplicates- for program SUGEOMCSV
+# Author: Andre Latour, July 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "---  Test the spikes=n option (multiple duplicates of input trace 3).       "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=l2rSTATICS.csv setid=r match=grnors,gaps names=c_su_id,grnors,gaps,gstat create=all spikes=3 <fakesimple2d.su >fakeduplicates.su
+#
+  sugethw <fakeduplicates.su key=fldr,tracf,grnors,gaps,gstat
+#
+  suximage <fakeduplicates.su
+#
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+  echo "---  sugeomcsv updates SU trace headers from fixed-format or csv files.     "
+  echo "---  Test the spikes=n option (multiple duplicates of input trace 3).       "
+  echo "----------------------------------------------------------------------------"

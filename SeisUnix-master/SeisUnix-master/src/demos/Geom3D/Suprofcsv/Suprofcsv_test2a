@@ -1,0 +1,25 @@
+#!/bin/sh
+# Suprofcsv_test2 - for program SUPROFCSV
+# Author: Andre Latour, Sept 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  From 3 locations, make points by chording by 10, average from 20 to 30."
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=asis gx=0,1000,1000 gy=0,0,1500 \
+           chordi=10 nmina=20 nmaxa=30 nmaxs=0 chordf=0 \
+           qout=testout21a.csv
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 3 and 4
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks of X, and no lines between.
+#
+  sed '/C_SU/d' testout21a.csv >testout22a.csv
+  cut -d, -f3,4 <testout22a.csv >testout23a.csv
+  sed '1,$ s/,/ /g' testout23a.csv >testout23a.txt
+  a2b <testout23a.txt >testout23a.bin
+  xgraph <testout23a.bin n=999 linecolor=2 mark=2 marksize=5 linewidth=0 \
+          width=800 height=800 x1beg=-100 x1end=1600 x2beg=-100 x2end=1600
+#

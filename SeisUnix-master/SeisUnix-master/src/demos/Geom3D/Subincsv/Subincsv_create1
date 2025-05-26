@@ -1,0 +1,15 @@
+#!/bin/sh
+# Subincsv_create1 - for program SUBINCSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some sparcely located traces     "
+  echo "---  within the area coverd by the 3D grid definition(s).                   "
+  echo "----------------------------------------------------------------------------"
+#
+  sugeomcsv rfile=tvalues.csv >faketfn.su create=all 
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some sparcely located traces     "
+  echo "---  within the area coverd by the 3D grid definition(s).                   "
+  echo "----------------------------------------------------------------------------"

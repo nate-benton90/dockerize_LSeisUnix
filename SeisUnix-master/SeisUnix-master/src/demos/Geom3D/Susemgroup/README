@@ -1,0 +1,36 @@
+
+SUSEMGROUP - Semblance Based Structure-Oriented Smooth In Trace Groups.   
+ 
+ This program performs semblance scanning to derive (apparent) dips in the  
+ direction of offsets within cdps (or other key values). It then uses those 
+ dips to align trace sample values and performs a normalized sum (which     
+ reduces noise). Since the dip compensation produces locally-flat horizons  
+ during summing, the result is less smearing of those horizons.            
+      This program does not interpolate. No traces will be created.         
+      This program can process 2D and 3D stacked data. Since interpolation  
+      is often desirable for stacked data, see program susembase for that.  
+
+------------------------------------------------------------------------------
+  I advise running the scripts in the following order.
+------------------------------------------------------------------------------
+
+---
+
+sh ./Susemgroup_offset
+
+sh ./Susemgroup_offset3
+
+---
+
+sh ./Susemgroup_test1
+
+sh ./Susemgroup_test2
+
+sh ./Susemgroup_test7
+
+---
+
+sh ./Susemgroup_cdp3dboth
+
+---
+

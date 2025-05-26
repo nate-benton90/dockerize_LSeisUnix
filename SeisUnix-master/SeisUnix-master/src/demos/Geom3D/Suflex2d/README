@@ -1,0 +1,48 @@
+
+SUFLEX2D -  Duplicate Some Traces Into CDPs From Neighbouring CDPs.       
+
+The suflex2d program is part of a set of 3 programs which were primarily
+written for surveys which are usually refered to as "crooked lines". 
+These 3 programs also can be used for straight, bent, or coil surveys.
+The 3 programs are:
+
+  suprofcsv - create cdp locations (coordinates) at intervals along a profile
+  sunearcsv - assign traces the cdp number of the nearest cdp of a profile
+  suflex2d  - duplicate traces of nearby cdps for offset bin fold requirements
+              (Using the suflex2d program is not required for crooked lines,
+               but it uses values that are output by sunearcsv).
+ 
+These 3 programs are under development. Should be available end of 2022.
+ 
+ 
+------------------------------------------------------------------------------
+  I advise running the scripts in the following order.
+------------------------------------------------------------------------------
+
+sh ./Suflex2d_test1
+
+sh ./Suflex2d_test2
+
+sh ./Suflex2d_test3
+
+sh ./Suflex2d_test4
+
+sh ./Suflex2d_test5
+
+sh ./Suflex2d_test6
+
+------------------------------------------------------------------------------
+The next 2 scripts must be run before the remaining in order to create data.
+The first 2 scripts employ the same fake crooked line survey definition   
+used elsewhere (such as demos/Geom3D/Suprofcsv and demos/Geom3D/Sunearcsv).                            
+------------------------------------------------------------------------------
+
+sh ./Suflex2d_create_realistic_traces
+
+sh ./Suflex2d_create_and_show_profile
+
+sh ./Suflex2d_flex_realistic
+
+sh ./Suflex2d_flex_realistic_limit_offset
+
+sh ./Suflex2d_flex_realistic_binbig

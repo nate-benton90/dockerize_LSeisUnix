@@ -1,0 +1,39 @@
+SUCLEAVE inputs 1 file and outputs multiple files with each output containing   
+a specific range of values. For instance, all traces with offset value greater
+than or equal to 0 and less than 100 can be output to one file. And all traces 
+greater than or equal to 100 and less than 200 can be output to another. 
+And so on for all offset ranges.            
+
+An important thing to understand is that traces are output in the same order
+as they are input. So, a cdp ordered input file can be split by offset ranges
+into multiple output files, and each output file is still cdp ordered.
+
+The key does not have to be offset, it can be any key. 
+So, an input file can also be separated into cdp ranges, or elevation ranges,
+or static ranges, and so on.
+
+Note that program SUBRAID can be considered the opposite of this program since
+it can combine multiple same-ordered input files into 1 same-ordered output.    
+
+
+The tests below contain details of how they are setup, and what they are  
+intended to do and show.
+
+I suggest you review and run the SUCLEAVE tests in this order....
+
+ sh ./Sucleave_test1    
+
+ sh ./Sucleave_test2    
+
+ sh ./Sucleave_test3    
+
+ sh ./Sucleave_test4    
+
+ sh ./Sucleave_test5    
+
+ sh ./Sucleave_test6    
+
+ sh ./Sucleave_test7    
+
+ sh ./Sucleave_test8    
+

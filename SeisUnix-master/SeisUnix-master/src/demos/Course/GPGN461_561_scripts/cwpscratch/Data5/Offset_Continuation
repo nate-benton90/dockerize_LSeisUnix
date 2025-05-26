@@ -1,0 +1,54 @@
+#! /bin/sh
+
+## A script to  fill in missing near offsets using SUOCEXT
+# Offset continuation is a method that reconstructs estimates of data
+# that would have been collected at offsets less than those that were
+# actually collected. Offset continuation is related to Dip Moveout (DMO).
+# Where DMO may be thought of as "migration to zero offset", offset continuation
+# may be thought of as "migration to near offset".
+
+# input data nmo corrected, gained, multiple suppressed data, sorted in
+# common offset gathers.  The vel_par_file contains only one set of vdmo=
+# tdmo= pairs -- pick a set of average values for the survey.
+
+# input data nmo corrected, gained, multiple suppressed data, sorted in
+# Caveat: the amplitudes on the reconstructed data may need to be adjusted.
+indata=radon_nmo_gain_co.su
+vel_par_file=offset_continuation_vel.par
+#
+
+# The nearest offset in the Viking Graben data is offset=-262 meters. 
+# The spacing # between offsets is 25 meters, thus we may be interested
+# in creating  approximations to the offsets -237, -212, -187, -162, -137,
+# -112, -87, -62, -37, -12 meters
+#
+# In this example the entire Viking Graben dataset is used to construct
+# estimates for the desired offset from each common offset in the data.
+# these resulting estimates are stacked. This may suppress multiples in
+# the reconstructed data.
+
+outdata=offset_continued_$indata
+rm $outdata
+rm tmpout
+for offset in -237 -212 -187 -162 -137 -112 -87 -62 -37 -12 
+do
+rm tmp tmp1
+echo "computing offset continuation for offset=$offset first sx position=$fsx"
+# compute the estimate, stack and fix the headers
+    suocext par=$vel_par_file cdpmin=1 cdpmax=2142 dxcdp=12.5 noffmix=2 \
+          offextr=$offset < $indata  | sushw key=offset a=$offset |
+		suchw key1=gx key2=sx key3=offset a=0 b=1 c=1 > tmp 
+	  susort cdp offset < tmp > tmp1
+	  sustack < tmp1 |
+		sushw key=offset a=offset |
+		suchw key1=gx key2=sx key3=offset > tmp
+cat tmp >> tmpout 
+done
+
+# the result consists of the original data in common offset gathers
+# with the reconstructed offsets  appended. You will need to sort 
+# the data into CDPs and re-gain the data prior to further processing
+cat $indata tmpout >> $outdata
+
+
+exit 0

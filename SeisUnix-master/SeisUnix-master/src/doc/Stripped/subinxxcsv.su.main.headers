@@ -1,0 +1,74 @@
+ SUBINXXCSV - Expand Size and Exchange Corners of 3D Grid Definition.       
+
+  subinxxcsv <stdin >stdout [parameters]                                    
+
+
+ Parameters:			          				     
+
+ rfile=   If specified, read a K-file containing a 3D grid definition.      ", 
+          Alternately you can supply the grid definition via command line   ", 
+          parameters. The required command line parameters are:             
+           grid_xa,grid_ya,grid_xb,grid_yb,grid_xc,grid_yc,grid_wb,grid_wc. ", 
+          Note that input grid definitions always run a routine which       ", 
+          adjusts the input values into compliance with grid standards.     ", 
+          (See program SUBINCSV for 3D grid details).                       ", 
+
+ wfile=   File to write the new grid definition after changes caused by     
+          the remaining parameters. Must be specified.                      
+
+ igilow=0  Add cells at low igi end (default is not to add cells).          
+       =n  Add n cells at low igi end (negative makes grid smaller).        
+
+ igihigh=0 Add cells at high igi end (default is not to add cells).         
+        =n Add n cells at high igi end (negative makes grid smaller).       
+
+ igclow=0  Add cells at low igc end (default is not to add cells).          
+       =n  Add n cells at low igc end (negative makes grid smaller).        
+
+ igchigh=0 Add cells at high igc end (default is not to add cells).         
+        =n Add n cells at high igc end (negative makes grid smaller).       
+
+ iflip=0   Defaults to not exchanging any grid corners.                     
+           This option is done AFTER any add-cell options listed above.     
+      =1   Exchange corner B with corner C and also exchange cell widths.   
+           This results in cdp numbers incrementing by 1 at right-angle     
+           to input grid and also exchanges igi,igc directions.             
+      =2   Exchange corner A with corner D and also exchange cell widths.   
+           This results in cdp numbers incrementing by 1 at right-angle     
+           to input grid and also exchanges igi,igc directions. But cdp     
+           numbering will now start where input corner D was.               
+      =-1  Exchange corner A with corner B and corner C with corner D.      
+      =-2  Exchange corner A with corner C and corner B with corner D.      
+
+ check=0   Do not print grid checking details.                              
+     Note: The options of this program cannot repair a corrupt input grid.  
+           Grid checking is always done on input grid definition and will   
+           error-halt if corrupt.                                           
+      =1   print grid checking details. This runs some grid functions on    
+           the 4 corner points of input grid, expanded grid (if any), and   
+           flipped grid (if any). This information can be written to a file 
+           by putting 2>yourfile on command line.                           
+
+ CAUTION: Any grid change is likely to result in some pre-stack traces      ", 
+          being assigned to different cells (cdps) than pure mathematics    ", 
+          would predict. That is, NEVER EXPECT the group of traces assigned ", 
+          to each cdp by the input grid definition to be exactly the same   ", 
+          as the group of traces assigned to any corresponding cdps by the  ", 
+          output grid definition. This is true despite computations herein  ", 
+          being performed with 8 byte floating point (double precision).    ", 
+          This issue occurs because some trace midpoints lie exactly on     ", 
+          cell boundaries - and even the slightest change in the grid       ", 
+          definition results in slight adjustments of all cell boundaries.  ", 
+            So, you should make grid adjustments before you start ANY trace ", 
+            processing, or re-run all trace processes, including, but not   ", 
+            limited to, cdp sorting.                                        ", 
+          Notwithstanding this caution, you have a reasonable chance of     ", 
+          using an altered grid post-stack because the post-stack cdps are  ", 
+          essentially located at the cell centre XYs, and cell centres are  ", 
+          usually far away from your output grid cell boundaries.           ", 
+
+
+ Credits:                                       
+  Andre Latour. Dec. 2021.   
+                              
+

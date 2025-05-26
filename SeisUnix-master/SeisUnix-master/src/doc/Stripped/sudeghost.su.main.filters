@@ -1,0 +1,65 @@
+ SUDEGHOST - applies a DEGHOSTING filter in (t,x) or (tau,p) data	
+
+ sudeghost <stdin >stdout [optional parameters]         		
+
+ Required parameters:                                         		
+ h=			source or receiver depth			
+
+ Optional parameters:							
+ v=1500.0		speed of sound in the top layer			
+ r=0.5			surface reflectivity 0 < r < .8			
+ lambert=1 		Lambert's cosine law obliquity factor		
+ dt= (from header)     time sampling interval (sec)        		
+ verbose=0		=1 for advisory messages, =2 debugging		
+ deghost=1		deghosting filter; =0 ghosting filter for modeling
+ pnoise=1.e-9		white noise parameter				
+
+ Notes:								
+ The input data are assumed to be shot gathers with no missing traces.	
+
+ If the input data are in the (x,t) domain, and the header fields	
+ f2=0 and d2=0, then the program assumes that the ghost signal is normally
+ incident and the ghost delay time is 2h/v.				
+
+ If the input data are in the (tau,p) domain, then it is assumed that  
+ f2=\'first p value\' and d2=\'increment in p\' and the ghost delay time
+ is assumed to be (2h/v) sqrt{1 - v^2 p^2}, addressing the angular	
+ dependence of the ghost delay. 					
+
+ Examples: 								
+ (t,x) domain, streamer depth 10m, surface reflectivity r=0.5		
+
+  sudeghost < input h=10 r=0.5 > output				
+
+ (tau,p) domain, streamer depth 10m surface reflectivity r=0.5		
+ min offset=-636 max offset -3237 					
+
+ suradon < input choose=0 igopt=3 interoff=-262 offref=-3237 		
+     pmin=-400 pmax=2000 dp=10 f1=90 f2=125 cdpkey=ep anderson=0  |	
+     sudeghost h=10 r=.5 deghost=1 |					
+ suradon choose=4 igopt=3 interoff=-262 offref=-3237			", 
+   pmin=-400 pmax=2000 dp=10  f1=90 f2=125 cdpkey=ep anderson=0  > output
+
+ Caveats:								
+ The value of r is the reflectivity of the sea surface, which may be   
+ both dependent on frequency and on the angle of incidence. The program
+ may be unstable if r > .8 is chosen.					
+
+ Smaller values of dp may be needed to retain high frequencies		
+
+ For lambert=1 a cosine obliquity law is chosen. Frequency dependence  
+ of reflectivity is not addressed.		 			
+
+ If tr.dt is not set in the header, then dt is mandatory		
+
+ Credits:
+      CWP: John Stockwell (November 2021)
+
+ Technical reference:
+  Perz, M. J., & Masoomzadeh, H. (2014). Deterministic marine 
+     deghosting: tutorial and recent advances. GeoConvention. 
+       Expanded Abstracts.
+ 
+ Trace header fields accessed: ns, dt, d1, f2, d2
+
+

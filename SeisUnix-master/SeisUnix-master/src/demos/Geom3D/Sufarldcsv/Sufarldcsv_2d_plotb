@@ -1,0 +1,62 @@
+#!/bin/sh
+# Sufarldcsv_2d_plotb - for program SUFARLDCSV
+# Author: Andre Latour, Nov 2023
+#
+  echo "----------------------------------------------------------------------------"
+  echo " xgraph the shot and receiver statics (red,blue) at shot,receiver STATIONs  "
+  echo "                                                                            "
+  echo " *** For xgraph, you need the number of shots and receivers.                "
+  echo " *** THIS script has correct sizes for l2slongcut2.csv, l2rlongcutends.csv  "
+  echo "                                                                            "
+  echo " Notice that the shots have sections where many are missing.                "
+  echo " Note particularly that shots near 340 are missing. This deliberately       "
+  echo " exists where a large inflection in statics,elevations occurs.              "
+  echo " THIS IS WHERE REDUCING avrad parameter will have easily noticable affects. "
+  echo "                                                                            "
+  echo " Notice that the receivers have many missing on each end-of-the-survey.     "
+  echo " THIS IS WHERE SETTING nback parameter to 300 will show noticable affects.  "
+  echo "                                                                            "
+  echo "                                                                            "
+  echo "                                                                            "
+  echo " Note:                                                                      "
+  echo "       This is not a MAP view. This 2D line has straight XYs.               "
+  echo " Note:                                                                      "
+  echo "       shot static,elevation value are deliberately slightly different      "
+  echo "       from receiver static,elevation so that you can see them both.        "
+  echo "       (This actually happens when shots are drilled down holes).           "
+  echo " Note:                                                                      "
+  echo "       The static,elevation values are deliberately (mostly) linear along   "
+  echo "       the STATIONs so that you can see the affects of averaging,smoothing. "
+  echo " Note:                                                                      "
+  echo "       Some locations have rapid static,elevation differences from their    "
+  echo "       neighbours so that you can see the affects of averaging,smoothing.   "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Input shot file with all shots and receiver fle with all receivers 
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 3 and 4                
+#  (3 and 11 for shot elevations, 3 and 10 for receiver elevations).               
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use xgraph to plot points with marks, and no lines between.
+#
+  sed '/C_SU/d' l2slongcut2.csv >testplotb1.csv
+  cut -d, -f3,4 <testplotb1.csv >testplotb2.csv
+  sed '1,$ s/,/ /g' testplotb2.csv >testplotb2.txt
+  a2b <testplotb2.txt >testplotb2.bin
+#
+  sed '/C_SU/d' l2rlongcutends.csv >testplotb3.csv
+  cut -d, -f3,4 <testplotb3.csv >testplotb4.csv
+  sed '1,$ s/,/ /g' testplotb4.csv >testplotb4.txt
+  a2b <testplotb4.txt >testplotb4.bin
+#
+  cat testplotb2.bin testplotb4.bin >testplotb5.bin
+#
+  xgraph <testplotb5.bin nplot=2 n=354,383 linecolor=2,4 mark=1,6 marksize=5,5 linewidth=0 \
+          style=normal width=1200 height=600 x1beg=0 x1end=600 x2beg=-300 x2end=100 \
+          title=" shot,receiver statics (red,blue) at cut shot,receiver STATIONs " & 
+#         style=normal width=1200 height=600 x1beg=0 x1end=600 x2beg=0 x2end=2600 \
+#         title=" shot,receiver elevations (red,blue) at cut shot,receiver STATIONs " & 
+

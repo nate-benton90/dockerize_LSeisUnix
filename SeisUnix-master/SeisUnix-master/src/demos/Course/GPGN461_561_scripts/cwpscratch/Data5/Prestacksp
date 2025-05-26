@@ -1,0 +1,30 @@
+#! /bin/sh
+
+# Takes roughly three days to run
+
+nxo=2142
+nxshot=1012
+nz=1500
+dz=3
+dx=12.5
+vfile=unewvelxz.bin
+fmax=125
+lpad=9999
+rpad=9999
+f1=4
+f2=8
+f3=80
+f4=125
+
+outfile=pre_sp.su
+
+rm $outfile
+
+data=repaired_radon_mute_gain_cs.su
+
+susort sx offset <  $data > data.shot.su
+
+sumigpresp < data.shot.su  nxo=$nxo nxshot=$nxshot nz=$nz dz=$dz dx=$dx fmax=$fmax vfile=$vfile verbose=1 lpad=$lpad rpad=$rpad > $outfile
+
+
+exit 0

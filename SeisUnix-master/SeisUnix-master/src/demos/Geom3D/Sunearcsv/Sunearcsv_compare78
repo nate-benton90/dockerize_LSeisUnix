@@ -1,0 +1,23 @@
+#!/bin/sh
+# Sunearcsv_compare78 - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Compare create_realistic_profile_and_graph_igi and                     "
+  echo "---           shift_realistic_profile_and_graph_igi                         "
+  echo "---                                                                         "
+  echo "---  Note that inline shift of 5 metres of cdps 675 to 840 has caused       "
+  echo "---  the inline igi distances to reduce to a range of -2 to +2.             "
+  echo "---                                                                         "
+  echo "---  This means the cdps from 675 to 840 are now composed of traces which   "
+  echo "---  are closer together (at least in the inline direction).                "
+  echo "---  This may be an important consideration for surveys that are almost     "
+  echo "---  straight or crooked surveys which have straight sections.              "
+  echo "---                                                                         "
+  echo "---                                                                         "
+  echo "----------------------------------------------------------------------------"
+#
+  cat fakexsrfn71.bin fakexsrfn81.bin >tcompare78.bin
+  xgraph <tcompare78.bin nplot=2 n=10140,10140 linecolor=3,4 mark=5,8 marksize=3,3 linewidth=0 \
+          width=1200 height=800 x1beg=-40 x1end=40 x2beg=0 x2end=1000
+#

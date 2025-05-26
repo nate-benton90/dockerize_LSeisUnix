@@ -1,0 +1,56 @@
+#!/bin/sh
+# Sumutecsv_realistic1 - for program SUMUTECSV
+# Author: Andre Latour, Oct 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  The idea of this example is to create some realistic traces amd        "
+  echo "---  apply a 3D mute. The sequence herein is:                               "
+  echo "---   - use SPS2 X-file and create traces with spikes                       "
+  echo "---   - update X,Ys and other values from SPS2 S-file and R-file            "
+  echo "---   - filter spikes to produce wavelets                                   "
+  echo "---   - set trace cdp numbers using SUBINCSV                                "
+  echo "---   - apply mute                                                          "
+  echo "---   - display muted traces (still in shot gather order)                   "
+  echo "---   - sort to cdp order (and display)                                     "
+  echo "---   - stack (and display)                                                 "
+  echo "----------------------------------------------------------------------------"
+#
+# Create traces from the values in SPS2 X-file (plus spikes)
+#
+  sugeomcsv rfile=l2xall.txt setid=x match=sps2 names=sps2 >fakex.su create=all \
+            spikes=4,0.01,200,1000,260,-1200,308,1000,408,900,500,-2000,640,1400,700,600,800,1600,1000,0
+#
+  sugeomcsv rfile=l2sall.txt setid=s match=sps2 names=sps2 <fakex.su >fakexs.su
+# rm -f fakex.su 
+#
+  sugeomcsv rfile=l2rall.txt setid=r match=sps2 names=sps2 <fakexs.su >fakexsr.su
+# rm -f fakexs.su 
+#
+  subfilt <fakexsr.su >fakexsrf.su fpasshi=20
+# rm -f fakexsr.su 
+#
+# Now, put 3d grid cell numbers to cdp key (as seen in ../Subincsv/Subincsv_example3).
+#
+  subincsv <fakexsrf.su >fakexsrfb.su rfile=kEFG.csv
+#
+  sumutecsv <fakexsrfb.su >fakexsrfbm.su rfile=kEFG.csv \
+        cdp=136,172,2314,2350\
+        offs=100,200,400,800 \
+        tims=50,350,600,1500 \
+        offs=100,200,400,800 \
+        tims=50,350,600,1500 \
+        offs=100,200,400,800 \
+        tims=500,750,1100,2000 \
+        offs=100,200,400,800 \
+        tims=600,850,1200,2100 \
+#
+  suxwigb <fakexsrfbm.su title='shot gathers after mute' &
+#
+  susort <fakexsrfbm.su >fakexsrfbms.su cdp offset
+#
+  suxwigb <fakexsrfbms.su title='cdp sorted after mute' &
+#
+  sustack <fakexsrfbms.su >fakexsrfbmss.su key=cdp
+#
+  suxwigb <fakexsrfbmss.su key=cdp title='cdp STACK after mute' &
+#

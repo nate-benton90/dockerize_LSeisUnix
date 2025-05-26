@@ -1,0 +1,18 @@
+/*********************** self documentation **********************/
+string sdoc =
+" 								\n"
+" SUZERO -- zero-out data within a time window	 		\n"
+" 								\n"
+" suzero itmax= < indata > outdata				\n"
+" 								\n"
+" Required parameters						\n"
+" 	itmax=		last time sample to zero out		\n"
+" 								\n"
+" Optional parameters						\n"
+" 	itmin=0		first time sample to zero out		\n"
+" 								\n"
+" See also: sukill, sumute					\n"
+" 								\n"
+;
+/**************** end self doc ***********************************/
+

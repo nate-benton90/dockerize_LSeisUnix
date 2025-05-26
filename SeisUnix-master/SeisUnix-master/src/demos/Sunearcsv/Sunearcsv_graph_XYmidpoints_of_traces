@@ -1,0 +1,16 @@
+#!/bin/sh
+# Sunearcsv_graph_XYmidpoints_of_traces - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Graph midpoint XYs of traces from Sunearcsv_create_realistic_traces.   "
+  echo "---  (Note the divisions by 20 in suchw since sugeomcsv scales XYs).        "
+  echo "----------------------------------------------------------------------------"
+#
+ suchw <fakexsrfn.su >fakexsrfn1.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=20,20 
+#sugethw <fakexsrfn1.su key=sx,sy,gx,gy,sdel,gdel,cdp,igi,igc
+#
+ sugethw <fakexsrfn1.su output=binary key=sdel,gdel >fakexsrfn1.bin
+#
+ xgraph <fakexsrfn1.bin n=10140 linecolor=3 mark=8 marksize=5 linewidth=0 \
+         width=1200 height=800 x1beg=334200 x1end=346500 x2beg=5538400 x2end=5551700

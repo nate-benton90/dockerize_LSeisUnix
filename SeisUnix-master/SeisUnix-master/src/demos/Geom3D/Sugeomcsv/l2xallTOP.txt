@@ -1,0 +1,8 @@
+C_SU_MATCH,fldr,tracf                                                           
+C_SU_SETID,X                                                                    
+C_SU_FORMS                                                                      
+C_SU_ID,%.0f,%.0f,%.0f,%.0f,%.2f,%.2f,%.0f,%.0f,%.0f,%.0f,%.2f,%.2f,%.2f,%.0f   
+C_SU_NAMES                                                                      
+C_SU_ID,2_numb2_7,8_match1_15,16_numb4_16,17_numb5_17,18_grnofr_27,28_grnlof_37 
+C_SU_MORE,38_numb8_38,39_matche1_cf_43,44_matche1_ct_48,49_matche1_ci_49        
+C_SU_MORE,50_grnors_59,60_gaps_rf_69,70_gaps_rt_79,80_numb15_80                 

@@ -1,0 +1,34 @@
+#!/bin/sh
+# Subincsp_example1 - for program SUBINCSV
+# Author: Andre Latour, Aug 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  in this example, subincsv reads a 3d grid definition from command line "
+  echo "---  parameters and updates cdp key with 3d cell number, and also updates   "
+  echo "---  igi,igc keys with 3d grid indexes (inline and crossline numbers).      "
+  echo "---  You should look at output file k1.csv since it contains the processed  "
+  echo "---  grid definition. This file can also be input to subincsv, which you    "
+  echo "---  see being done in the second subincsv run herein. Note the check=1 on  "
+  echo "---  the first subincsv run, which shows you some corner point information. "
+  echo "----------------------------------------------------------------------------"
+#
+# Note that input traces were produced from file tvalues.csv using the create option
+# of sugeomcsv as seen in demos/Geom3D/Sugeomcsv
+#
+  subincsv <faketfn.su >faketfnb.su bintype=30 grid_xa=338800 grid_ya=5540700 grid_xb=340299 grid_yb=5538101 grid_xc=339753 grid_yc=5541250 grid_wb=25 grid_wc=50 wfile=k1.csv check=1 
+#
+  sugethw <faketfnb.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+  subincsv <faketfn.su >faketfnb2.su rfile=k1.csv  
+#
+  sugethw <faketfnb2.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  in this example, subincsv reads a 3d grid definition from command line "
+  echo "---  parameters and updates cdp key with 3d cell number, and also updates   "
+  echo "---  igi,igc keys with 3d grid indexes (inline and crossline numbers).      "
+  echo "---  You should look at output file k1.csv since it contains the processed  "
+  echo "---  grid definition. This file can also be input to subincsv, which you    "
+  echo "---  see being done in the second subincsv run herein. Note the check=1 on  "
+  echo "---  the first subincsv run, which shows you some corner point information. "
+  echo "----------------------------------------------------------------------------"

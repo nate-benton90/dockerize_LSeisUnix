@@ -1,0 +1,39 @@
+#!/bin/sh
+# Subraid_test4 - for program SUBRAID
+# Author: Andre Latour, Feb 2022
+#
+  echo " "
+  echo "-- This test is the same as test3 except for DEscending cdps.        --"
+  echo " "
+#
+  sunull nt=3 ntr=40 >tnull51.su
+  sushw <tnull51.su >tnull52.su key=cdp,offset,selev a=1,-299,1 b=3,200,0 j=5,4,1000
+  suhtmath <tnull52.su >tnull53.su key=cdp op=add 
+  suhtmath <tnull53.su >tnull54.su key=offset op=add scale=100 
+  susort <tnull54.su >tnull55.su -cdp offset
+#
+  sunull nt=3 ntr=30 >tnull56.su
+  sushw <tnull56.su >tnull57.su key=cdp,offset,selev a=2,-297,2 b=2,200,0 j=5,4,1000
+  suhtmath <tnull57.su >tnull58.su key=cdp op=add 
+  suhtmath <tnull58.su >tnull59.su key=offset op=add scale=100 
+  susort <tnull59.su >tnull60.su -cdp offset
+#
+  sunull nt=3 ntr=40 >tnull61.su
+  sushw <tnull61.su >tnull62.su key=cdp,offset,selev a=4,-295,1 b=5,100,0 j=5,4,1000
+  suhtmath <tnull62.su >tnull63.su key=cdp op=add 
+  suhtmath <tnull63.su >tnull64.su key=offset op=add scale=100 
+  susort <tnull64.su >tnull65.su -cdp offset
+#
+  subraid key=-cdp,offset in11=tnull55.su in52=tnull60.su in83=tnull65.su >tnull66.su 
+  suascii <tnull66.su >info66.txt
+#
+# Now combine the 3 files by concatenate and full resort. Should be same.
+#
+  cat tnull55.su tnull60.su tnull65.su >tnull67.su
+  susort <tnull67.su >tnull68.su -cdp offset
+  suascii <tnull68.su >info68.txt
+  echo " "
+  echo "  diff -q info66.txt info68.txt follows. Should be blank."
+  echo " "
+  diff -q info66.txt info68.txt
+

@@ -1,0 +1,129 @@
+#!/bin/sh
+# Subinqcsv_example1_command - for program SUBINQCSV
+# Author: Andre Latour, Dec 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This is a realistic example. The input time and velocity parameters    "
+  echo "---  are the same as used for sunmocsv. Also the input values are the same  "
+  echo "---  as demos/Geom3D/Sunmocsv_realistic1                                    "
+  echo "----------------------------------------------------------------------------"
+#
+# Note that output times are 0 to 1000 in intervals of 100. 
+# If you output at intervals of 4 (a usual sampling interval for seismic traces),
+# you will get big records in the output q-file.
+#
+# Note that iecho=1 means only make output records at the input cdp numbers.
+#
+# Note that the input tnmo and vnmo have varying amounts of values at some cdps.
+# This is typical for velans (time-velocity pairs derived from semblance-scans).
+# There are unlikely values for at least one of the cdps (this is deliberate, 
+# it produces an obvious effect, see demos/Geom3D/Sunmocsv_realistic1 for details).
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout41.csv outind=0,1000,100 iecho=1 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        tnmo=0,190,450,800 \
+        vnmo=1200,2000,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=2800,5500,6000,8000 \
+        tnmo=0,200,500 \
+        vnmo=3333,5555,6666 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1200,2000,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800,900 \
+        vnmo=1800,3500,4000,5000,5500 \
+        tnmo=0,190,450,800 \
+        vnmo=2800,5500,6000,8000 \
+#
+# Here, iecho is not specified, so you get output q-records at all cdps defined
+# in the 3d grid (subinqcsv has parameters which allow you to restrict the
+# cdp range you want to output, see the self-doc).
+#
+  subinqcsv rfile=kEFG.csv qout=qvalsout42.csv outind=0,1000,100 \
+        cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+        tnmo=0,190,450,800 \
+        vnmo=1200,2000,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=2800,5500,6000,8000 \
+        tnmo=0,200,500 \
+        vnmo=3333,5555,6666 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1200,2000,4000,5000 \
+        tnmo=0,190,450,800 \
+        vnmo=1800,3500,4000,5000 \
+        tnmo=0,190,450,800,900 \
+        vnmo=1800,3500,4000,5000,5500 \
+        tnmo=0,190,450,800 \
+        vnmo=2800,5500,6000,8000 \
+#
+# As a bonus, here is a relatively simple way to get an output q-file that can
+# be modified to get identical values for read-into Subinqcsv_example1_qinput.
+# Just add tupa=1,2,3,4 to most cdps, but 1,2,3 to one, and 1,2,3,4,5 to another.
+# Then set outlist=1,2,3,4 (or use outind). 
+# Afterward, delete the C_SU_NDIMS record from qvalsin41base.csv and manually  
+# make 3 tuples on one, and 5 tuples on another.
+#
+# The big point is adding tupa= at each cdp makes the tuples into triplets.
+# And, subinqcsv always reduces its output tuple size by 1 on the q-records,
+# making them into pairs (but you must delete the C_SU_NDIMS record).
+#
+# subinqcsv qout=qvalsin41base.csv outlist=1,2,3,4 formtv=%g iecho=1 \
+#       cdp=21,41,81,101,1473,1493,1533,1553,2683,2703,2743,2763 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1200,2000,4000,5000 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1800,3500,4000,5000 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1800,3500,4000,5000 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=2800,5500,6000,8000 \
+#       tupa=1,2,3 \
+#       tnmo=0,200,500 \
+#       vnmo=3333,5555,6666 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1800,3500,4000,5000 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1800,3500,4000,5000 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1800,3500,4000,5000 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1200,2000,4000,5000 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=1800,3500,4000,5000 \
+#       tupa=1,2,3,4,5 \
+#       tnmo=0,190,450,800,900 \
+#       vnmo=1800,3500,4000,5000,5500 \
+#       tupa=1,2,3,4 \
+#       tnmo=0,190,450,800 \
+#       vnmo=2800,5500,6000,8000 \
+#

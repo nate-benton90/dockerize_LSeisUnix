@@ -1,0 +1,40 @@
+#!/bin/sh
+# Sunearcsv_test8 - for program SUNEARCSV
+# Author: Andre Latour, Oct  2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  Same as test7 except the keyp=dist option is used in sunearcsv.        "
+  echo "---  Which means igi=0 everywhere and igc=distance from trace to near cdp.  "
+  echo "----------------------------------------------------------------------------"
+#
+ suprofcsv keyx=gx keyy=gy keyp=gaps gx=0,1000,1000 gy=0,0,1500 gaps=500,300,200 \
+           chordi=100 nmaxa=3 nmaxs=3 chordf=100 \
+           qout=testout81.csv
+#
+ sunull nt=4 ntr=10 >tnull81.su
+ sushw <tnull81.su >tnull82.su key=sx,sy,gx,gy a=600,-50,600,-50 b=60,125,60,125
+#
+ sunearcsv qin=testout81.csv <tnull82.su dimx=mgx dimy=mgy >tnear81.su keyp=dist okeys=cdp,gaps
+#
+ suchw <tnear81.su >tnear82.su key1=sdel,gdel key2=sx,sy key3=gx,gy b=1,1 c=1,1 d=2,2 
+ sugethw <tnear82.su key=sx,sy,gx,gy,sdel,gdel,gaps,cdp,igi,igc
+#
+# Use sed to remove the first lines (C_SU header lines).
+# Use cut with a deliminator of comma to retain only fields 3 and 4
+# Use sed to replace every comma with a blank.               
+# Use a2b to convert ascii to binary                        
+# Use sugethw to output x,y values in binary.                                   
+# Use cat to combine the 2 sets of XYs into one file.                           
+#
+# Use xgraph to plot 2 sets of points with marks of Xs and triangles.
+#
+ sed '/C_SU/d' testout81.csv >testout82.csv
+ cut -d, -f4,5 <testout82.csv >testout83.csv
+ sed '1,$ s/,/ /g' testout83.csv >testout83.txt
+ a2b <testout83.txt >testout83.bin
+#
+ sugethw <tnear82.su output=binary key=sdel,gdel >testout84.bin
+ cat testout83.bin testout84.bin >testout85.bin
+#
+ xgraph <testout85.bin n=40,10 linecolor=2,3 mark=2,6 marksize=10,10 linewidth=0 \
+         width=1000 height=700 x1beg=-800 x1end=1400 x2beg=-100 x2end=2800

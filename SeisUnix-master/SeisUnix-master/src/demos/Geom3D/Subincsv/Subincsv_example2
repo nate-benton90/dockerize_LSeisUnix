@@ -1,0 +1,47 @@
+#!/bin/sh
+# Subincsp_example2 - for program SUBINCSV
+# Author: Andre Latour, Aug 2021
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  in this example, subincsv reads a 3d grid definition and updates the   "
+  echo "---  trace keys cdp,igi,igc with 3d cell and inline and crossline indexes   "
+  echo "---  from input trace midpoint coordinates (sx+gx)/2.0 and (sy+gy)/2.0      "
+  echo "---   subincsv is run 8 times. The concept is that a survey can be enclosed "
+  echo "---  within a rectangle and numbered in 8 reasonable ways. In subincsv      "
+  echo "---  documentation, the 4 corner points of the grid are named A,B,C,D.      "
+  echo "---  Here, the corners of an enclosing rectangle are refered to as E,F,G,H. "
+  echo "---  The first  subincsv uses rectangle corners EFG for grid corners ABC.   "
+  echo "---  The second subincsv uses rectangle corners EGF for grid corners ABC.   "
+  echo "---  The third  subincsv uses rectangle corners FEH for grid corners ABC.   "
+  echo "---  And so on. Note also that the cell width values are exchanged in half  "
+  echo "---  of the 8 grid definitions used here.                                   "
+  echo "                                                                            "
+  echo "----------------------------------------------------------------------------"
+#
+# Note that input traces were produced from file tvalues.csv using the create option
+# of sugeomcsv as seen in demos/Geom3D/Sugeomcsv
+#
+subincsv <faketfn.su >fakeEFG.su rfile=kEFG.csv check=1
+sugethw <fakeEFG.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+subincsv <faketfn.su >fakeEGF.su rfile=kEGF.csv check=1
+sugethw <fakeEGF.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+subincsv <faketfn.su >fakeFEH.su rfile=kFEH.csv check=1 
+sugethw <fakeFEH.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+subincsv <faketfn.su >fakeFHE.su rfile=kFHE.csv check=1
+sugethw <fakeFHE.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+subincsv <faketfn.su >fakeGEH.su rfile=kGEH.csv check=1
+sugethw <fakeGEH.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+subincsv <faketfn.su >fakeGHE.su rfile=kGHE.csv check=1
+sugethw <fakeGHE.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+subincsv <faketfn.su >fakeHFG.su rfile=kHFG.csv check=1
+sugethw <fakeHFG.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#
+subincsv <faketfn.su >fakeHGF.su rfile=kHGF.csv check=1
+sugethw <fakeHGF.su key=sx,sy,gx,gy,offset,cdp,igi,igc
+#

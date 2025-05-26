@@ -1,0 +1,40 @@
+#!/bin/sh
+# Sunmocsv_test2 - for program SUNMOCSV
+# Author: Andre Latour, Jan 2022
+#
+  echo "----------------------------------------------------------------------------"
+  echo "---  This test puts input velocity functions at the 4 corners of the        "
+  echo "---  input 3d grid (to make sure that having input velocity functions       "
+  echo "---  at the maximum extent of the 3d grid does not have bugs).              "
+  echo "----------------------------------------------------------------------------"
+#
+# Make a null dataset of 2783 traces (and 4 samples, which is convenient for the 
+# dump at the end of this). Then set the cdp numbers to 1-2783, which is the     
+# full number of cdps in the 3d grid defined within the kEFG.csv K-file.
+#
+  sunull nt=4 ntr=2783 >tnull11.su
+  sushw <tnull11.su >tnull12.su key=cdp a=1 b=1
+#
+# Just like Sunmocsv_test1, each output line in the tnullvels.txt file is the  
+# interpolated velocities at one cdp (conveniently, the line number of this text file
+# is equal to the cdp number). Since all 4 input velocity functions have values that 
+# match their cdp,igi,igc plus 1000000,2000000,3000000 the INTERPOLATED output
+# tnullvels.txt values should match. But actually, values in tnullvels.txt will   
+# not match exactly because 1/velocity-squared is applied before interpolation.  
+# But the addition of 1000000,2000000,3000000 reduces the effect of 1/vel-squared.                   
+#
+  sunmocsv <tnull12.su >tnull13.su rfile=kEFG.csv voutfile=tnullvels13 check=1 2>tinfo8.txt \
+        cdp=1,121,2663,2783  \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=1000001,2000001,3000001,4000000 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=1000121,2000121,3000001,4000100 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=1002663,2000001,3000023,4000300 \
+        tnmo=0.000,0.004,0.008,0.012 \
+        vnmo=1002783,2000121,3000023,4000400 \
+#
+# Show the velocity values.
+#
+        od -f -v tnullvels13 > tnullvels13.txt
+#
