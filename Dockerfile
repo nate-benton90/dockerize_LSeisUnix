@@ -62,23 +62,48 @@ RUN apt-get update && apt-get install --fix-missing -y \
 #         && cpan Moose
 
 # Install cpanminus and the required Perl modules
-RUN cpan App::cpanminus \
-    && cpanm \
-        Module::Refresh \
-        Moose \
-        Clone \
-        File::ShareDir \
-        File::Slurp \
-        Shell \
-        Test::Compile::Internal \
-        Time::HiRes \
-        Tk \
-        Tk::JFileDialog \
-        Tk::Pod \
-        aliased \
-        namespace::autoclean \
-    && cpanm MIME::Base64 \
-    && cpanm PDL::Core
+# RUN cpan App::cpanminus \
+#     && cpanm \
+#         Module::Refresh \
+#         Moose \
+#         Clone \
+#         File::ShareDir \
+#         File::Slurp \
+#         Shell \
+#         Test::Compile::Internal \
+#         Time::HiRes \
+#         Tk \
+#         Tk::JFileDialog \
+#         Tk::Pod \
+#         aliased \
+#         namespace::autoclean \
+#     && cpanm MIME::Base64 \
+#     && cpanm PDL::Core
+
+# Install cpanminus first, minimal setup
+RUN apt-get update && apt-get install -y curl make gcc perl \
+    && curl -L https://cpanmin.us | perl - App::cpanminus
+
+# Use cpanm to install all required Perl modules
+RUN cpanm -n \
+    Module::Refresh \
+    Moose \
+    Clone \
+    File::ShareDir \
+    File::Slurp \
+    Shell \
+    Test::Compile::Internal \
+    Time::HiRes \
+    Tk \
+    Tk::JFileDialog \
+    Tk::Pod \
+    aliased \
+    namespace::autoclean \
+    MIME::Base64 \
+    PDL::Core \
+    YAML \
+    CPAN::DistnameInfo
+
 
 # Set LD_LIBRARY_PATH including PGPLOT directory early in the file
 ENV LD_LIBRARY_PATH=/usr/local/pgplot
