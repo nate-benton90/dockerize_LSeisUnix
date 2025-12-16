@@ -1,4 +1,0 @@
-PSTOPDFCYMK - convert (E)PS to PDF
-
- pstopdfcymk [options...] (input.[e]ps|-) [output.pdf|-]
-

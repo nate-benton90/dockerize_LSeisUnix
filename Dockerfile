@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PERL_MM_USE_DEFAULT=1
 
 # Copy the SeisUnix-master directory contents into the image
-COPY SeisUnix-master/* /usr/local/cwp_su_all_44R22
+COPY seismic_unix/* /usr/local/cwp_su_all_44R22
 
 # Copy the pgplot directory contents into the image (for FORTRAN plotting)
 COPY pgplot usr/local/pgplot
@@ -48,15 +48,15 @@ RUN apt-get update && apt-get install --fix-missing -y \
     imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
-# Install cpanminus for easier module installation
-RUN cpan App::cpanminus \
-        && cpanm Tk Tk::JFileDialog Tk::Pod
+# # Install cpanminus for easier module installation
+# RUN cpan App::cpanminus \
+#         && cpanm Tk Tk::JFileDialog Tk::Pod
 
-# Install last 2 packages from DL's docs for CPAN setup
-RUN cpan Module::Build \
-        && cpan TAP::Harness \
-        && cpan Moose \
-        && cpanm --notest App::SeismicUnixGui
+# # Install last 2 packages from DL's docs for CPAN setup
+# RUN cpan Module::Build \
+#         && cpan TAP::Harness \
+#         && cpan Moose \
+#         && cpanm --notest App::SeismicUnixGui
 
 # Set LD_LIBRARY_PATH including PGPLOT directory early in the file
 ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \

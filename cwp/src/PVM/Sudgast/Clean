@@ -1,6 +1,0 @@
-#! /bin/sh
-
-cd lib ; rm libdga.a
-cd ..
-
-cd Demo ; Clean

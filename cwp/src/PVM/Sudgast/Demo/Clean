@@ -1,7 +1,0 @@
-#! /bin/sh
-#Cleaning purposes
-
-rm *demo*
-rm xcor
-rm *log* 
-
