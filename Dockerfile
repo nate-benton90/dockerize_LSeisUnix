@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PERL_MM_USE_DEFAULT=1
 
 # Copy the SeisUnix-master directory contents into the image
-COPY seismic_unix/* /usr/local/cwp_su_all_44R22
+COPY seismic_unix/* /usr/local/cwp_su_all_44R22/src/
 
 # Copy the pgplot directory contents into the image (for FORTRAN plotting)
 COPY pgplot usr/local/pgplot
@@ -47,6 +47,13 @@ RUN apt-get update && apt-get install --fix-missing -y \
     xorg \
     imagemagick \
     && rm -rf /var/lib/apt/lists/*
+
+# Ubuntu 22.04: SunRPC headers are provided by libtirpc under /usr/include/tirpc
+RUN rm -f /usr/include/rpc/rpc || true \
+    && mkdir -p /usr/include/rpc \
+    && ln -sf /usr/include/tirpc/rpc/types.h /usr/include/rpc/types.h \
+    && ln -sf /usr/include/tirpc/rpc/xdr.h  /usr/include/rpc/xdr.h
+
 
 # # Install cpanminus for easier module installation
 # RUN cpan App::cpanminus \
@@ -140,6 +147,14 @@ WORKDIR /home/sug_user
 
 # Create the directory inside the container (if needed)
 RUN mkdir -p /home/sug_user/sug_data
+
+# Create group/user only if they don't already exist
+RUN getent group sug_ug >/dev/null || groupadd -r sug_ug \
+    && id -u sug_user >/dev/null 2>&1 || useradd -r -g sug_ug -m -s /bin/bash sug_user
+
+# Give sug_user ownership + r/w access to CWPROOT
+RUN chown -R sug_user:sug_ug /usr/local/cwp_su_all_44R22 \
+    && chmod -R u+rwX,g+rwX /usr/local/cwp_su_all_44R22
 
 # Run as the new non-admin user by default
 USER sug_user
