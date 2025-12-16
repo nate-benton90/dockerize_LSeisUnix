@@ -1,0 +1,31 @@
+#! /bin/sh
+
+nxo=2142
+nxshot=950      # bombs with segmentation fault at 36 shots left
+nz=1000 	# do only the first 1000 out of 1500 samples
+dz=3
+dx=12.5
+vfile=unewvelxz.bin
+fmax=125
+lpad=9999
+rpad=9999
+f1=4
+f2=8
+f3=80
+f4=125
+
+outfile=pre_pspi.su
+
+rm $outfile
+
+data=repaired_radon_mute_gain_cs.su
+
+susort sx offset <  $data > data_tmp.su
+
+# time gating to remote the bottom 500 samples
+suwind itmin=0 itmax=999 < data_tmp.su >  data.shot_pspi.su
+
+sumigprepspi < data.shot_pspi.su  nxo=$nxo nxshot=$nxshot nz=$nz dz=$dz dx=$dx fmax=$fmax vfile=$vfile verbose=1 lpad=$lpad rpad=$rpad > $outfile
+
+
+exit 0

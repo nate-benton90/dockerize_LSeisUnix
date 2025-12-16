@@ -1,0 +1,52 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 4.81kB 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 ...
+
+#3 [auth] library/ubuntu:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 DONE 1.2s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.1s
+
+#5 [ 1/26] FROM docker.io/library/ubuntu:22.04@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85d813da2fb
+#5 resolve docker.io/library/ubuntu:22.04@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85d813da2fb 0.1s done
+#5 DONE 0.1s
+
+#6 [internal] load build context
+#6 transferring context: 49.20MB 4.8s
+#6 transferring context: 87.45MB 9.9s
+#6 transferring context: 157.86MB 14.9s
+#6 transferring context: 234.45MB 20.0s
+#6 transferring context: 309.12MB 25.1s
+#6 transferring context: 370.68MB 28.6s done
+#6 DONE 28.7s
+
+#7 [ 2/26] COPY SeisUnix-master/* /usr/local/cwp_su_all_44R22
+#7 ERROR: lstat /var/lib/docker/tmp/buildkit-mount3392347395/SeisUnix-master: no such file or directory
+------
+ > [ 2/26] COPY SeisUnix-master/* /usr/local/cwp_su_all_44R22:
+------
+
+ 1 warning found (use docker --debug to expand):
+ - UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 62)
+Dockerfile:10
+--------------------
+   8 |     
+   9 |     # Copy the SeisUnix-master directory contents into the image
+  10 | >>> COPY SeisUnix-master/* /usr/local/cwp_su_all_44R22
+  11 |     
+  12 |     # Copy the pgplot directory contents into the image (for FORTRAN plotting)
+--------------------
+ERROR: failed to solve: lstat /var/lib/docker/tmp/buildkit-mount3392347395/SeisUnix-master: no such file or directory
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/zazk48nacz15zbx926k5ykcyc

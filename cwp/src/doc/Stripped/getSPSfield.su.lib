@@ -1,0 +1,27 @@
+                                                                   *
+  int getSPSfield(char *Line, const int rev, \                    *
+                int const idx, void *addr)                         *
+                                                                   *
+  Author:  Fernando Roxo <petro@roxo.org>                          *
+                                                                   *
+  Description:                                                     *
+      This function takes as input one single line record from an  *
+    SPS file and extracts one single field from it.  The only      *
+    supported records are point records 'R' or 'S' and the relation*
+    record 'X'.                                                    *
+                                                                   *
+  Parameters:                                                      *
+    char *Line :  line record to be processed.  First character    *
+                  must be the label of one of supported records.   *
+    const int rev :  SPS version being processed.  Supported:     *
+                  0 - SPS revision 0.                              *
+                  2 - SPS revision 2.1                             *
+    int const idx  :  Index of the field to be extracted.  This is *
+                  the item number as described by standard.        *
+                  The label is item 0 (zero) and so one.           *
+    void *addr     :  This is a pointer for the recovered item.    *
+                  The item type must be according to the format    *
+                  used by function, that differs from standard     *
+                  for some fields.                                 *
+                                                                   * 
+                                                                   *

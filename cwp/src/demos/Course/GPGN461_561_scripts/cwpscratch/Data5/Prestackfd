@@ -1,0 +1,32 @@
+#! /bin/sh
+
+nxo=2142
+nxshot=950    # this should be a 1012, but it returns a segmentation fault 
+              # at 60 shots remaining.
+nz=1000		# data will be time gated to 1000 samples below
+dz=3
+dx=12.5
+vfile=unewvelxz.bin
+fmax=125
+lpad=9999
+rpad=9999
+f1=4
+f2=8
+f3=80
+f4=125
+
+outfile=pre_fd.su
+
+rm $outfile
+
+data=repaired_radon_mute_gain_cs.su
+
+susort sx offset <  $data > temp_fd.su
+
+# time gate to 1000 samples
+suwind itmin=0 itmax=999 < temp_fd.su > data.shot_fd.su
+
+sumigprefd < data.shot_fd.su  nxo=$nxo nxshot=$nxshot nz=$nz dz=$dz dx=$dx fmax=$fmax vfile=$vfile verbose=1 lpad=$lpad rpad=$rpad >$outfile
+
+
+exit 0

@@ -1,0 +1,23 @@
+SVD - Singular Value Decomposition related routines
+
+compute_svd - perform singular value decomposition 
+svd_backsubstitute - back substitute results of compute_svd
+svd_sort - sort singular values in descending order
+
+Credits:
+The compute_svd routine is adapted from svdecomp.c in XLISP-STAT 2.1 which is
+code from Numerical Recipes adapted by Luke Tierney and David Betz.
+
+Other contributors:
+Ian Kay, Canadian Geological Survey, Ottawa, Ontario 1999.
+This is a translation in C from an code written in Fortran that appeared
+in NETLIB, EISPACK, and SLATEC collections that was itself a translation
+from an original Algol code that appeared in:
+
+Original Algol code that is the basis of svdecomp.c is from:
+Golub, G. and C. Reinsch (1971) Handbook for automatic computation II,
+ linear algebra, p 134-151. SpringerVerlag, New York.
+
+See also discussions of a similar code in Numerical Recipes in C.
+Credits
+svd_sort: Nils Maercklin, GeoForschungsZentrum (GFZ) Potsdam, Germany, 2001.

@@ -1,0 +1,3 @@
+SMOOTH2 --- SMOOTH a uniformly sampled 2d array of data, within a user-
+SMOOTH3D - 3D grid velocity SMOOTHing by the damped least squares	
+SMOOTHINT2 --- SMOOTH non-uniformly sampled INTerfaces, via the damped
