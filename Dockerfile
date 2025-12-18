@@ -1,4 +1,5 @@
-# Use a build stage for cloning the repo with SSH access
+# use only this version - all dev work past this has resulted in error for Docker builds
+# TODO: use multi-stage build to simplify and debloat current setup
 FROM ubuntu:20.04
 
 # Avoid prompts from apt and set CPAN to non-interactive mode
@@ -48,29 +49,30 @@ RUN apt-get update && apt-get install --fix-missing -y \
     imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
-
 # Install cpanminus for easier module installation
 RUN cpan App::cpanminus \
         && cpanm Tk Tk::JFileDialog Tk::Pod
 
-# Install last 2 packages from DL's docs for CPAN setup
+# install latest version of SeismicUnixGui from CPAN
 RUN cpan Module::Build \
         && cpan TAP::Harness \
         && cpan Moose \
         && cpanm --notest App::SeismicUnixGui
 
 # Set LD_LIBRARY_PATH including PGPLOT directory early in the file
+# TODO: fix var setup and version path for Perl software
 ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \
     CWPROOT=/usr/local/cwp_su_all_44R22 \
     LOCAL=/usr/local \
-    SeismicUnixGui=/usr/local/share/perl/5.34.0/App/SeismicUnixGui \
-    SeismicUnixGui_script=/usr/local/share/perl/5.34.0/App/SeismicUnixGui/script \
+    SeismicUnixGui=/usr/local/share/perl/5.30.0/App/SeismicUnixGui \
+    SeismicUnixGui_script=/usr/local/share/perl/5.30.0/App/SeismicUnixGui/script \
     PGPLOT_DIR=/usr/local/pgplot \
     PGPLOT_DEV=/XWINDOW \
     SIOSEIS=/usr/local/sioseis/sioseis-2024.1.1 \
     DISPLAY=host.docker.internal:0.0
 
 # Extend PATH to include all required directories
+# TODO: fix this like above
 ENV PATH=$PATH:/usr/local/pgplot:/usr/local/sioseis/sioseis-2024.1.1:$CWPROOT/bin:$CWPROOT/src/Sfio/bin:$SeismicUnixGui_script
 
 # Set LD_LIBRARY_PATH including PGPLOT directory
@@ -123,6 +125,7 @@ RUN mkdir -p /usr/local/data \
 COPY data/Servilleta.tz /usr/local/data/Servilleta.tz
 
 # Untar/decrompress the tar file
+# TODO: fix non-root user setup and permissions below
 RUN tar -xzf /usr/local/data/Servilleta.tz -C /home/sug_user
 
 # Create non-admin user
