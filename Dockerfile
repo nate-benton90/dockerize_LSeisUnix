@@ -1,5 +1,5 @@
 # Use a build stage for cloning the repo with SSH access
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 # Avoid prompts from apt and set CPAN to non-interactive mode
 # TODO: maybe combine with large ENV layer near end of this file
@@ -48,22 +48,16 @@ RUN apt-get update && apt-get install --fix-missing -y \
     imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
-# Ubuntu 22.04: SunRPC headers are provided by libtirpc under /usr/include/tirpc
-RUN rm -f /usr/include/rpc/rpc || true \
-    && mkdir -p /usr/include/rpc \
-    && ln -sf /usr/include/tirpc/rpc/types.h /usr/include/rpc/types.h \
-    && ln -sf /usr/include/tirpc/rpc/xdr.h  /usr/include/rpc/xdr.h
 
+# Install cpanminus for easier module installation
+RUN cpan App::cpanminus \
+        && cpanm Tk Tk::JFileDialog Tk::Pod
 
-# # Install cpanminus for easier module installation
-# RUN cpan App::cpanminus \
-#         && cpanm Tk Tk::JFileDialog Tk::Pod
-
-# # Install last 2 packages from DL's docs for CPAN setup
-# RUN cpan Module::Build \
-#         && cpan TAP::Harness \
-#         && cpan Moose \
-#         && cpanm --notest App::SeismicUnixGui
+# Install last 2 packages from DL's docs for CPAN setup
+RUN cpan Module::Build \
+        && cpan TAP::Harness \
+        && cpan Moose \
+        && cpanm --notest App::SeismicUnixGui
 
 # Set LD_LIBRARY_PATH including PGPLOT directory early in the file
 ENV LD_LIBRARY_PATH=/usr/local/pgplot:$LD_LIBRARY_PATH \
@@ -116,7 +110,9 @@ COPY sioseis-2024.1.1 /usr/local/sioseis/sioseis-2024.1.1/
 
 # Run MAKE on the sioseis package
 RUN cd /usr/local/sioseis/sioseis-2024.1.1 \
-        && make all
+    # Remove the GCC 10+ only flag that gfortran-9 doesn't understand
+    && grep -rl -- '-fallow-argument-mismatch' . | xargs sed -i 's/-fallow-argument-mismatch//g' \
+    && make all
 
 # Optional: Extract the tar file inside the image (if needed)
 # Ensure the data directory exists
