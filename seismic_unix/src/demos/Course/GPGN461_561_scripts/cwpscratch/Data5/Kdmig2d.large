@@ -1,0 +1,28 @@
+#! /bin/sh
+
+# this runs in about 3.5 hours on an iMac
+# input file in SU format
+# multiple suppressed, repaired, muted, filtered, but not gained
+# the sorting geometry does not matter
+infile=filter_radon_repaired_filter_mute_cdp.su
+
+# traveltime tables generated with rayt2d
+ttfile=tfile.unewvelzx
+
+# outfile
+outfile=kdmig.su
+
+# Run sukdmig2d
+# the output are image gathers, which are migrated CDP gathers
+sukdmig2d infile=$infile outfile=$outfile ttfile=$ttfile \
+ft=0 fzt=0 nzt=1500 dzt=3 \
+angmax=80.0 \
+nxo=2142 dxo=12.5 nzo=1500 dzo=3 \
+fxt=0 nxt=2142 dxt=12.5 \
+fs=3237 ns=1012 ds=25 \
+mtr=1 ntr=121440 \
+dxm=12.5 v0=1500 noff=120 off0=-262 doff=-25
+
+# note that noff= gives the number offsets in output
+# for making image gathers. 
+exit 0

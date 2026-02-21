@@ -1,0 +1,28 @@
+#! /bin/sh
+
+nxo=2142
+nxshot=950   # should be 1012 but is set to 950 because the program
+             # bombs at 60 shots to the end with a segmentation fault
+nz=1000      # cut off the bottom 500 samples speeds up the process
+dz=3
+dx=12.5
+vfile=unewvelxz.bin
+fmax=90
+lpad=9999
+rpad=9999
+
+outfile=pre_ffd.su
+
+rm $outfile
+
+data=repaired_radon_mute_gain_cs.su
+
+susort sx offset <  $data > temp_ffd.su
+
+suwind itmin=0 itmax=999 < temp_ffd.su > data.shot_ffd.su
+
+sumigpreffd < data.shot_ffd.su nxo=$nxo nxshot=$nxshot nz=$nz dz=$dz dx=$dx fmax=$fmax vfile=$vfile verbose=1 > $outfile
+
+
+exit 0
+

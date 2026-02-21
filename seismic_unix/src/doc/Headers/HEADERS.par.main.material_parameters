@@ -1,0 +1,7 @@
+HTI2STIFF - convert HTI parameters alpha, beta, d(V), e(V), gamma	
+ HUDSON - compute  effective parameters of anisotropic solids	        
+LINRORT - linearized P-P, P-S1 and P-S2 reflection coefficients 	
+REFREALAZIHTI -  REAL AZImuthal REFL/transm coeff for HTI media 	
+REFREALVTI -  REAL REFL/transm coeff for VTI media and symmetry-axis	
+THOM2HTI - Convert Thompson parameters V_p0, V_s0, eps, gamma,	
+THOM2STIFF - convert Thomsen's parameters into (density normalized)	

@@ -1,0 +1,62 @@
+
+ VOLTLOTKA -  VOLTerra-LOTKA predator-prey model, modified 	
+	        slightly to include a carrying capacity of the  
+		prey species						
+
+  voltlotka  > [stdout]					
+
+ Required Parameters: none					
+ Optional Parameters:						
+ a=0.5			prey increase parameter			
+ b=0.02		prey reduction by predation parameter	
+ c=0.75		predator reduction rate			
+ d=0.005		predator increase by prey capture	
+
+ K=1000000		carrying capacity of prey environment 	
+			reduces to classical Volterra-Lotka when
+			K >> x and K >> y	
+
+ x0=500		initial number of prey			
+ y0=25			initial number of predator		
+
+ thresh=1.0		extinction if x <= thresh or y <= thresh
+
+ h=1.0			step size				
+ stepmax=100		maximum number of steps to compute	
+ mode=PP		number of Pred. followed by number of Prey
+			=R predator only, =Y prey only		
+ Notes:							
+ This program is really just a demo showing how to use the 	
+ differential equation solver rke_solve written by Francois 	
+ Pinard, based on a modified form of the 4th order Runge-Kutta 
+ method, which employs the error checking method of R. England 
+ 1969.								
+
+ The output consists of unformated C-style binary floats, of	
+ either pairs or triplets as specified by the "mode" paramerter.
+
+ Modified Volterra-Lotka equations: 					
+ dx/dt = a*x*(1 - x/K) - b*x*y					
+ dy/dt = -c*y + p*x*y						
+
+ x = number of members of the prey species			
+ y = number of members of the predator species 		
+ bxy = prey population reduction due to predation		
+ pxy = predator population increase due due to predation	
+ a = prey increase parameter (prey have unlimited food)	
+ c = predator reduction (predators starve without prey)	
+ K = carrying capacity of for the prey specie, when K large	
+     (1 - x/K)-> 1 and the system reduces to original VL system
+
+ Examples:							
+ Default: classic Snowshoe hare versus Canadian lynx		
+ voltlotka | xgraph n=100 nplot=2 d1=1 style=normal &		
+
+ Caveat: if there is weird behavior, try reducing the h= value	
+
+
+ References:
+
+ Author:  May 2020: John Stockwell
+
+

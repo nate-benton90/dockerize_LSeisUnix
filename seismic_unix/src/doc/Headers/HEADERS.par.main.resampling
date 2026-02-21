@@ -1,0 +1,9 @@
+REGRID3 - REwrite a [ni3][ni2][ni1] GRID to a [no3][no2][no1] 3-D grid
+RESAMP - RESAMPle the 1st dimension of a 2-dimensional function f(x1,x2)
+SUBSET - select a SUBSET of the samples from a 3-dimensional file	
+TRANSP - TRANSPose an n1 by n2 element matrix				
+TRANSP3D - TRANSPose an n1 by n2 by n3 element matrix			
+UNISAM - UNIformly SAMple a function y(x) specified as x,y pairs	
+UNISAM2 - UNIformly SAMple a 2-D function f(x1,x2)			
+XY2Z - converts (X,Y)-pairs to spike Z values on a uniform grid	
+Z2XYZ - convert binary floats representing Z-values to ascii	

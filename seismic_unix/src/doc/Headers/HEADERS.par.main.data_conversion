@@ -1,0 +1,13 @@
+A2B - convert ascii floats to binary 				
+A2I - convert Ascii to binary Integers			
+B2A - convert binary floats to ascii				
+FARITH - File ARITHmetic -- perform simple arithmetic with binary files
+FLOAT2IBM - convert native binary FLOATS to IBM tape FLOATS	
+FTNSTRIP - convert a file of binary data plus record delimiters created
+FTNUNSTRIP - convert C binary floats to Fortran style floats	
+H2B - convert 8 bit hexidecimal floats to binary		
+I2A - convert binary integers to ascii				
+IBM2FLOAT - convert IBM tape FLOATS to native binary FLOATS	
+RECAST - RECAST data type (convert from one data type to another)	
+SWAPBYTES - SWAP the BYTES of various  data types			
+UTMCONV - CONVert longitude and latitude to UTM, and vice versa       
